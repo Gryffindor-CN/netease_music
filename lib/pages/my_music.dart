@@ -10,7 +10,7 @@ class MyMusic extends StatefulWidget {
 }
 
 /// 第一步：在 MaterialApp 或 Scaffold 的 [body] 部分，维护一个 Navigator，实现局部路由。
-/// 第二步：利用 [onGenerateRoute] （重新）定义路由映射，主要目的是使 Navigator 外部的 [context] 能够以参数的形式传入内部。
+/// 第二步：利用 [onGenerateRoute] （重新）定义路由映射，主要目的是使 Navigator 外部的 [context] 能够以参数的形式传入内部，实现局部路由页面内，可跳转全局路由。
 /// 重点：局部路由必须使用 Navigator 的 [context]，而 [pageContext] 是 MaterialApp 给它的，所以它并不属于 Navigator，
 /// 因此 Routes.router.navigateTo(pageContext, '/anotherpage') 和 Routes.router.navigateTo(context, '/mymusic/mycollection') 是不同的实例。
 /// 路由跳转全都是利用 Fluro 的 [navigateTo] 方法。
