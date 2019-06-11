@@ -2,6 +2,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/netease.dart';
 import 'package:netease_music/router/Routes.dart';
+import 'components/selection/select_all.dart';
 
 void main() => runApp(MyApp());
 
@@ -15,12 +16,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      onGenerateRoute: Routes.router.generator,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Netease(),
-    );
+        title: 'Flutter Demo',
+        onGenerateRoute: Routes.router.generator,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text('demo'),
+          ),
+          body: SelectAll(
+            songs: [],
+          ),
+        ));
   }
 }
