@@ -10,6 +10,8 @@ class Routes {
   
   // 一级路由
   static String anotherPage = '/anotherpage';
+  static String albumBox = '/albumbox';
+
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
@@ -20,6 +22,7 @@ class Routes {
         print('ROUTE WAS NOT FOUND !!!');
       }
     );
+    router.define(albumBox, handler: albumHandler, transitionType: TransitionType.native);
     router.define(anotherPage, handler: anotherPageHandler, transitionType: TransitionType.native);
     router.define(mycollection, handler: mycollectionHandler, transitionType: TransitionType.native);
   }
