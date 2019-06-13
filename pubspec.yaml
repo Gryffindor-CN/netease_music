@@ -29,6 +29,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   sticky_headers: ^0.1.8 
+  flutter_sticky_header: ^0.4.0
+  sticky_header_list: ^1.0.6
+  overlay_support: ^0.3.0
+  dio: ^2.1.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
