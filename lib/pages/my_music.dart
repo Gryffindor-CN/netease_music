@@ -66,6 +66,12 @@ class MyMusicHome extends StatelessWidget{
                   Routes.router.navigateTo(context, '/mymusic/mycollection');
                 },
               ),
+              RaisedButton(
+                child: Text('评论页'),
+                onPressed: () {
+                  Routes.router.navigateTo(pageContext, '/music_comment_page?data=1');
+                },
+              ),
             ],
           ),
         ),

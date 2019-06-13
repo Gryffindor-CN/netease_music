@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:netease_music/components/comment/comment_page.dart';
 
 import 'my_music.dart';
 
@@ -20,10 +21,7 @@ class _NeteaseState extends State<Netease> {
       'Index 1: Business',
       style: optionStyle,
     ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
+    MyMusic(),
   ];
 
   void _onItemTapped(int index) {
