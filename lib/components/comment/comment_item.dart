@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class CommentItem extends StatelessWidget {
   const CommentItem(
@@ -50,11 +51,15 @@ class CommentItem extends StatelessWidget {
                         child: SizedBox(
                           width: 30.0,
                           height: 30.0,
-                          child: Image(
-                            image: NetworkImage(
-                              this.userImage,
-                            ),
-                            fit: BoxFit.cover,
+//                          child: Image(
+//                            image: NetworkImage(
+//                              this.userImage,
+//                            ),
+//                            fit: BoxFit.cover,
+//                          ),
+                          child: FadeInImage.memoryNetwork(
+                            image: this.userImage,
+                            placeholder: kTransparentImage,
                           ),
                         ),
                       ),

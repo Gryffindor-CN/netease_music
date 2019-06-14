@@ -366,7 +366,13 @@ class _CommentPageState extends State<CommentPage> {
         child: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
-          leading: Icon(Icons.arrow_back_ios,color: Colors.black,),
+          leading: IconButton(
+
+            icon: Icon(Icons.arrow_back_ios,color: Colors.black,),
+            onPressed: (){
+              Navigator.pop(context);
+            },
+          ),
           title: Center(
             child: Text(
               this.map == null? '评论':'评论('+ this.map['total'].toString() +')',

@@ -27,6 +27,8 @@ dependencies:
   sticky_headers: ^0.1.8
   dio: ^2.1.7
   toast: ^0.1.4
+  # 透明图片占位符
+  transparent_image: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
