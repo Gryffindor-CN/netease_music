@@ -140,8 +140,8 @@ class SelectAllState extends State<SelectAll> {
       ),
       SelectBottom(
         child: Container(
-          padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 1.0),
-          height: 70.0,
+          padding: EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 0.0),
+          // height: 6.0,
           width: MediaQuery.of(context).size.width,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -163,7 +163,8 @@ class SelectAllState extends State<SelectAll> {
                         padding: EdgeInsets.only(top: 4.0),
                         child: Text(
                           '下一首播放',
-                          style: TextStyle(color: Color(0xff3f3b3c)),
+                          style: TextStyle(
+                              color: Color(0xff3f3b3c), fontSize: 12.0),
                         ),
                       )
                     ],
@@ -187,7 +188,8 @@ class SelectAllState extends State<SelectAll> {
                         padding: EdgeInsets.only(top: 4.0),
                         child: Text(
                           '收藏到歌单',
-                          style: TextStyle(color: Color(0xff3f3b3c)),
+                          style: TextStyle(
+                              color: Color(0xff3f3b3c), fontSize: 12.0),
                         ),
                       )
                     ],
@@ -213,7 +215,8 @@ class SelectAllState extends State<SelectAll> {
                         padding: EdgeInsets.only(top: 4.0),
                         child: Text(
                           '删除',
-                          style: TextStyle(color: Color(0xff3f3b3c)),
+                          style: TextStyle(
+                              color: Color(0xff3f3b3c), fontSize: 12.0),
                         ),
                       )
                     ],

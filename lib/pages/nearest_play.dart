@@ -211,8 +211,8 @@ class SongsTabState extends State<SongsTab> {
     List<Widget> clearItems = [
       Theme(
         data: ThemeData(
-            iconTheme: IconThemeData(color: Color(0xffd4d4d4)),
-            textTheme: TextTheme(body2: TextStyle(color: Colors.green))),
+          iconTheme: IconThemeData(color: Color(0xffd4d4d4)),
+        ),
         child: GestureDetector(
           onTap: () {
             // todo 清除播放记录
@@ -305,13 +305,16 @@ class SongsTabState extends State<SongsTab> {
                                           '播放全部',
                                           style: TextStyle(
                                             fontWeight: FontWeight.w600,
-                                            fontSize: 16.0,
+                                            fontSize: Theme.of(context)
+                                                .textTheme
+                                                .title
+                                                .fontSize,
                                           ),
                                         ),
                                       ),
                                       Text('（共${lists.length}首）',
                                           style: TextStyle(
-                                              fontSize: 14.0,
+                                              fontSize: 12.0,
                                               color: Theme.of(context)
                                                   .textTheme
                                                   .subtitle

@@ -11,13 +11,13 @@ class SelectBottomTabs extends AnimatedWidget {
     final Animation<double> animation = listenable;
     return Positioned(
       width: MediaQuery.of(context).size.width,
-      height: 70.0,
+      height: 56.0,
       left: 0,
       bottom: _posAnimation.evaluate(animation),
       child: Container(
         decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: Color(0xffd4d4d4))),
-            color: Color(0xfffafafa)),
+            border: Border(top: BorderSide(color: Color(0xffeeeeee))),
+            color: Color(0xfffcfcfc)),
         child: child,
       ),
     );
@@ -39,7 +39,7 @@ class SelectBottomState extends State<SelectBottom>
   initState() {
     super.initState();
     controller = new AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
+        duration: const Duration(milliseconds: 440), vsync: this);
     animation = new CurvedAnimation(parent: controller, curve: Curves.linear);
     controller.forward();
   }
