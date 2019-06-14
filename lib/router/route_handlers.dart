@@ -2,6 +2,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/another_page.dart';
 import 'package:netease_music/pages/my_music.dart';
+import 'package:netease_music/pages/playlist/page_playlist.dart';
 
 import '../components/base/album_box.dart';
 
@@ -20,5 +21,11 @@ var anotherPageHandler = new Handler(
 var mycollectionHandler = new Handler(
   handlerFunc: (BuildContext context, Map<String, dynamic> params) {
     return new MyCollection();
+  }
+);
+
+var playlistHandler = new Handler(
+  handlerFunc: (BuildContext, Map<String, dynamic> params) {
+    return PlaylistPage();
   }
 );

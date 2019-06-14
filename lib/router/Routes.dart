@@ -11,6 +11,7 @@ class Routes {
   // 一级路由
   static String anotherPage = '/anotherpage';
   static String albumBox = '/albumbox';
+  static String playlist = '/playlist';
 
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
@@ -25,5 +26,6 @@ class Routes {
     router.define(albumBox, handler: albumHandler, transitionType: TransitionType.native);
     router.define(anotherPage, handler: anotherPageHandler, transitionType: TransitionType.native);
     router.define(mycollection, handler: mycollectionHandler, transitionType: TransitionType.native);
+    router.define(playlist, handler: playlistHandler, transitionType: TransitionType.native);
   }
 }

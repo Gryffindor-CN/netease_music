@@ -50,7 +50,7 @@ class MyMusicHome extends StatelessWidget{
           FlatButton(
             child: Icon(Icons.home),
             onPressed: () {
-              Routes.router.navigateTo(pageContext, '/albumbox');
+              Routes.router.navigateTo(context, '/playlist');
             },
           ),
         ],

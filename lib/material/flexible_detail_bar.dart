@@ -18,14 +18,22 @@ class FlexibleDetailBar extends StatelessWidget {
         assert(background != null),
         super(key: key);
 
+  static double percentage(BuildContext context) {
+    _FlexibleDetail value = context.inheritFromWidgetOfExactType(_FlexibleDetail);
+    assert(value != null, 'ooh, can not find');
+    return value.t;
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
 
     /// 查找 [FlexibleSpaceBarSettings] 类型
-    final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
-    final double deltaExtent = settings.maxExtent - settings.minExtent;
-    final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+    // final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
+    // final double deltaExtent = settings.maxExtent - settings.minExtent;
+    // final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+    final double deltaExtent = 230;
+    final double t = 0.0;
 
     // 背景添加视差滚动效果
     children.add(Positioned(
@@ -35,7 +43,7 @@ class FlexibleDetailBar extends StatelessWidget {
       ).transform(t),
       left: 0,
       right: 0,
-      height: settings.maxExtent,
+      height: 360.0,
       child: background,
     ));
 
@@ -46,10 +54,10 @@ class FlexibleDetailBar extends StatelessWidget {
     }
     
     children.add(Positioned(
-      top: settings.currentExtent - settings.maxExtent,
+      top: 360.0 - 0.0,
       left: 0,
       right: 0,
-      height: settings.maxExtent,
+      height: 360.0,
       child: Opacity(
         opacity: 1 - t,
         child: Padding(
