@@ -16,8 +16,8 @@ var mycollectionHandler = new Handler(
   }
 );
 
-var musicCommentPageHandler = new Handler(
+var commentPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-      return new MusicCommentPage(params["data"][0]);
+      return new CommentPage(int.parse(params["type"][0]),params["id"][0],params["name"][0],params["author"][0],params["imageUrl"][0]);
     }
 );

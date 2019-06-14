@@ -25,7 +25,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   fluro: ^1.4.0
   sticky_headers: ^0.1.8
-
+  dio: ^2.1.7
+  toast: ^0.1.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -14,7 +14,7 @@ class Routes {
   static String mycollection = '/mymusic/mycollection';
 
   // 歌曲评论页
-  static String musicCommentPage = '/music_comment_page';
+  static String commentPage = '/commentpage';
 
   /// 过渡动画在路由定义[router.define]时给定，没有特殊要求的情况下，统一使用 [TransitionType.native]
   static void configureRoutes(Router router) {
@@ -25,6 +25,6 @@ class Routes {
     );
     router.define(anotherPage, handler: anotherPageHandler, transitionType: TransitionType.native);
     router.define(mycollection, handler: mycollectionHandler, transitionType: TransitionType.native);
-    router.define(musicCommentPage, handler: musicCommentPageHandler, transitionType: TransitionType.native);
+    router.define(commentPage, handler: commentPageHandler, transitionType: TransitionType.native);
   }
 }
