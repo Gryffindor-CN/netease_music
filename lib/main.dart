@@ -2,8 +2,8 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/netease.dart';
 import 'package:netease_music/router/Routes.dart';
-import 'package:overlay_support/overlay_support.dart';
-import './netease_toast.dart';
+import './components/netease_toast.dart';
+import './components/pull_to_refresh_header.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,68 +41,14 @@ class HomePageState extends State<HomePage> {
         title: Text('toast demo'),
       ),
       body: NeteaseToast(
+        toastText: '已为你推荐新的个性化内容!!!',
         showToast: isShow,
-        child: Center(
-          child: Column(
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(top: 100.0),
-                decoration: BoxDecoration(color: Colors.green),
-                child: Container(
-                  decoration: BoxDecoration(color: Colors.green),
-                  width: 80,
-                  height: 50,
-                  child: RaisedButton(
-                    child: Text('toast'),
-                    onPressed: () {
-                      // NeteaseOverlay(context).showToast();
-                      setState(() {
-                        isShow = true;
-                      });
-                    },
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
+        child: RefreshIndicators(showToastCb: () {
+          setState(() {
+            isShow = true;
+          });
+        }),
       ),
-    );
-  }
-}
-
-class IosStyleToast extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Positioned(
-          top: 100.0,
-          child: SafeArea(
-            child: DefaultTextStyle(
-              style: Theme.of(context)
-                  .textTheme
-                  .body1
-                  .copyWith(color: Colors.white),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                        color: Colors.black87,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 16,
-                        ),
-                        child: Text('以为你推荐新的个性化内容')),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        )
-      ],
     );
   }
 }
