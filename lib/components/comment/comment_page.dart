@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import 'comment_item.dart';
 import 'package:toast/toast.dart';
+import 'package:emoji_picker/emoji_picker.dart';
+
 
 ///歌曲,歌单,专辑评论页
 class CommentPage extends StatefulWidget{
@@ -42,6 +44,10 @@ class _CommentPageState extends State<CommentPage> {
   int commentPageNum = 0;
   //评论输入框controller
   final TextEditingController commentController = new TextEditingController();
+  //评论输入框焦点
+  FocusNode commentInputFocusNode = FocusNode();
+  //是否显示表情选择器
+  bool showEmojiSelector = false;
 
   ///加载数据
   void _getData(){
@@ -213,6 +219,7 @@ class _CommentPageState extends State<CommentPage> {
                 maxLines: 3,
                 minLines: 1,
                 controller: commentController,
+                focusNode: commentInputFocusNode,
                 onChanged: (value) {
                   if(commentController.text.length > 140){
                     Toast.show(
@@ -237,7 +244,6 @@ class _CommentPageState extends State<CommentPage> {
 
                 ),
                 inputFormatters: [
-//                        BlacklistingTextInputFormatter(RegExp("[a-z]")),
                   LengthLimitingTextInputFormatter(140)
                 ],
               ),
@@ -248,10 +254,25 @@ class _CommentPageState extends State<CommentPage> {
                 print('贴图');
               },
             ),
+            this.showEmojiSelector == true ?
+            IconButton(
+              icon: Icon(Icons.keyboard),
+              onPressed: (){
+                FocusScope.of(context).requestFocus(commentInputFocusNode);
+                setState(() {
+                  this.showEmojiSelector = false;
+                });
+              },
+            ):
             IconButton(
               icon: Icon(Icons.insert_emoticon),
               onPressed: (){
-                print('表情');
+                // 触摸收起键盘
+                FocusScope.of(context).requestFocus(FocusNode());
+                setState(() {
+                  this.showEmojiSelector = true;
+                });
+
               },
             ),
           ],
@@ -358,6 +379,18 @@ class _CommentPageState extends State<CommentPage> {
     return [Center()];
   }
 
+  ///关闭输入键盘和表情选择器
+  void hideKeyBord(){
+    if(this.showEmojiSelector){
+      setState(() {
+        this.showEmojiSelector = false;
+      });
+    }
+    if(commentInputFocusNode.hasFocus){
+      FocusScope.of(context).requestFocus(FocusNode());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -403,98 +436,118 @@ class _CommentPageState extends State<CommentPage> {
         color: Colors.white,
         child: Column(
           children: <Widget>[
+
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                physics: BouncingScrollPhysics(),
-                itemCount: 5,
-                // ignore: missing_return
-                itemBuilder: (BuildContext context, int index){
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTapDown: (v) {
+                  hideKeyBord();
+                },
+                child: ListView.builder(
+                  controller: _scrollController,
+                  physics: BouncingScrollPhysics(),
+                  itemCount: 5,
+                  // ignore: missing_return
+                  itemBuilder: (BuildContext context, int index){
 
-                  //名字/作者/封面
-                  if(index == 0){
-                    return _buildTitleCard();
-                  }
+                    //名字/作者/封面
+                    if(index == 0){
+                      return _buildTitleCard();
+                    }
 
-                  //判断是否还没有加载到数据
-                  if(this.map == null ){
-                    if(index == 4){
-                      _getData();
-                      return Container(
-                        padding: const EdgeInsets.all(16.0),
-                        alignment: Alignment.center,
-                        child: Column(
-                          children: <Widget>[
-                            SizedBox(
-                                width: 24.0,
-                                height: 24.0,
-                                child: CircularProgressIndicator(strokeWidth: 2.0)
-                            ),
-                            Text(''),
-                            Text(
-                              '正在加载...',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
+                    //判断是否还没有加载到数据
+                    if(this.map == null ){
+                      if(index == 4){
+                        _getData();
+                        return Container(
+                          padding: const EdgeInsets.all(16.0),
+                          alignment: Alignment.center,
+                          child: Column(
+                            children: <Widget>[
+                              SizedBox(
+                                  width: 24.0,
+                                  height: 24.0,
+                                  child: CircularProgressIndicator(strokeWidth: 2.0)
                               ),
-                            ),
-                          ],
-                        ),
+                              Text(''),
+                              Text(
+                                '正在加载...',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return Center();
+
+                    }
+
+                    //间隔
+                    if(index == 1){
+
+                      return Container(
+                        height: 8,
+                        color: Color(0x1e999999),
+                        child: Center(),
                       );
                     }
 
-                    return Center();
+                    //精彩评论
+                    if(index == 2){
+                      return _buildHotComment();
+                    }
 
-                  }
+                    //更多评论
+                    if(index == 3){
+                      return _buildComment();
+                    }
 
-                  //间隔
-                  if(index == 1){
-
-                    return Container(
-                      height: 8,
-                      color: Color(0x1e999999),
-                      child: Center(),
-                    );
-                  }
-
-                  //精彩评论
-                  if(index == 2){
-                    return _buildHotComment();
-                  }
-
-                  //更多评论
-                  if(index == 3){
-                    return _buildComment();
-                  }
-
-                  //加载更多
-                  if(index == 4){
-                    return this.isDone ?
-                    Container(
+                    //加载更多
+                    if(index == 4){
+                      return this.isDone ?
+                      Container(
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.all(16.0),
+                          child: Text("没有更多了", style: TextStyle(color: Colors.grey),)
+                      ):
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
                         alignment: Alignment.center,
-                        padding: EdgeInsets.all(16.0),
-                        child: Text("没有更多了", style: TextStyle(color: Colors.grey),)
-                    ):
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                          width: 24.0,
-                          height: 24.0,
-                          child: CircularProgressIndicator(strokeWidth: 2.0)
-                      ),
-                    );
-                  }
-                },
+                        child: SizedBox(
+                            width: 24.0,
+                            height: 24.0,
+                            child: CircularProgressIndicator(strokeWidth: 2.0)
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
             ),
             Divider(height: 0,color: Colors.grey,),
 
             //评论输入框
             _buildInput(),
+            this.showEmojiSelector == true ? EmojiPicker(
+              rows: 3,
+              columns: 8,
+              numRecommended: 10,
+              buttonMode: ButtonMode.CUPERTINO,
+              onEmojiSelected: (emoji, category) {
+                setState(() {
+                  this.commentController.text = this.commentController.text+ emoji.emoji;
+                });
+              },
+            ):Center(),
           ],
         ),
       ),
+      resizeToAvoidBottomPadding: !this.showEmojiSelector,//设置输入键盘是否要顶起内容
+
     );
   }
 
@@ -502,8 +555,17 @@ class _CommentPageState extends State<CommentPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
+      hideKeyBord();
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         _retrieveData();
+      }
+    });
+    commentInputFocusNode.addListener((){
+      if (commentInputFocusNode.hasFocus) {
+        // TextField has lost focus
+        setState(() {
+          this.showEmojiSelector = false;
+        });
       }
     });
   }

@@ -29,6 +29,8 @@ dependencies:
   toast: ^0.1.4
   # 透明图片占位符
   transparent_image: ^1.0.0
+  emoji_picker:
+    git: https://github.com/Ahmadre/emoji_picker
 dev_dependencies:
   flutter_test:
     sdk: flutter
