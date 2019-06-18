@@ -23,12 +23,13 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  # cupertino_icons: ^0.1.2
+  cupertino_icons: ^0.1.2
   fluro: ^1.4.0
 
 dev_dependencies:
-  # flutter_icons: ^0.1.4
-  fluwx: ^0.6.3
+  flutter_icons: ^0.1.4
+  dio: ^2.1.7
+  # fluwx: ^0.6.3
   # fluwx:
   #   git:
   #     url: https://github.com/OpenFlutter/fluwx
@@ -50,7 +51,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
    - assets/icons/friend_circle_32.png
-   - assets/icons/friend_circle_16.png
+   - assets/icons/qq_friend_32.png
+   - assets/icons/qq_zone_32.png
+   - assets/icons/wechat_32.png
+   - assets/icons/weibo_32.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
