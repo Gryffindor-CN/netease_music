@@ -53,6 +53,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluwx:
+    dependency: "direct dev"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: b861e0a861afbae3953e1aa946d866bd17191042
+      url: "https://github.com/OpenFlutter/fluwx"
+    source: git
+    version: "0.6.3"
   matcher:
     dependency: transitive
     description:

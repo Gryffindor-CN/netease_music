@@ -19,8 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       // onGenerateRoute: Routes.router.generator,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue, canvasColor: Colors.transparent),
       home: ShareWidget(),
     );
   }
@@ -63,28 +62,6 @@ class ShareWidgetState extends State<ShareWidget>
                       decoration: BoxDecoration(
                           color: Color(0xfff7f7f7), shape: BoxShape.circle),
                       child: Image.asset(
-                        'assets/icons/friend_circle_16.png',
-                      ),
-                    ),
-                    Text('微信朋友圈', style: TextStyle(fontSize: 10.0))
-                  ],
-                ),
-                onTap: () {
-                  print('share');
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: InkWell(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      width: 46.0,
-                      height: 46.0,
-                      decoration: BoxDecoration(
-                          color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                      child: Image.asset(
                         'assets/icons/friend_circle_32.png',
                       ),
                     ),
@@ -110,7 +87,7 @@ class ShareWidgetState extends State<ShareWidget>
                         'assets/icons/friend_circle_32.png',
                       ),
                     ),
-                    Text('微信朋友圈', style: TextStyle(fontSize: 10.0))
+                    Text('微信好友', style: TextStyle(fontSize: 10.0))
                   ],
                 ),
                 onTap: () {
@@ -132,7 +109,29 @@ class ShareWidgetState extends State<ShareWidget>
                         'assets/icons/friend_circle_32.png',
                       ),
                     ),
-                    Text('微信朋友圈', style: TextStyle(fontSize: 10.0))
+                    Text('QQ空间', style: TextStyle(fontSize: 10.0))
+                  ],
+                ),
+                onTap: () {
+                  print('share');
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: InkWell(
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      width: 46.0,
+                      height: 46.0,
+                      decoration: BoxDecoration(
+                          color: Color(0xfff7f7f7), shape: BoxShape.circle),
+                      child: Image.asset(
+                        'assets/icons/friend_circle_32.png',
+                      ),
+                    ),
+                    Text('QQ好友', style: TextStyle(fontSize: 10.0))
                   ],
                 ),
                 onTap: () {
@@ -154,7 +153,7 @@ class ShareWidgetState extends State<ShareWidget>
                         'assets/icons/friend_circle_32.png',
                       ),
                     ),
-                    Text('微信朋友圈', style: TextStyle(fontSize: 10.0))
+                    Text('微薄', style: TextStyle(fontSize: 10.0))
                   ],
                 ),
                 onTap: () {
@@ -176,7 +175,7 @@ class ShareWidgetState extends State<ShareWidget>
                         'assets/icons/friend_circle_32.png',
                       ),
                     ),
-                    Text('微信朋友圈', style: TextStyle(fontSize: 10.0))
+                    Text('大神圈子', style: TextStyle(fontSize: 10.0))
                   ],
                 ),
                 onTap: () {
@@ -275,7 +274,7 @@ class ShareWidgetState extends State<ShareWidget>
                   builder: (BuildContext context) {
                     return BottomSheet(
                       animationController: AnimationController(vsync: this),
-                      backgroundColor: Colors.transparent,
+                      // backgroundColor: Colors.transparent,
                       onClosing: () {},
                       enableDrag: true,
                       builder: (BuildContext context) {
