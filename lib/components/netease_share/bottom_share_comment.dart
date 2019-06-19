@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import '../router/Routes.dart';
+import '../../router/Routes.dart';
+import './utils.dart';
 
 class BottomShareComment {
-  static showBottomShareComment(
-      BuildContext context, String commentCoverImgUrl) {
+  static showBottomShareComment(BuildContext context, int playListId,
+      String commentCoverImgUrl, String playListName, String playListUserName) {
+    var _url = commentCoverImgUrl.toString().replaceAll('/', '_');
     Routes.router.navigateTo(context,
-        '/commentsharepage?id=61650863&coverImgUrl=${commentCoverImgUrl.toString().replaceAll('/', '_')}');
+        '/commentsharepage?playListId=$playListId&coverImgUrl=$_url&playListName=${FluroConvertUtils.fluroCnParamsEncode(playListName)}&playListUserName=${FluroConvertUtils.fluroCnParamsEncode(playListUserName)}');
     // Scaffold.of(context).showBottomSheet((context) {
     //   return Container(
     //     height: MediaQuery.of(context).size.height,

@@ -2,8 +2,8 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/netease.dart';
 import 'package:netease_music/router/Routes.dart';
-import 'components/bottom_share.dart';
-import './components/bottom_share_comment.dart';
+import 'components/netease_share/bottom_share.dart';
+import './components/netease_share/bottom_share_comment.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 
@@ -21,7 +21,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       // onGenerateRoute: Routes.router.generator,
-      theme: ThemeData.light().copyWith(canvasColor: Colors.transparent),
+      // theme: ThemeData.light().copyWith(canvasColor: Colors.transparent),
+      theme: ThemeData(
+        canvasColor: Colors.transparent,
+        primaryColor: Color(0xffC20C0C),
+      ),
       home: DemoWidget(),
     );
   }
@@ -57,20 +61,34 @@ class DemoWidgetState extends State<DemoWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('分享'),
       ),
       body: Builder(
         builder: (context) {
           return Center(
-            child: Container(
-              child: RaisedButton(
-                child: Text('share'),
-                onPressed: () {
-                  BottomShareComment.showBottomShareComment(
-                      context, playlistObj['coverImgUrl']);
-                },
-              ),
+            child: Column(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text('普通分享'),
+                  onPressed: () {
+                    BottomShare.showBottomShare(context);
+                  },
+                ),
+                RaisedButton(
+                  child: Text('评论分享'),
+                  onPressed: () {
+                    BottomShareComment.showBottomShareComment(
+                      context,
+                      playlistObj['id'],
+                      playlistObj['coverImgUrl'],
+                      playlistObj['name'],
+                      playlistObj['creator']['nickname'],
+                    );
+                  },
+                )
+              ],
             ),
           );
         },

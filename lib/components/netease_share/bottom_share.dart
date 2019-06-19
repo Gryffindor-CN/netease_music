@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 class ShareWidget extends StatefulWidget {
   @override
@@ -87,7 +88,7 @@ Widget _buildShareIcons(BuildContext context) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
               child: Column(
                 children: <Widget>[
@@ -109,7 +110,7 @@ Widget _buildShareIcons(BuildContext context) {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
               child: Column(
                 children: <Widget>[
@@ -131,7 +132,7 @@ Widget _buildShareIcons(BuildContext context) {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
               child: Column(
                 children: <Widget>[
@@ -153,7 +154,7 @@ Widget _buildShareIcons(BuildContext context) {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
               child: Column(
                 children: <Widget>[
@@ -175,7 +176,7 @@ Widget _buildShareIcons(BuildContext context) {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
               child: Column(
                 children: <Widget>[
@@ -197,7 +198,7 @@ Widget _buildShareIcons(BuildContext context) {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             child: InkWell(
               child: Column(
                 children: <Widget>[
@@ -252,7 +253,8 @@ Widget _buildShareInterior(BuildContext context) {
                         height: 46.0,
                         decoration: BoxDecoration(
                             color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                        child: Icon(Icons.mail_outline),
+                        // child: Icon(Icons.mail_outline),
+                        child: Icon(AntDesign.getIconData("mail")),
                       ),
                       Text('云音乐动态', style: TextStyle(fontSize: 10.0))
                     ],

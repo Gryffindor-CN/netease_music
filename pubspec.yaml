@@ -29,6 +29,7 @@ dependencies:
 dev_dependencies:
   flutter_icons: ^0.1.4
   dio: ^2.1.7
+  date_format: ^1.0.6
   # fluwx: ^0.6.3
   # fluwx:
   #   git:
@@ -55,7 +56,7 @@ flutter:
    - assets/icons/qq_zone_32.png
    - assets/icons/wechat_32.png
    - assets/icons/weibo_32.png
-  #  - images/a_dot_ham.jpeg
+   - assets/code.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
