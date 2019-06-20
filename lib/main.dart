@@ -41,6 +41,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   List<dynamic> songs = [];
   ScrollController _scrollController;
+  int songCommentTotal = 0;
 
   void getHttp() async {
     try {
@@ -48,10 +49,26 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           .get("http://192.168.206.133:3000/song/detail?ids=1339725941");
       var result = json.decode(response.toString());
 
-      setState(() {
-        songs = result['songs'];
-        print(songs[0]['name']);
+      getSongComment(result['songs'][0]['id']).then((data) {
+        print(data['total']);
+        setState(() {
+          songs = result['songs'];
+
+          songCommentTotal = data['total'];
+        });
       });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  getSongComment(int id) async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
+      var result = json.decode(response.toString());
+
+      return result;
     } catch (e) {
       print(e);
     }
@@ -61,6 +78,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     getHttp();
+
     _scrollController = ScrollController();
   }
 
@@ -101,7 +119,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   },
                   {
                     'leadingIcon': AntDesign.getIconData('message1'),
-                    'title': '评论',
+                    'title': '评论($songCommentTotal)',
                     'callback': () {}
                   },
                   {
