@@ -20,7 +20,38 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Netease(),
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  @override
+  HomePageState createState() => HomePageState();
+}
+
+class HomePageState extends State<HomePage> {
+  GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _globalKey,
+      appBar: AppBar(
+        title: Text('pull up'),
+      ),
+      body: Center(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _globalKey.currentState.showBottomSheet((BuildContext context) {
+            return Container(
+              decoration: BoxDecoration(color: Colors.black),
+              height: 200.0,
+            );
+          });
+        },
+        child: Text('do pull up'),
+      ),
     );
   }
 }
