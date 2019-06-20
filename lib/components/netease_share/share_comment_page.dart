@@ -199,7 +199,6 @@ class CommentShareContainerState extends State<CommentShareContainer> {
                         direction: Axis.horizontal,
                         children: <Widget>[
                           Container(
-                            // decoration: BoxDecoration(color: Colors.red),
                             width: 180.0,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,15 +294,23 @@ class CommentShareContainerState extends State<CommentShareContainer> {
                             color: Color(0xffA17B6E)),
                       ),
                     ),
-                    _buildCommentListAdpator(),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      decoration: BoxDecoration(
-                          borderRadius: new BorderRadius.only(
-                              bottomLeft: Radius.circular(4.0),
-                              bottomRight: Radius.circular(4.0)),
-                          color: Color(0xffffffff)),
-                      child: _buildCommentList(),
+                      // height: 200.0,
+                      decoration: BoxDecoration(color: Colors.white),
+                      child: Column(
+                        children: <Widget>[
+                          _buildCommentListAdpator(),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0),
+                            decoration: BoxDecoration(
+                                borderRadius: new BorderRadius.only(
+                                    bottomLeft: Radius.circular(4.0),
+                                    bottomRight: Radius.circular(4.0)),
+                                color: Color(0xffffffff)),
+                            child: _buildCommentList(),
+                          )
+                        ],
+                      ),
                     ),
                     Container(
                         padding: EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 130.0),
