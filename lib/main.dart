@@ -65,33 +65,29 @@ class DemoWidgetState extends State<DemoWidget> {
       appBar: AppBar(
         title: Text('分享'),
       ),
-      body: Builder(
-        builder: (context) {
-          return Center(
-            child: Column(
-              children: <Widget>[
-                RaisedButton(
-                  child: Text('普通分享'),
-                  onPressed: () {
-                    BottomShare.showBottomShare(context);
-                  },
-                ),
-                RaisedButton(
-                  child: Text('评论分享'),
-                  onPressed: () {
-                    BottomShareComment.showBottomShareComment(
-                      context,
-                      playlistObj['id'],
-                      playlistObj['coverImgUrl'],
-                      playlistObj['name'],
-                      playlistObj['creator']['nickname'],
-                    );
-                  },
-                )
-              ],
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            RaisedButton(
+              child: Text('普通分享'),
+              onPressed: () {
+                BottomShare.showBottomShare(context);
+              },
             ),
-          );
-        },
+            RaisedButton(
+              child: Text('评论分享'),
+              onPressed: () {
+                BottomShareComment.showBottomShareComment(
+                  context,
+                  playlistObj['id'],
+                  playlistObj['coverImgUrl'],
+                  playlistObj['name'],
+                  playlistObj['creator']['nickname'],
+                );
+              },
+            )
+          ],
+        ),
       ),
     );
   }
