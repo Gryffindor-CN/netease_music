@@ -2,6 +2,11 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/netease.dart';
 import 'package:netease_music/router/Routes.dart';
+import './components/song_detail_dialog.dart';
+import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:flutter_icons/flutter_icons.dart';
+import './components/netease_share/bottom_share.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,7 +23,8 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       onGenerateRoute: Routes.router.generator,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        canvasColor: Colors.transparent,
+        primaryColor: Color(0xffC20C0C),
       ),
       home: HomePage(),
     );
@@ -30,12 +36,38 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
+
+  List<dynamic> songs = [];
+  ScrollController _scrollController;
+
+  void getHttp() async {
+    try {
+      Response response = await Dio()
+          .get("http://192.168.206.133:3000/song/detail?ids=1339725941");
+      var result = json.decode(response.toString());
+
+      setState(() {
+        songs = result['songs'];
+        print(songs[0]['name']);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getHttp();
+    _scrollController = ScrollController();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       key: _globalKey,
       appBar: AppBar(
         title: Text('pull up'),
@@ -43,12 +75,70 @@ class HomePageState extends State<HomePage> {
       body: Center(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _globalKey.currentState.showBottomSheet((BuildContext context) {
-            return Container(
-              decoration: BoxDecoration(color: Colors.black),
-              height: 200.0,
-            );
-          });
+          showModalBottomSheet(
+              context: _globalKey.currentContext,
+              builder: (BuildContext context) {
+                return SongDetailDialog(
+                    songs[0]['name'],
+                    songs[0]['al']['name'],
+                    songs[0]['ar'][0]['name'],
+                    songs[0]['al']['picUrl'],
+                    songs[0]['alia'][0], [
+                  {
+                    'leadingIcon': AntDesign.getIconData('playcircleo'),
+                    'title': '下一首播放',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('plussquareo'),
+                    'title': '收藏到歌单',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('download'),
+                    'title': '下载',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('message1'),
+                    'title': '评论',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('sharealt'),
+                    'title': '分享',
+                    'callback': () {
+                      Navigator.of(context).pop();
+                      BottomShare.showBottomShare(context);
+                    }
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('adduser'),
+                    'title': '歌手：${songs[0]['ar'][0]['name']}',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('adduser'),
+                    'title': '专辑：${songs[0]['al']['name']}',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('youtube'),
+                    'title': '查看视频',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('barchart'),
+                    'title': '人气榜应援',
+                    'callback': () {}
+                  },
+                  {
+                    'leadingIcon': AntDesign.getIconData('delete'),
+                    'title': '删除',
+                    'callback': () {}
+                  }
+                ]);
+              });
         },
         child: Text('do pull up'),
       ),
