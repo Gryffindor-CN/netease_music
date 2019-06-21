@@ -31,11 +31,7 @@ class SongDetailDialogState extends State<SongDetailDialog> {
 
     widget.lists.asMap().forEach((index, item) {
       widgetsList.add(
-        ListViewItem(
-            // AntDesign.getIconData('playcircleo'), '下一首播放', () {}
-            item['leadingIcon'],
-            item['title'],
-            item['callback']),
+        ListViewItem(item['leadingIcon'], item['title'], item['callback']),
       );
     });
     return widgetsList;
@@ -63,6 +59,7 @@ class SongDetailDialogState extends State<SongDetailDialog> {
                   topRight: const Radius.circular(16.0),
                 ),
                 child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
                   child: Column(
                     children: _buildLists(),
                   ),
@@ -82,32 +79,48 @@ class ListViewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // padding: EdgeInsets.fromLTRB(20.0, 0.0, 0.0, 10.0),
-      child: InkWell(
-        onTap: handleTap,
-        child: Container(
-            padding: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 0.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Icon(
-                  iconData,
-                  size: 20.0,
-                ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.bottomLeft,
-                    margin: EdgeInsets.only(left: 16.0),
-                    padding: EdgeInsets.only(bottom: 14.0),
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(color: Color(0x3caaaaaa)))),
-                    child: Text(title),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        iconTheme: Theme.of(context).iconTheme.copyWith(
+            color: handleTap == null
+                ? Color(0x96aaaaaa)
+                : Theme.of(context).iconTheme.color),
+      ),
+      child: Container(
+        child: InkWell(
+          onTap: handleTap == null
+              ? () {
+                  return null;
+                }
+              : handleTap,
+          child: Container(
+              padding: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 0.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    iconData,
+                    size: 20.0,
                   ),
-                )
-              ],
-            )),
+                  Expanded(
+                    child: Container(
+                      alignment: Alignment.bottomLeft,
+                      margin: EdgeInsets.only(left: 16.0),
+                      padding: EdgeInsets.only(bottom: 14.0),
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(color: Color(0x3caaaaaa)))),
+                      child: Text(
+                        title,
+                        style: handleTap == null
+                            ? TextStyle(color: Color(0x96aaaaaa))
+                            : DefaultTextStyle.of(context).style,
+                      ),
+                    ),
+                  )
+                ],
+              )),
+        ),
       ),
     );
   }
@@ -184,7 +197,8 @@ class _Header extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Expanded(
+            Flexible(
+              flex: 6,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -202,18 +216,28 @@ class _Header extends StatelessWidget {
                       ),
                       Container(
                         margin: EdgeInsets.only(left: 15.0),
-                        width: 180.0,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Flex(
+                          direction: Axis.horizontal,
                           children: <Widget>[
-                            Text(
-                              '$songName（$songAlia）',
-                              style: TextStyle(fontSize: 14.0),
-                            ),
-                            Text(
-                              artistName,
-                              style: TextStyle(
-                                  color: Color(0xffaaaaaa), fontSize: 12.0),
+                            Container(
+                              width: 160.0,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    '$songName（$songAlia）',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 14.0),
+                                  ),
+                                  Text(
+                                    artistName,
+                                    style: TextStyle(
+                                        color: Color(0xffaaaaaa),
+                                        fontSize: 12.0),
+                                  )
+                                ],
+                              ),
                             )
                           ],
                         ),
@@ -227,9 +251,12 @@ class _Header extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              alignment: Alignment.centerRight,
-              child: OpenVipBtn('开通VIP畅享'),
+            Flexible(
+              flex: 2,
+              child: Container(
+                alignment: Alignment.centerRight,
+                child: OpenVipBtn('开通VIP畅享'),
+              ),
             )
           ],
         ),

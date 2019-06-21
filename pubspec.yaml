@@ -28,6 +28,7 @@ dependencies:
 dev_dependencies:
   flutter_icons: ^0.1.4
   dio: ^2.1.7
+  fluwx: ^0.6.3
   flutter_test:
     sdk: flutter
 

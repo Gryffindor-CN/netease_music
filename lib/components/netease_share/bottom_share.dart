@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
 
 class ShareWidget extends StatefulWidget {
   @override
@@ -42,7 +43,6 @@ class ShareWidgetState extends State<ShareWidget>
                   children: <Widget>[
                     _buildShareIcons(context),
                     Container(
-                      // margin: EdgeInsets.only(top: 10.0),
                       width: MediaQuery.of(context).size.width,
                       height: 60.0,
                       child: InkWell(
@@ -105,7 +105,20 @@ Widget _buildShareIcons(BuildContext context) {
                 ],
               ),
               onTap: () {
-                print('share');
+                // print('share');
+                // var model = new fluwx.WeChatShareVideoModel(
+                //     videoUrl: 'http://www.qq.com',
+                //     transaction: "video",
+                //     videoLowBandUrl: 'http://www.qq.com',
+                //     thumbnail: 'assets://assets/code.png',
+                //     description: 'A Popular Rock Band From China',
+                //     scene: scene,
+                //     title: 'Beyond');
+
+                fluwx.share(fluwx.WeChatShareTextModel(
+                    text: '_____',
+                    transaction: "text${DateTime.now().millisecondsSinceEpoch}",
+                    scene: fluwx.WeChatScene.SESSION));
               },
             ),
           ),

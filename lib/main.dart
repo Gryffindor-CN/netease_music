@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:flutter_icons/flutter_icons.dart';
 import './components/netease_share/bottom_share.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
 
 void main() => runApp(MyApp());
 
@@ -43,6 +44,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ScrollController _scrollController;
   int songCommentTotal = 0;
 
+  _initFluwx() async {
+    await fluwx.register(
+        appId: "wxd930ea5d5a258f4f",
+        doOnAndroid: true,
+        doOnIOS: true,
+        enableMTA: false);
+    var result = await fluwx.isWeChatInstalled();
+    print("is installed $result");
+  }
+
   void getHttp() async {
     try {
       Response response = await Dio()
@@ -50,7 +61,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       var result = json.decode(response.toString());
 
       getSongComment(result['songs'][0]['id']).then((data) {
-        print(data['total']);
         setState(() {
           songs = result['songs'];
 
@@ -78,7 +88,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     getHttp();
-
+    _initFluwx();
     _scrollController = ScrollController();
   }
 
@@ -105,7 +115,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   {
                     'leadingIcon': AntDesign.getIconData('playcircleo'),
                     'title': '下一首播放',
-                    'callback': () {}
+                    'callback': null
                   },
                   {
                     'leadingIcon': AntDesign.getIconData('plussquareo'),
