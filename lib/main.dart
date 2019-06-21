@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: Routes.router.generator,
       theme: ThemeData(
         canvasColor: Colors.transparent,
-        primaryColor: Color(0xffC20C0C),
+        primarySwatch: Colors.blue,
       ),
       home: HomePage(),
     );
@@ -41,29 +41,22 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   List<dynamic> songs = [];
+  List<int> likelist = [];
+  List<dynamic> songlist = [];
+  List<int> commentlist = [];
+
   ScrollController _scrollController;
   int songCommentTotal = 0;
 
-  _initFluwx() async {
-    await fluwx.register(
-        appId: "wxd930ea5d5a258f4f",
-        doOnAndroid: true,
-        doOnIOS: true,
-        enableMTA: false);
-    await fluwx.isWeChatInstalled();
-  }
-
-  void getHttp() async {
+  void getSongDetail(int id) async {
     try {
-      Response response = await Dio()
-          .get("http://192.168.206.133:3000/song/detail?ids=1339725941");
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/song/detail?ids=$id");
       var result = json.decode(response.toString());
-
       getSongComment(result['songs'][0]['id']).then((data) {
         setState(() {
-          songs = result['songs'];
-
-          songCommentTotal = data['total'];
+          songlist.add(result['songs'][0]);
+          commentlist.add(data['total']);
         });
       });
     } catch (e) {
@@ -76,7 +69,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       Response response =
           await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
       var result = json.decode(response.toString());
-
       return result;
     } catch (e) {
       print(e);
@@ -86,89 +78,115 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    getHttp();
-    _initFluwx();
+    [33911781, 36270426, 1370897787].asMap().forEach((index, item) {
+      getSongDetail(item);
+    });
     _scrollController = ScrollController();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       key: _globalKey,
       appBar: AppBar(
-        title: Text('pull up'),
+        title: Text('弹起'),
       ),
-      body: Center(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-              context: _globalKey.currentContext,
-              builder: (BuildContext context) {
-                return SongDetailDialog(
-                    songs[0]['name'],
-                    songs[0]['al']['name'],
-                    songs[0]['ar'][0]['name'],
-                    songs[0]['al']['picUrl'],
-                    songs[0]['alia'][0], [
-                  {
-                    'leadingIcon': AntDesign.getIconData('playcircleo'),
-                    'title': '下一首播放',
-                    'callback': null
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('plussquareo'),
-                    'title': '收藏到歌单',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('download'),
-                    'title': '下载',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('message1'),
-                    'title': '评论($songCommentTotal)',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('sharealt'),
-                    'title': '分享',
-                    'callback': () {
-                      Navigator.of(context).pop();
-                      BottomShare.showBottomShare(context);
-                    }
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('adduser'),
-                    'title': '歌手：${songs[0]['ar'][0]['name']}',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('adduser'),
-                    'title': '专辑：${songs[0]['al']['name']}',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('youtube'),
-                    'title': '查看视频',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('barchart'),
-                    'title': '人气榜应援',
-                    'callback': () {}
-                  },
-                  {
-                    'leadingIcon': AntDesign.getIconData('delete'),
-                    'title': '删除',
-                    'callback': () {}
-                  }
-                ]);
-              });
+      body: Center(
+          child: ListView.builder(
+        itemCount: 3,
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            child: ListTile(
+              leading: Text('${index + 1}'),
+              title: songlist.length > 0
+                  ? Text(songlist[index]['name'])
+                  : Text('----'),
+              trailing: InkWell(
+                child: Icon(Icons.more_vert),
+                onTap: () {
+                  showModalBottomSheet(
+                      context: _globalKey.currentContext,
+                      builder: (BuildContext context) {
+                        return SongDetailDialog(
+                            songlist[index]['name'],
+                            songlist[index]['al']['name'],
+                            songlist[index]['ar'][0]['name'],
+                            songlist[index]['al']['picUrl'],
+                            songlist[index]['alia'].length == 0
+                                ? ''
+                                : '（${songlist[index]['alia'][0]}）',
+                            [
+                              {
+                                'leadingIcon':
+                                    AntDesign.getIconData('playcircleo'),
+                                'title': '下一首播放',
+                                'callback': null
+                              },
+                              {
+                                'leadingIcon':
+                                    AntDesign.getIconData('plussquareo'),
+                                'title': '收藏到歌单',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon':
+                                    AntDesign.getIconData('download'),
+                                'title': '下载',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon':
+                                    AntDesign.getIconData('message1'),
+                                'title': '评论(${commentlist[index]})',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon':
+                                    AntDesign.getIconData('sharealt'),
+                                'title': '分享',
+                                'callback': () {
+                                  Navigator.of(context).pop();
+                                  BottomShare.showBottomShare(context);
+                                }
+                              },
+                              {
+                                'leadingIcon': AntDesign.getIconData('adduser'),
+                                'title':
+                                    '歌手：${songlist[index]['ar'][0]['name']}',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon': AntDesign.getIconData('adduser'),
+                                'title': '专辑：${songlist[index]['al']['name']}',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon': AntDesign.getIconData('youtube'),
+                                'title': '查看视频',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon':
+                                    AntDesign.getIconData('barchart'),
+                                'title': '人气榜应援',
+                                'callback': () {}
+                              },
+                              {
+                                'leadingIcon': AntDesign.getIconData('delete'),
+                                'title': '删除',
+                                'callback': () {}
+                              }
+                            ]);
+                      });
+                },
+              ),
+            ),
+          );
         },
-        child: Text('do pull up'),
-      ),
+      )),
     );
   }
 }

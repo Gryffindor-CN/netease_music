@@ -40,34 +40,39 @@ class SongDetailDialogState extends State<SongDetailDialog> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.only(bottom: 5.0),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(16.0),
-              topRight: const Radius.circular(16.0),
-            ),
-            color: Colors.white),
-        height: MediaQuery.of(context).size.height / 2,
-        child: Column(
-          children: <Widget>[
-            _Header(widget.albumPicUrl, widget.songName, widget.songAlia,
-                widget.artistName),
-            Expanded(
-              child: Material(
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16.0),
-                  topRight: const Radius.circular(16.0),
-                ),
-                child: SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  child: Column(
-                    children: _buildLists(),
+      height: MediaQuery.of(context).size.height / 2,
+      decoration: BoxDecoration(color: Colors.transparent),
+      child: Container(
+          padding: EdgeInsets.only(bottom: 5.0),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(16.0),
+                topRight: const Radius.circular(16.0),
+              ),
+              color: Colors.white),
+          height: MediaQuery.of(context).size.height / 2,
+          child: Column(
+            children: <Widget>[
+              _Header(widget.albumPicUrl, widget.songName, widget.songAlia,
+                  widget.artistName),
+              Expanded(
+                child: Material(
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(16.0),
+                    topRight: const Radius.circular(16.0),
+                  ),
+                  child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      children: _buildLists(),
+                    ),
                   ),
                 ),
-              ),
-            )
-          ],
-        ));
+              )
+            ],
+          )),
+    );
+    ;
   }
 }
 
@@ -94,7 +99,7 @@ class ListViewItem extends StatelessWidget {
                 }
               : handleTap,
           child: Container(
-              padding: EdgeInsets.fromLTRB(20.0, 10.0, 0.0, 0.0),
+              padding: EdgeInsets.fromLTRB(10.0, 15.0, 0.0, 0.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -112,6 +117,8 @@ class ListViewItem extends StatelessWidget {
                               bottom: BorderSide(color: Color(0x3caaaaaa)))),
                       child: Text(
                         title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: handleTap == null
                             ? TextStyle(color: Color(0x96aaaaaa))
                             : DefaultTextStyle.of(context).style,
@@ -126,7 +133,7 @@ class ListViewItem extends StatelessWidget {
   }
 }
 
-const double _DIALOG_HEADER_HEIGHT = 115.0;
+const double _DIALOG_HEADER_HEIGHT = 100.0;
 
 class OpenVipBtn extends StatefulWidget {
   final String text;
@@ -201,7 +208,7 @@ class _Header extends StatelessWidget {
               flex: 6,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +218,9 @@ class _Header extends StatelessWidget {
                         height: 50.0,
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                          child: Image.network(albumPicUrl, fit: BoxFit.fill),
+                          child: albumPicUrl != ''
+                              ? Image.network(albumPicUrl, fit: BoxFit.fill)
+                              : CircularProgressIndicator(),
                         ),
                       ),
                       Container(
@@ -225,7 +234,7 @@ class _Header extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Text(
-                                    '$songName（$songAlia）',
+                                    '$songName$songAlia',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(fontSize: 14.0),
