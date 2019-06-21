@@ -50,8 +50,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         doOnAndroid: true,
         doOnIOS: true,
         enableMTA: false);
-    var result = await fluwx.isWeChatInstalled();
-    print("is installed $result");
+    await fluwx.isWeChatInstalled();
   }
 
   void getHttp() async {

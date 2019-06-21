@@ -207,8 +207,8 @@ class _Header extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Container(
-                        width: 60.0,
-                        height: 60.0,
+                        width: 50.0,
+                        height: 50.0,
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(4.0)),
                           child: Image.network(albumPicUrl, fit: BoxFit.fill),
@@ -234,7 +234,7 @@ class _Header extends StatelessWidget {
                                     artistName,
                                     style: TextStyle(
                                         color: Color(0xffaaaaaa),
-                                        fontSize: 12.0),
+                                        fontSize: 10.0),
                                   )
                                 ],
                               ),
