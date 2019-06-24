@@ -41,7 +41,22 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   List<dynamic> songs = [];
-  List<int> likelist = [];
+  List<int> likelist = [
+    33911781,
+    5271858,
+    36270426,
+    25951011,
+    1370897787,
+    1339725941,
+    186436,
+    1339725941,
+    1370897787,
+    25951011,
+    36270426,
+    5271858,
+    33911781,
+    186436
+  ];
   List<dynamic> songlist = [];
   List<int> commentlist = [];
 
@@ -78,7 +93,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    [33911781, 36270426, 1370897787].asMap().forEach((index, item) {
+    likelist.asMap().forEach((index, item) {
       getSongDetail(item);
     });
     _scrollController = ScrollController();
@@ -93,7 +108,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
       body: Center(
           child: ListView.builder(
-        itemCount: 3,
+        itemCount: likelist.length,
         itemBuilder: (BuildContext context, int index) {
           return Container(
             decoration: BoxDecoration(
