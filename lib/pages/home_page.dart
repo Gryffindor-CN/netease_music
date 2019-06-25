@@ -132,7 +132,7 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                             border: Border(
                                 top: BorderSide(
                                     color: Theme.of(context).primaryColor,
-                                    width: 2.0))),
+                                    width: .0))),
                         width: MediaQuery.of(context).size.width,
                         height: 40.0,
                       ),
@@ -142,7 +142,7 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                             decoration:
                                 BoxDecoration(color: Colors.transparent),
                             width: MediaQuery.of(context).size.width,
-                            height: 200.0,
+                            height: 138.0,
                             child: banners.length <= 0
                                 ? Container(
                                     child: CircularProgressIndicator(
@@ -173,12 +173,13 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                   ),
                           ),
                           Container(
-                              margin: EdgeInsets.only(top: 15.0),
+                              margin: EdgeInsets.only(top: 20.0),
                               padding: EdgeInsets.symmetric(horizontal: 15.0),
                               decoration: BoxDecoration(
                                   color: Colors.white,
                                   border: Border(
-                                      bottom: BorderSide(color: Colors.grey))),
+                                      bottom: BorderSide(
+                                          color: Colors.grey, width: 0.0))),
                               width: MediaQuery.of(context).size.width,
                               height: 80.0,
                               child: Row(

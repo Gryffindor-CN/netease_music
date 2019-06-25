@@ -55,12 +55,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         appBar: AppBar(
           title: Text('business'),
         ),
-        body: Text('ss')),
+        body: Text(
+          'ss',
+          style: optionStyle,
+        )),
     Scaffold(
         appBar: AppBar(
           title: Text('school'),
         ),
-        body: Text('ss')),
+        body: Text(
+          'ss',
+          style: optionStyle,
+        )),
   ];
 
   @override
@@ -77,87 +83,37 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _globalKey,
-        body: Stack(
-          children: <Widget>[
-            currentIndex == 0
-                ? Scaffold(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    appBar: AppBar(
-                      title: Text('home'),
-                      elevation: 0.0,
-                    ),
-                    body: NeteaseToast(
-                      toastText: '已为你推荐新的个性化内容!!!',
-                      showToast: isShow,
-                      child: RefreshIndicators(showToastCb: () {
-                        setState(() {
-                          isShow = true;
-                        });
-                      }),
-                    ),
-                  )
-                : _widgetOptions[currentIndex],
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                  child: Stack(
-                    children: <Widget>[
-                      Opacity(
-                        opacity: 0.5,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: 60.0,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 10.0,
-                        child: NeteaseBottomNavBar(
-                          [
-                            {'iconData': Icons.home, 'title': 'Home'},
-                            {'iconData': Icons.business, 'title': 'Business'},
-                            {'iconData': Icons.school, 'title': 'School'}
-                          ],
-                          currentIndex,
-                          onTap: (value) {
-                            setState(() {
-                              currentIndex = value;
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ),
+        body: NeteaseBottomNavBar(
+          [
+            {'iconData': Icons.home, 'title': 'Home'},
+            {'iconData': Icons.business, 'title': 'Business'},
+            {'iconData': Icons.school, 'title': 'School'}
           ],
-        )
-
-        // bottomNavigationBar: ClipRect(
-        //   child: BackdropFilter(
-        //     filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        //     child: Opacity(
-        //       opacity: 0.5,
-        //       child: Container(
-        //         width: MediaQuery.of(context).size.width,
-        //         height: 60.0,
-        //         decoration: BoxDecoration(
-        //           color: Colors.grey.shade200,
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        );
+          onTap: (value) {
+            setState(() {
+              currentIndex = value;
+            });
+          },
+          currentIndex: currentIndex,
+          child: currentIndex == 0
+              ? Scaffold(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  appBar: AppBar(
+                    title: Text('home'),
+                    elevation: 0.0,
+                  ),
+                  body: NeteaseToast(
+                    toastText: '已为你推荐新的个性化内容!!!',
+                    showToast: isShow,
+                    child: RefreshIndicators(showToastCb: () {
+                      setState(() {
+                        isShow = true;
+                      });
+                    }),
+                  ),
+                )
+              : _widgetOptions[currentIndex],
+        ));
   }
 }
 
@@ -183,69 +139,36 @@ class ContentState extends State<Content> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        currentIndex == 0
-            ? Scaffold(
-                appBar: AppBar(
-                  title: Text('home'),
-                  elevation: 0.0,
-                ),
-                body: NeteaseToast(
-                  toastText: '已为你推荐新的个性化内容!!!',
-                  showToast: isShow,
-                  child: RefreshIndicators(showToastCb: () {
-                    setState(() {
-                      isShow = true;
-                    });
-                  }),
-                ),
-              )
-            : _widgetOptions[currentIndex],
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-              child: Stack(
-                children: <Widget>[
-                  Opacity(
-                    opacity: 0.5,
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 60.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    top: 10.0,
-                    child: NeteaseBottomNavBar(
-                      [
-                        {'iconData': Icons.home, 'title': 'Home'},
-                        {'iconData': Icons.business, 'title': 'Business'},
-                        {'iconData': Icons.school, 'title': 'School'}
-                      ],
-                      currentIndex,
-                      onTap: (value) {
-                        setState(() {
-                          currentIndex = value;
-                        });
-                      },
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        )
+    return NeteaseBottomNavBar(
+      [
+        {'iconData': Icons.home, 'title': 'Home'},
+        {'iconData': Icons.business, 'title': 'Business'},
+        {'iconData': Icons.school, 'title': 'School'}
       ],
+      onTap: (value) {
+        setState(() {
+          currentIndex = value;
+        });
+      },
+      currentIndex: currentIndex,
+      child: currentIndex == 0
+          ? Scaffold(
+              backgroundColor: Theme.of(context).primaryColor,
+              appBar: AppBar(
+                title: Text('home'),
+                elevation: 0.0,
+              ),
+              body: NeteaseToast(
+                toastText: '已为你推荐新的个性化内容!!!',
+                showToast: isShow,
+                child: RefreshIndicators(showToastCb: () {
+                  setState(() {
+                    isShow = true;
+                  });
+                }),
+              ),
+            )
+          : _widgetOptions[currentIndex],
     );
-    ;
   }
 }
