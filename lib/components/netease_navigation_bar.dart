@@ -40,7 +40,7 @@ class NeteaseBottomNavBarState extends State<NeteaseBottomNavBar> {
               child: Stack(
                 children: <Widget>[
                   Opacity(
-                    opacity: 0.5,
+                    opacity: 0.3,
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: 60.0,
