@@ -1,16 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../router/Routes.dart';
 
 class SearchPage extends StatefulWidget {
+  final String keyword;
+  SearchPage({this.keyword});
+
   @override
   SearchPageState createState() => SearchPageState();
 }
 
 class SearchPageState extends State<SearchPage> {
-  final TextEditingController _textEditingController = TextEditingController();
+  TextEditingController _textEditingController = TextEditingController();
+  bool hasSearchInsert;
+  bool isSuggestLoading = true;
+  List<Music> searchhistorylists = [];
+  List<Music> hotlists = [];
+  List<dynamic> suggestlists = [];
 
   @override
   void initState() {
     super.initState();
+    if (widget.keyword != null) {
+      hasSearchInsert = true;
+      isSuggestLoading = true;
+      _textEditingController = TextEditingController(text: widget.keyword);
+      _getSearchSuggest(widget.keyword);
+    } else {
+      _getSearchHot();
+      SharedPreferences.getInstance().then((prefs) {
+        if (prefs.getStringList('search_history') != null) {
+          setState(() {
+            searchhistorylists.clear();
+            prefs.getStringList('search_history').forEach((item) {
+              searchhistorylists.add(Music(name: item));
+            });
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    hasSearchInsert = false;
+    _textEditingController.clear();
+  }
+
+  void _getSearchHot() async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/search/hot");
+      var hots = json.decode(response.toString())['result']['hots'];
+
+      setState(() {
+        hots.forEach((item) {
+          hotlists.add(Music(name: item['first']));
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _getSearchSuggest(String keywords) async {
+    try {
+      Response response = await Dio().get(
+          "http://192.168.206.133:3000/search/suggest?keywords=$keywords&type=mobile");
+      var result = json.decode(response.toString())['result']['allMatch'];
+      if (result == null) {
+        setState(() {
+          isSuggestLoading = false;
+          suggestlists = [];
+        });
+      } else {
+        setState(() {
+          isSuggestLoading = false;
+          suggestlists = result;
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -22,15 +97,32 @@ class SearchPageState extends State<SearchPage> {
           height: 36.0,
           child: TextField(
             onChanged: (value) {
-              print(value);
+              if (value == '') {
+                setState(() {
+                  hasSearchInsert = false;
+                });
+              } else {
+                setState(() {
+                  hasSearchInsert = true;
+                  _getSearchSuggest(value);
+                });
+              }
             },
             controller: _textEditingController,
             autofocus: true,
-            style: TextStyle(
-              fontSize: 16.0,
-            ),
+            style: TextStyle(fontSize: 16.0, color: Colors.white),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: 2.0),
+              suffixIcon: Opacity(
+                  opacity: 0.8,
+                  child: IconButton(
+                    icon: Icon(Icons.cancel, color: Colors.black26),
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.clear();
+                      });
+                    },
+                  )),
               prefixIcon: Icon(
                 Icons.search,
                 color: Colors.white24,
@@ -49,148 +141,346 @@ class SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
-      body: CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
-        SearchHistory([
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-          Music(name: '喜帖街', id: 541641564),
-        ]),
-      ]
-          // child: Column(
-          //   children: <Widget>[
-          //     SearchHistory([
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //       Music(name: '喜帖街', id: 541641564),
-          //     ])
-          //   ],
-          // ),
-          ),
+      body: hasSearchInsert == true
+          ? CustomScrollView(
+              physics: BouncingScrollPhysics(),
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: Container(
+                    child: InkWell(
+                      onTap: () {
+                        // 搜索
+                        String url =
+                            '/home/searchresultpage?keyword=${_textEditingController.text}';
+                        url = Uri.encodeFull(url);
+                        Routes.router.navigateTo(context, url);
+                        setState(() {
+                          hasSearchInsert = false;
+                          _textEditingController.clear();
+                        });
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          SizedBox(
+                            width: 10.0,
+                          ),
+                          Expanded(
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Color(0xFFE0E0E0)))),
+                                padding: EdgeInsets.symmetric(vertical: 10.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Text('搜索'),
+                                    SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Text('“${_textEditingController.text}”')
+                                  ],
+                                )),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: isSuggestLoading == true
+                      ? Center(child: CircularProgressIndicator())
+                      : Container(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: suggestlists.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return SearchSuggestMusic(
+                                suggestlists[index]['keyword'],
+                                searchCb: () {
+                                  setState(() {
+                                    hasSearchInsert = false;
+                                    _textEditingController.clear();
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                )
+              ],
+            )
+          : CustomScrollView(
+              physics: BouncingScrollPhysics(),
+              slivers: searchhistorylists.length <= 0
+                  ? [
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 10.0,
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: SearchListTitle(
+                          '热搜榜',
+                        ),
+                      ),
+                      SearchHotList(hotlists),
+                    ]
+                  : [
+                      SliverToBoxAdapter(
+                        child: SearchListTitle(
+                          '搜索历史',
+                          icon: {
+                            'iconData': Icons.delete_forever,
+                            'iconPressd': () {
+                              // 清空搜索历史
+                              SharedPreferences.getInstance().then((prefs) {
+                                prefs.remove('search_history');
+                                setState(() {
+                                  searchhistorylists.clear();
+                                });
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      SearchHistoryList(
+                        searchhistorylists,
+                        ctx: context,
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 25.0,
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: SearchListTitle(
+                          '热搜榜',
+                        ),
+                      ),
+                      SearchHotList(hotlists),
+                    ]),
     );
   }
 }
 
+class SearchSuggestMusic extends StatelessWidget {
+  final String keyword;
+  final VoidCallback searchCb;
+  SearchSuggestMusic(this.keyword, {this.searchCb});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        // 点击后加入搜索记录
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        var searchHisLists = prefs.getStringList('search_history');
+        if (searchHisLists == null) {
+          searchHisLists = [keyword];
+        } else if (!searchHisLists.contains(keyword)) {
+          searchHisLists.add(keyword);
+        }
+
+        SharedPreferences.getInstance().then((preference) {
+          preference.setStringList('search_history', searchHisLists);
+          // 搜索
+          String url = '/home/searchresultpage?keyword=$keyword';
+          url = Uri.encodeFull(url);
+          Routes.router.navigateTo(context, url);
+          searchCb();
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.fromLTRB(10.0, 10.0, 0.0, 0.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(right: 8.0),
+              child: Icon(Icons.search),
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.only(bottom: 10.0),
+                decoration: BoxDecoration(
+                    border:
+                        Border(bottom: BorderSide(color: Color(0xFFE0E0E0)))),
+                child: Text(keyword),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 热搜榜列表
+class SearchHotList extends StatelessWidget {
+  final List<Music> songlist;
+  SearchHotList(this.songlist);
+
+  @override
+  Widget build(BuildContext context) {
+    return songlist.length <= 0
+        ? SliverToBoxAdapter(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        : SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return InkWell(
+                  onTap: () async {
+                    // 点击后加入搜索记录
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    var searchHisLists = prefs.getStringList('search_history');
+                    if (searchHisLists == null) {
+                      searchHisLists = [songlist[index].name];
+                    } else if (!searchHisLists.contains(songlist[index].name)) {
+                      searchHisLists.add(songlist[index].name);
+                    }
+
+                    SharedPreferences.getInstance().then((preference) {
+                      preference.setStringList(
+                          'search_history', searchHisLists);
+
+                      // todo
+                      String url =
+                          '/home/searchresultpage?keyword=${songlist[index].name}';
+                      url = Uri.encodeFull(url);
+                      Routes.router.navigateTo(context, url);
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.symmetric(vertical: 15.0),
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.only(left: 15.0),
+                          margin: EdgeInsets.only(right: 20.0),
+                          child: Container(
+                            child: Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                  color: (index < 3)
+                                      ? Theme.of(context).primaryColor
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .display4
+                                          .color,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(0.0),
+                          child: Text(
+                            songlist[index].name,
+                            style: TextStyle(
+                                color: Theme.of(context).textTheme.body1.color,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.0),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+              childCount: songlist.length,
+            ),
+          );
+  }
+}
+
+// 列表顶部标题
+class SearchListTitle extends StatelessWidget {
+  final String title;
+  final Map<String, dynamic> icon;
+  SearchListTitle(this.title, {this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(left: 15.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: icon != null
+            ? <Widget>[
+                Text(
+                  title,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                IconButton(
+                  padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
+                  icon: Icon(
+                    icon['iconData'],
+                    color: Color(0xFFBDBDBD),
+                  ),
+                  onPressed: icon['iconPressd'],
+                )
+              ]
+            : <Widget>[
+                Text(
+                  title,
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+      ),
+    );
+  }
+}
+
+// 歌曲
 class Music {
   final String name;
   final int id;
 
-  Music({@required this.name, @required this.id});
+  Music({@required this.name, this.id});
 }
 
-class SearchHistory extends StatelessWidget {
+// 搜索历史列表
+class SearchHistoryList extends StatelessWidget {
   final List<Music> songlist;
-  SearchHistory(this.songlist);
+  final BuildContext ctx;
+  SearchHistoryList(this.songlist, {this.ctx});
 
   @override
   Widget build(BuildContext context) {
-    // return Container(
-    //   width: MediaQuery.of(context).size.width,
-    //   padding: EdgeInsets.all(15.0),
-    //   child: Column(
-    //     children: <Widget>[
-    //       Row(
-    //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //         children: <Widget>[
-    //           Text('历史记录'),
-    //           IconButton(
-    //             icon: Icon(Icons.delete_forever),
-    //             onPressed: () {},
-    //           )
-    //         ],
-    //       ),
-    //       Container(
-    //         height: 40.0,
-    //         // width: 300.0,
-    //         child: GridView.builder(
-    //             scrollDirection: Axis.horizontal,
-    //             itemCount: songlist.length,
-    //             itemBuilder: (BuildContext context, int index) {
-    //               return InkResponse(
-    //                 onTap: () {},
-    //                 child: Container(
-    //                   alignment: Alignment.center,
-    //                   padding: EdgeInsets.all(10.0),
-    //                   decoration: BoxDecoration(
-    //                       color: Colors.grey,
-    //                       borderRadius:
-    //                           BorderRadius.all(Radius.circular(10.0))),
-    //                   child: Text(songlist[index].name),
-    //                 ),
-    //               );
-    //             },
-    //             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-    //                 crossAxisCount: songlist.length,
-    //                 mainAxisSpacing: 4.0,
-    //                 crossAxisSpacing: 20.0)),
-    //       )
-    //     ],
-    //   ),
-    // );
     return SliverToBoxAdapter(
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('历史记录'),
-              IconButton(
-                icon: Icon(Icons.delete_forever),
-                onPressed: () {},
-              )
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.all(15.0),
-            // height: 80.0,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: BouncingScrollPhysics(),
-              itemCount: songlist.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  width: 60.0,
-                  height: 20.0,
-                  margin: EdgeInsets.symmetric(horizontal: 12.0),
-                  alignment: Alignment.center,
-                  // padding: EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(color: Colors.grey),
-                  child: Text(songlist[index].name),
-                );
+      child: SizedBox(
+        height: 30.0,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: BouncingScrollPhysics(),
+          itemCount: songlist.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+                child: InkResponse(
+              onTap: () {
+                Routes.router.navigateTo(
+                    ctx,
+                    Uri.encodeFull(
+                        '/home/searchresultpage?keyword=${songlist[index].name}'));
               },
-            ),
-          )
-        ],
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 12.0),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.all(Radius.circular(16.0))),
+                child: Text(
+                  songlist[index].name,
+                ),
+                padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 14.0),
+              ),
+            ));
+          },
+        ),
       ),
     );
-    // return SliverGrid(
-
-    //   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-    //     maxCrossAxisExtent: 500.0,
-    //     mainAxisSpacing: 0.0,
-    //     crossAxisSpacing: 0.0,
-    //     childAspectRatio: 1.0,
-    //   ),
-    //   delegate: SliverChildBuilderDelegate(
-    //     (BuildContext context, int index) {
-    //       return ;
-    //     },
-    //     childCount: 1,
-    //   ),
-    // );
   }
 }

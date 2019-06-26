@@ -11,7 +11,10 @@ class Routes {
   // 一级路由
   static String anotherPage = '/anotherpage';
 
-  static String searchPage = '/searchpage';
+  static String searchPage = '/home/searchpage';
+
+  static String searchResPage = '/home/searchresultpage';
+
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
@@ -26,7 +29,9 @@ class Routes {
     router.define(mycollection,
         handler: mycollectionHandler, transitionType: TransitionType.native);
     router.define(searchPage,
-        handler: searchPageHandler,
-        transitionType: TransitionType.inFromBottom);
+        handler: searchPageHandler, transitionType: TransitionType.inFromRight);
+    router.define(searchResPage,
+        handler: searchResultHandler,
+        transitionType: TransitionType.inFromRight);
   }
 }

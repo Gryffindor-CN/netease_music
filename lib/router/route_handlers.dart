@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:netease_music/pages/another_page.dart';
 import 'package:netease_music/pages/my_music.dart';
 import 'package:netease_music/pages/search.dart';
+import 'package:netease_music/pages/search_result.dart';
 
 var anotherPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
@@ -16,5 +17,13 @@ var mycollectionHandler = new Handler(
 
 var searchPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-  return new SearchPage();
+  if (params['keyword'] != null) {
+    return SearchPage(keyword: params['keyword'][0]);
+  }
+  return SearchPage();
+});
+
+var searchResultHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new SearchResult(params['keyword'][0]);
 });
