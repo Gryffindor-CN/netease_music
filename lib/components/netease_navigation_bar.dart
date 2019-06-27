@@ -43,7 +43,7 @@ class NeteaseBottomNavBarState extends State<NeteaseBottomNavBar> {
                     opacity: 0.3,
                     child: Container(
                       width: MediaQuery.of(context).size.width,
-                      height: 60.0,
+                      height: 52.0,
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                       ),
@@ -52,7 +52,7 @@ class NeteaseBottomNavBarState extends State<NeteaseBottomNavBar> {
                   Positioned(
                     left: 0,
                     right: 0,
-                    top: 10.0,
+                    top: 8.0,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children:
@@ -73,10 +73,10 @@ class NeteaseBottomNavBarState extends State<NeteaseBottomNavBar> {
                                 widget.barsList[index]['title'],
                                 style: widget.currentIndex == index
                                     ? TextStyle(
-                                        fontSize: 14.0,
+                                        fontSize: 10.0,
                                         color: Theme.of(context).primaryColor)
                                     : TextStyle(
-                                        fontSize: 14.0,
+                                        fontSize: 10.0,
                                       ),
                               )
                             ],

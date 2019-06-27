@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import '../components/netease_toast.dart';
 import '../router/Routes.dart';
+import './search.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb});
@@ -309,9 +310,11 @@ class NeteaseHome extends StatefulWidget {
   NeteaseHomeState createState() => NeteaseHomeState();
 }
 
-class NeteaseHomeState extends State<NeteaseHome> {
+class NeteaseHomeState extends State<NeteaseHome>
+    with AutomaticKeepAliveClientMixin {
   bool isShow = false;
-
+  @override
+  bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -345,12 +348,12 @@ class NeteaseHomeContainer extends StatefulWidget {
 
 class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
   bool isShow = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        elevation: 0.0,
         leading: Icon(Icons.mic),
         centerTitle: true,
         title: InkWell(
@@ -371,6 +374,7 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
                 Icon(
                   Icons.search,
                   color: Colors.white24,
+                  size: 22.0,
                 )
               ],
             ),
@@ -417,7 +421,6 @@ class _ItemState extends State<Item> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 }

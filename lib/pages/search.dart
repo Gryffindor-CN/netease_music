@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/rendering.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
@@ -35,7 +36,7 @@ class SearchPageState extends State<SearchPage> {
         if (prefs.getStringList('search_history') != null) {
           setState(() {
             searchhistorylists.clear();
-            prefs.getStringList('search_history').forEach((item) {
+            prefs.getStringList('search_history').reversed.forEach((item) {
               searchhistorylists.add(Music(name: item));
             });
           });
@@ -93,8 +94,8 @@ class SearchPageState extends State<SearchPage> {
     return Scaffold(
       appBar: AppBar(
         title: Container(
-          width: 250.0,
-          height: 36.0,
+          width: MediaQuery.of(context).size.width,
+          height: 32.0,
           child: TextField(
             onChanged: (value) {
               if (value == '') {
@@ -110,22 +111,29 @@ class SearchPageState extends State<SearchPage> {
             },
             controller: _textEditingController,
             autofocus: true,
-            style: TextStyle(fontSize: 16.0, color: Colors.white),
+            style: TextStyle(fontSize: 14.0, color: Colors.white),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: 2.0),
-              suffixIcon: Opacity(
-                  opacity: 0.8,
-                  child: IconButton(
-                    icon: Icon(Icons.cancel, color: Colors.black26),
-                    onPressed: () {
-                      setState(() {
-                        _textEditingController.clear();
-                      });
-                    },
-                  )),
+              suffixIcon: _textEditingController.text == ''
+                  ? null
+                  : Opacity(
+                      opacity: 0.8,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.cancel,
+                          color: Colors.black26,
+                          size: 16.0,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _textEditingController.clear();
+                          });
+                        },
+                      )),
               prefixIcon: Icon(
                 Icons.search,
                 color: Colors.white24,
+                size: 22.0,
               ),
               hintText: 'Seach...',
               filled: true,
@@ -148,15 +156,37 @@ class SearchPageState extends State<SearchPage> {
                 SliverToBoxAdapter(
                   child: Container(
                     child: InkWell(
-                      onTap: () {
-                        // 搜索
-                        String url =
-                            '/home/searchresultpage?keyword=${_textEditingController.text}';
-                        url = Uri.encodeFull(url);
-                        Routes.router.navigateTo(context, url);
-                        setState(() {
-                          hasSearchInsert = false;
-                          _textEditingController.clear();
+                      onTap: () async {
+                        // 跳转搜索页面
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        var searchHisLists =
+                            prefs.getStringList('search_history');
+                        if (searchHisLists == null) {
+                          searchHisLists = [_textEditingController.text];
+                        } else if (!searchHisLists
+                            .contains(_textEditingController.text)) {
+                          searchHisLists.add(_textEditingController.text);
+                        }
+
+                        SharedPreferences.getInstance().then((preference) {
+                          preference.setStringList(
+                              'search_history', searchHisLists);
+
+                          String url =
+                              '/home/searchresultpage?keyword=${_textEditingController.text}';
+                          url = Uri.encodeFull(url);
+                          Routes.router.navigateTo(context, url);
+                          setState(() {
+                            hasSearchInsert = false;
+                            searchhistorylists.clear();
+                            searchHisLists
+                                .asMap()
+                                .forEach((int index, String item) {
+                              searchhistorylists.add(Music(name: item));
+                            });
+                            _textEditingController.clear();
+                          });
                         });
                       },
                       child: Row(
@@ -198,6 +228,18 @@ class SearchPageState extends State<SearchPage> {
                                 suggestlists[index]['keyword'],
                                 searchCb: () {
                                   setState(() {
+                                    searchhistorylists.clear();
+                                    SharedPreferences.getInstance()
+                                        .then((prefs) {
+                                      prefs
+                                          .getStringList('search_history')
+                                          .asMap()
+                                          .forEach((int index, String item) {
+                                        searchhistorylists
+                                            .add(Music(name: item));
+                                      });
+                                    });
+
                                     hasSearchInsert = false;
                                     _textEditingController.clear();
                                   });
@@ -223,7 +265,13 @@ class SearchPageState extends State<SearchPage> {
                           '热搜榜',
                         ),
                       ),
-                      SearchHotList(hotlists),
+                      SearchHotList(hotlists, callback: (lists) {
+                        setState(() {
+                          lists.asMap().forEach((int index, String item) {
+                            searchhistorylists.add(Music(name: item));
+                          });
+                        });
+                      }),
                     ]
                   : [
                       SliverToBoxAdapter(
@@ -257,7 +305,17 @@ class SearchPageState extends State<SearchPage> {
                           '热搜榜',
                         ),
                       ),
-                      SearchHotList(hotlists),
+                      SearchHotList(
+                        hotlists,
+                        callback: (list) {
+                          setState(() {
+                            list.asMap().forEach((int index, String item) {
+                              print(item);
+                              searchhistorylists.add(Music(name: item));
+                            });
+                          });
+                        },
+                      ),
                     ]),
     );
   }
@@ -283,7 +341,7 @@ class SearchSuggestMusic extends StatelessWidget {
 
         SharedPreferences.getInstance().then((preference) {
           preference.setStringList('search_history', searchHisLists);
-          // 搜索
+          // 跳转搜索页面
           String url = '/home/searchresultpage?keyword=$keyword';
           url = Uri.encodeFull(url);
           Routes.router.navigateTo(context, url);
@@ -318,7 +376,8 @@ class SearchSuggestMusic extends StatelessWidget {
 // 热搜榜列表
 class SearchHotList extends StatelessWidget {
   final List<Music> songlist;
-  SearchHotList(this.songlist);
+  final ValueChanged callback;
+  SearchHotList(this.songlist, {this.callback});
 
   @override
   Widget build(BuildContext context) {
@@ -346,12 +405,11 @@ class SearchHotList extends StatelessWidget {
                     SharedPreferences.getInstance().then((preference) {
                       preference.setStringList(
                           'search_history', searchHisLists);
-
-                      // todo
                       String url =
                           '/home/searchresultpage?keyword=${songlist[index].name}';
                       url = Uri.encodeFull(url);
                       Routes.router.navigateTo(context, url);
+                      if (callback != null) callback(searchHisLists);
                     });
                   },
                   child: Container(
@@ -382,7 +440,7 @@ class SearchHotList extends StatelessWidget {
                             style: TextStyle(
                                 color: Theme.of(context).textTheme.body1.color,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 16.0),
+                                fontSize: 14.0),
                           ),
                         )
                       ],
@@ -412,13 +470,13 @@ class SearchListTitle extends StatelessWidget {
             ? <Widget>[
                 Text(
                   title,
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0),
                 ),
                 IconButton(
                   padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
                   icon: Icon(
                     icon['iconData'],
-                    color: Color(0xFFBDBDBD),
+                    color: Color(0xFFE0E0E0),
                   ),
                   onPressed: icon['iconPressd'],
                 )
@@ -426,7 +484,7 @@ class SearchListTitle extends StatelessWidget {
             : <Widget>[
                 Text(
                   title,
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0),
                 ),
               ],
       ),
@@ -470,12 +528,13 @@ class SearchHistoryList extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: 12.0),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: Color(0xFFE0E0E0),
+                    color: Color(0xFFEEEEEE),
                     borderRadius: BorderRadius.all(Radius.circular(16.0))),
                 child: Text(
                   songlist[index].name,
+                  style: TextStyle(fontSize: 12.0),
                 ),
-                padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 14.0),
+                padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 14.0),
               ),
             ));
           },
