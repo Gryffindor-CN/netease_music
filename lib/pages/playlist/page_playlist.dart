@@ -120,7 +120,20 @@ class _PlayListState extends State<PlayList> {
                   bottom: MusicListHeader(
                     count: widget.musiclist.length
                   ),
-                  // flexibleSpace: _PlaylistHeader(playlist: widget.playlist),
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: Text(
+                      '可折叠的组件',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    background: Image.network(
+                        'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1549129578802&di=f866c638ea12ad13c5d603bcc008a6c2&imgtype=0&src=http%3A%2F%2Fpic2.16pic.com%2F00%2F07%2F66%2F16pic_766297_b.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
