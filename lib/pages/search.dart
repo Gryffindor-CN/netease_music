@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' as prefix1;
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/rendering.dart';
@@ -52,6 +53,7 @@ class SearchPageState extends State<SearchPage> {
     _textEditingController.clear();
   }
 
+  // 获取热搜榜
   void _getSearchHot() async {
     try {
       Response response =
@@ -68,6 +70,7 @@ class SearchPageState extends State<SearchPage> {
     }
   }
 
+  // 获取输入建议
   void _getSearchSuggest(String keywords) async {
     try {
       Response response = await Dio().get(
@@ -127,6 +130,7 @@ class SearchPageState extends State<SearchPage> {
                         onPressed: () {
                           setState(() {
                             _textEditingController.clear();
+                            hasSearchInsert = false;
                           });
                         },
                       )),
@@ -150,173 +154,179 @@ class SearchPageState extends State<SearchPage> {
         ),
       ),
       body: hasSearchInsert == true
-          ? CustomScrollView(
-              physics: BouncingScrollPhysics(),
-              slivers: <Widget>[
-                SliverToBoxAdapter(
-                  child: Container(
-                    child: InkWell(
-                      onTap: () async {
-                        // 跳转搜索页面
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                        var searchHisLists =
-                            prefs.getStringList('search_history');
-                        if (searchHisLists == null) {
-                          searchHisLists = [_textEditingController.text];
-                        } else if (!searchHisLists
-                            .contains(_textEditingController.text)) {
-                          searchHisLists.add(_textEditingController.text);
-                        }
+          ? Container(
+              decoration: BoxDecoration(color: Colors.white),
+              child: CustomScrollView(
+                physics: BouncingScrollPhysics(),
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: Container(
+                      child: InkWell(
+                        onTap: () async {
+                          // 跳转搜索页面
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          var searchHisLists =
+                              prefs.getStringList('search_history');
+                          if (searchHisLists == null) {
+                            searchHisLists = [_textEditingController.text];
+                          } else if (!searchHisLists
+                              .contains(_textEditingController.text)) {
+                            searchHisLists.add(_textEditingController.text);
+                          }
 
-                        SharedPreferences.getInstance().then((preference) {
-                          preference.setStringList(
-                              'search_history', searchHisLists);
+                          SharedPreferences.getInstance().then((preference) {
+                            preference.setStringList(
+                                'search_history', searchHisLists);
 
-                          String url =
-                              '/home/searchresultpage?keyword=${_textEditingController.text}';
-                          url = Uri.encodeFull(url);
-                          Routes.router.navigateTo(context, url);
-                          setState(() {
-                            hasSearchInsert = false;
-                            searchhistorylists.clear();
-                            searchHisLists
-                                .asMap()
-                                .forEach((int index, String item) {
-                              searchhistorylists.add(Music(name: item));
-                            });
-                            _textEditingController.clear();
-                          });
-                        });
-                      },
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(
-                            width: 10.0,
-                          ),
-                          Expanded(
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            color: Color(0xFFE0E0E0)))),
-                                padding: EdgeInsets.symmetric(vertical: 10.0),
-                                child: Row(
-                                  children: <Widget>[
-                                    Text('搜索'),
-                                    SizedBox(
-                                      width: 10.0,
-                                    ),
-                                    Text('“${_textEditingController.text}”')
-                                  ],
-                                )),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: isSuggestLoading == true
-                      ? Center(child: CircularProgressIndicator())
-                      : Container(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: suggestlists.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return SearchSuggestMusic(
-                                suggestlists[index]['keyword'],
-                                searchCb: () {
-                                  setState(() {
-                                    searchhistorylists.clear();
-                                    SharedPreferences.getInstance()
-                                        .then((prefs) {
-                                      prefs
-                                          .getStringList('search_history')
-                                          .asMap()
-                                          .forEach((int index, String item) {
-                                        searchhistorylists
-                                            .add(Music(name: item));
-                                      });
-                                    });
-
-                                    hasSearchInsert = false;
-                                    _textEditingController.clear();
-                                  });
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                )
-              ],
-            )
-          : CustomScrollView(
-              physics: BouncingScrollPhysics(),
-              slivers: searchhistorylists.length <= 0
-                  ? [
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 10.0,
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: SearchListTitle(
-                          '热搜榜',
-                        ),
-                      ),
-                      SearchHotList(hotlists, callback: (lists) {
-                        setState(() {
-                          lists.asMap().forEach((int index, String item) {
-                            searchhistorylists.add(Music(name: item));
-                          });
-                        });
-                      }),
-                    ]
-                  : [
-                      SliverToBoxAdapter(
-                        child: SearchListTitle(
-                          '搜索历史',
-                          icon: {
-                            'iconData': Icons.delete_forever,
-                            'iconPressd': () {
-                              // 清空搜索历史
-                              SharedPreferences.getInstance().then((prefs) {
-                                prefs.remove('search_history');
-                                setState(() {
-                                  searchhistorylists.clear();
-                                });
+                            String url =
+                                '/home/searchresultpage?keyword=${_textEditingController.text}';
+                            url = Uri.encodeFull(url);
+                            Routes.router.navigateTo(context, url);
+                            setState(() {
+                              hasSearchInsert = false;
+                              searchhistorylists.clear();
+                              searchHisLists
+                                  .asMap()
+                                  .forEach((int index, String item) {
+                                searchhistorylists.add(Music(name: item));
                               });
-                            }
-                          },
-                        ),
-                      ),
-                      SearchHistoryList(
-                        searchhistorylists,
-                        ctx: context,
-                      ),
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 25.0,
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: SearchListTitle(
-                          '热搜榜',
-                        ),
-                      ),
-                      SearchHotList(
-                        hotlists,
-                        callback: (list) {
-                          setState(() {
-                            list.asMap().forEach((int index, String item) {
-                              print(item);
-                              searchhistorylists.add(Music(name: item));
+                              _textEditingController.clear();
                             });
                           });
                         },
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Expanded(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(
+                                          bottom: BorderSide(
+                                              color: Color(0xFFE0E0E0)))),
+                                  padding: EdgeInsets.symmetric(vertical: 10.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text('搜索'),
+                                      SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      Text('“${_textEditingController.text}”')
+                                    ],
+                                  )),
+                            )
+                          ],
+                        ),
                       ),
-                    ]),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: isSuggestLoading == true
+                        ? Center(child: CircularProgressIndicator())
+                        : Container(
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: suggestlists.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SearchSuggestMusic(
+                                  suggestlists[index]['keyword'],
+                                  searchCb: () {
+                                    setState(() {
+                                      searchhistorylists.clear();
+                                      SharedPreferences.getInstance()
+                                          .then((prefs) {
+                                        prefs
+                                            .getStringList('search_history')
+                                            .asMap()
+                                            .forEach((int index, String item) {
+                                          searchhistorylists
+                                              .add(Music(name: item));
+                                        });
+                                      });
+
+                                      hasSearchInsert = false;
+                                      _textEditingController.clear();
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                  )
+                ],
+              ),
+            )
+          : Container(
+              decoration: BoxDecoration(color: Colors.white),
+              child: CustomScrollView(
+                  physics: BouncingScrollPhysics(),
+                  slivers: searchhistorylists.length <= 0
+                      ? [
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 10.0,
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: SearchListTitle(
+                              '热搜榜',
+                            ),
+                          ),
+                          SearchHotList(hotlists, callback: (lists) {
+                            setState(() {
+                              lists.asMap().forEach((int index, String item) {
+                                searchhistorylists.add(Music(name: item));
+                              });
+                            });
+                          }),
+                        ]
+                      : [
+                          SliverToBoxAdapter(
+                            child: SearchListTitle(
+                              '搜索历史',
+                              icon: {
+                                'iconData': Icons.delete_forever,
+                                'iconPressd': () {
+                                  // 清空搜索历史
+                                  SharedPreferences.getInstance().then((prefs) {
+                                    prefs.remove('search_history');
+                                    setState(() {
+                                      searchhistorylists.clear();
+                                    });
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          SearchHistoryList(
+                            searchhistorylists,
+                            ctx: context,
+                          ),
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 25.0,
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: SearchListTitle(
+                              '热搜榜',
+                            ),
+                          ),
+                          SearchHotList(
+                            hotlists,
+                            callback: (list) {
+                              setState(() {
+                                list.asMap().forEach((int index, String item) {
+                                  print(item);
+                                  searchhistorylists.add(Music(name: item));
+                                });
+                              });
+                            },
+                          ),
+                        ]),
+            ),
     );
   }
 }
@@ -462,7 +472,7 @@ class SearchListTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: EdgeInsets.only(left: 15.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

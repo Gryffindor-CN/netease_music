@@ -28,6 +28,7 @@ dependencies:
 dev_dependencies:
   shared_preferences: ^0.5.3
   dio: ^2.1.7
+  flutter_icons: ^0.1.4
   overlay_support: ^0.3.0
   flutter_swiper: ^1.1.6
   pull_to_refresh: ^1.4.4

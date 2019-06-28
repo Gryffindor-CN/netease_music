@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:netease_music/components/tab_navigator.dart';
+import 'package:flutter/painting.dart';
+import 'dart:math';
 import '../router/Routes.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
+import '../components/song_detail_dialog.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 class SearchResult extends StatefulWidget {
   final String keyword;
@@ -19,13 +22,17 @@ class Music {
   final int aritstId;
   final String albumName;
   final int albumId;
+  final Map<String, dynamic> detail;
+  final int commentCount;
   Music(
       {@required this.name,
       this.id,
       this.aritstName,
       this.aritstId,
       this.albumName,
-      this.albumId});
+      this.albumId,
+      this.detail,
+      this.commentCount});
 }
 
 class PlayList {
@@ -65,20 +72,27 @@ class SearchResultState extends State<SearchResult>
     _tabController.dispose();
   }
 
+  // 获取单曲
   void _doSearchSingAlbum(String keyword) async {
     try {
       Response response = await Dio()
           .get("http://192.168.206.133:3000/search?keywords=$keyword&limit=5");
       var songRes = json.decode(response.toString())['result']['songs'];
-      setState(() {
-        songRes.asMap().forEach((int index, item) {
-          songs.add(Music(
-              name: item['name'],
-              id: item['id'],
-              aritstName: item['artists'][0]['name'],
-              aritstId: item['artists'][0]['id'],
-              albumName: item['album']['name'],
-              albumId: item['album']['id']));
+
+      songRes.asMap().forEach((int index, item) async {
+        var res = await getSongDetail(item['id']);
+        setState(() {
+          songs.add(
+            Music(
+                name: item['name'],
+                id: item['id'],
+                aritstName: item['artists'][0]['name'],
+                aritstId: item['artists'][0]['id'],
+                albumName: item['album']['name'],
+                albumId: item['album']['id'],
+                detail: res['detail'],
+                commentCount: res['commentCount']),
+          );
         });
       });
     } catch (e) {
@@ -86,6 +100,7 @@ class SearchResultState extends State<SearchResult>
     }
   }
 
+  // 获取歌单
   void _doSearchPlaylist(String keyword) async {
     try {
       Response response = await Dio().get(
@@ -108,6 +123,35 @@ class SearchResultState extends State<SearchResult>
     }
   }
 
+// 获取单曲详情
+  getSongDetail(int id) async {
+    Map<String, dynamic> songDetail = {};
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/song/detail?ids=$id");
+      var result = json.decode(response.toString());
+      await getSongComment(id).then((data) {
+        songDetail.addAll(
+            {'detail': result['songs'][0], 'commentCount': data['total']});
+      });
+      return songDetail;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 获取歌曲论数量
+  getSongComment(int id) async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
+      var result = json.decode(response.toString());
+      return result;
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _viewWidget = [
@@ -117,15 +161,18 @@ class SearchResultState extends State<SearchResult>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              height: 350.0,
               child: Album(
+                widget.keyword,
                 songs,
                 tabController: _tabController,
               ),
             ),
+            SizedBox(
+              height: 25.0,
+            ),
             Container(
-              height: 500.0,
               child: Playlist(
+                widget.keyword,
                 playlist,
                 tabController: _tabController,
               ),
@@ -133,13 +180,13 @@ class SearchResultState extends State<SearchResult>
           ],
         ),
       ),
-      Text('单曲'),
-      Text('视频'),
-      Text('歌手'),
-      Text('专辑'),
-      Text('歌单'),
-      Text('主播电台'),
-      Text('用户'),
+      Center(child: Text('单曲')),
+      Center(child: Text('视频')),
+      Center(child: Text('歌手')),
+      Center(child: Text('专辑')),
+      Center(child: Text('歌单')),
+      Center(child: Text('主播电台')),
+      Center(child: Text('用户')),
     ];
     return Scaffold(
       appBar: AppBar(
@@ -182,7 +229,9 @@ class SearchResultState extends State<SearchResult>
                         color: Colors.black26,
                         size: 16.0,
                       ),
-                      onPressed: () {})
+                      onPressed: () {
+                        Routes.router.navigateTo(context, '/home/searchpage');
+                      })
                 ]),
           ),
         ),
@@ -203,22 +252,80 @@ class SearchResultState extends State<SearchResult>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: _viewWidget,
+      body: Container(
+        decoration: BoxDecoration(color: Colors.white),
+        child: TabBarView(
+          controller: _tabController,
+          children: _viewWidget,
+        ),
       ),
     );
   }
 }
 
+// 单曲
 class Album extends StatelessWidget {
+  final String keyword;
   final List<Music> songList;
   final TabController tabController;
-  Album(this.songList, {this.tabController});
 
-  List<Widget> _buildWidget() {
+  Album(
+    this.keyword,
+    this.songList, {
+    this.tabController,
+  });
+  static Widget _nameWidget;
+  static Widget _albumnameWidget;
+
+  List<Widget> _buildWidget(BuildContext context) {
     List<Widget> widgetList = [];
     songList.asMap().forEach((int index, Music item) {
+      if (item.name.contains(keyword)) {
+        var _startIndex = item.name.indexOf(keyword);
+        var _itemNameLen = item.name.length;
+        var _keywordLen = keyword.length;
+        _nameWidget = DefaultTextStyle(
+          style: TextStyle(fontSize: 14.0, color: Colors.black),
+          child: Row(
+            children: <Widget>[
+              Text(
+                item.name.substring(0, _startIndex),
+              ),
+              Text(
+                keyword,
+                style: TextStyle(color: Color(0xff0c73c2)),
+              ),
+              Text(item.name.substring(_startIndex + _keywordLen, _itemNameLen))
+            ],
+          ),
+        );
+      } else {
+        _nameWidget = DefaultTextStyle(
+          style: TextStyle(fontSize: 14.0, color: Colors.black),
+          child: Text(item.name),
+        );
+      }
+
+      if (item.albumName.contains(keyword)) {
+        var _startIndex = item.albumName.indexOf(keyword);
+        var _itemNameLen = item.albumName.length;
+        var _keywordLen = keyword.length;
+
+        _albumnameWidget = Row(
+          children: <Widget>[
+            Text(
+              item.name.substring(0, _startIndex),
+            ),
+            Text(
+              keyword,
+              style: TextStyle(color: Color(0xff0c73c2)),
+            ),
+            Text(item.name.substring(_startIndex + _keywordLen, _itemNameLen))
+          ],
+        );
+      } else {
+        _albumnameWidget = Text(item.albumName);
+      }
       widgetList.add(InkWell(
         onTap: () {},
         child: Row(
@@ -234,18 +341,14 @@ class Album extends StatelessWidget {
                         bottom:
                             BorderSide(color: Color(0xFFE0E0E0), width: 1.0))),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Padding(
                           padding: EdgeInsets.only(bottom: 2.0),
-                          child: Text(
-                            item.name,
-                            style: TextStyle(
-                                fontSize: 14.0, color: Color(0xff0c73c2)),
-                          ),
+                          child: _nameWidget,
                         ),
                         DefaultTextStyle(
                           style: TextStyle(
@@ -264,12 +367,105 @@ class Album extends StatelessWidget {
                               SizedBox(
                                 width: 4.0,
                               ),
-                              Text(
-                                item.albumName,
-                              )
+                              _albumnameWidget
                             ],
                           ),
                         )
+                      ],
+                    ),
+                    ListTail(
+                      tails: [
+                        {
+                          'iconData': Icons.play_circle_outline,
+                          'iconPress': () {}
+                        },
+                        {
+                          'iconData': Icons.more_vert,
+                          'iconPress': () async {
+                            print(item.commentCount);
+                            var detail = item.detail;
+                            var commentCount = item.commentCount;
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return SongDetailDialog(
+                                      detail['name'],
+                                      detail['al']['name'],
+                                      detail['ar'][0]['name'],
+                                      detail['al']['picUrl'],
+                                      detail['alia'].length == 0
+                                          ? ''
+                                          : '（${detail['alia'][0]}）',
+                                      [
+                                        {
+                                          'leadingIcon': AntDesign.getIconData(
+                                              'playcircleo'),
+                                          'title': '下一首播放',
+                                          'callback': null
+                                        },
+                                        {
+                                          'leadingIcon': AntDesign.getIconData(
+                                              'plussquareo'),
+                                          'title': '收藏到歌单',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('download'),
+                                          'title': '下载',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('message1'),
+                                          'title': '评论($commentCount)',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('sharealt'),
+                                          'title': '分享',
+                                          'callback': () {
+                                            // Navigator.of(context).pop();
+                                            // BottomShare.showBottomShare(
+                                            //     context);
+                                          }
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('adduser'),
+                                          'title':
+                                              '歌手：${detail['ar'][0]['name']}',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('adduser'),
+                                          'title': '专辑：${detail['al']['name']}',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('youtube'),
+                                          'title': '查看视频',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('barchart'),
+                                          'title': '人气榜应援',
+                                          'callback': () {}
+                                        },
+                                        {
+                                          'leadingIcon':
+                                              AntDesign.getIconData('delete'),
+                                          'title': '删除',
+                                          'callback': () {}
+                                        }
+                                      ]);
+                                });
+                          }
+                        }
                       ],
                     )
                   ],
@@ -283,88 +479,134 @@ class Album extends StatelessWidget {
         ),
       ));
     });
-    widgetList.add(Row(
-      children: <Widget>[
-        SizedBox(
-          width: 15.0,
-        ),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1.0))),
-            child: InkResponse(
-                highlightColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                onTap: tabController != null
-                    ? () {
-                        tabController.animateTo(1);
-                      }
-                    : null,
-                child: Stack(
-                  children: <Widget>[
-                    Positioned(
-                      right: 0.0,
-                      top: 0.0,
-                      bottom: 0.0,
-                      child: OutlineButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(16.0)),
-                        child: Text(
-                          '播放全部',
-                          style: TextStyle(fontSize: 12.0),
-                        ),
-                        onPressed: () {
-                          print('play all');
-                        },
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    widgetList.insert(
+        0,
+        Row(
+          children: <Widget>[
+            SizedBox(
+              width: 15.0,
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12.0),
+                decoration: BoxDecoration(
+                    border: Border(
+                        bottom:
+                            BorderSide(color: Color(0xFFE0E0E0), width: 1.0))),
+                child: InkResponse(
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: tabController != null
+                        ? () {
+                            tabController.animateTo(1);
+                          }
+                        : null,
+                    child: Stack(
                       children: <Widget>[
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              '单曲',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                        Positioned(
+                          right: 0.0,
+                          top: 0.0,
+                          bottom: 0.0,
+                          child: OutlineButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(16.0)),
+                            child: Text(
+                              '播放全部',
+                              style: TextStyle(fontSize: 12.0),
                             ),
-                            Icon(Icons.keyboard_arrow_right)
+                            onPressed: () {
+                              print('play all');
+                            },
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                  '单曲',
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                Icon(Icons.keyboard_arrow_right)
+                              ],
+                            )
                           ],
-                        )
+                        ),
                       ],
-                    ),
-                  ],
-                )),
-          ),
-        ),
-        SizedBox(
-          width: 15.0,
-        )
-      ],
-    ));
-    return widgetList.reversed.toList();
+                    )),
+              ),
+            ),
+            SizedBox(
+              width: 15.0,
+            )
+          ],
+        ));
+    return widgetList;
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _buildWidget(),
+      children: _buildWidget(context),
     );
   }
 }
 
+// 歌单
 class Playlist extends StatelessWidget {
+  final String keyword;
   final List<PlayList> playList;
   final TabController tabController;
-  Playlist(this.playList, {this.tabController});
+  Playlist(this.keyword, this.playList, {this.tabController});
+  static Widget _nameWidget;
 
   List<Widget> _buildWidget() {
-    print(playList);
     List<Widget> widgetList = [];
     playList.asMap().forEach((int index, PlayList item) {
+      if (item.name.contains(keyword)) {
+        var startIndex = item.name.indexOf(keyword);
+        var itemNameLen = item.name.length;
+        var keywordLen = keyword.length;
+        _nameWidget = DefaultTextStyle(
+          style: TextStyle(
+            fontSize: 15.0,
+            color: Colors.black,
+          ),
+          child: Row(
+            children: <Widget>[
+              Text(
+                item.name.substring(0, startIndex),
+              ),
+              Text(
+                keyword,
+                style: TextStyle(color: Color(0xff0c73c2)),
+              ),
+              Flexible(
+                flex: 1,
+                child: Text(
+                    item.name.substring(startIndex + keywordLen, itemNameLen),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              )
+            ],
+          ),
+        );
+      } else {
+        _nameWidget = DefaultTextStyle(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 15.0, color: Colors.black),
+          child: Text(
+            item.name,
+          ),
+        );
+      }
+
       widgetList.add(InkWell(
         onTap: () {},
         child: Row(
@@ -399,12 +641,8 @@ class Playlist extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Padding(
-                                padding: EdgeInsets.only(bottom: 4.0),
-                                child: Text(
-                                  item.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                padding: EdgeInsets.only(bottom: 2.0),
+                                child: _nameWidget,
                               ),
                               DefaultTextStyle(
                                 style: TextStyle(
@@ -415,13 +653,14 @@ class Playlist extends StatelessWidget {
                                       '${item.trackCount}首音乐',
                                     ),
                                     SizedBox(
-                                      width: 4.0,
+                                      width: 6.0,
                                     ),
                                     Text('by ${item.creatorName}'),
                                     SizedBox(
-                                      width: 4.0,
+                                      width: 6.0,
                                     ),
-                                    Text('播放${item.playCount}次'),
+                                    Text(
+                                        '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
                                   ],
                                 ),
                               )
@@ -441,54 +680,86 @@ class Playlist extends StatelessWidget {
         ),
       ));
     });
-    widgetList.add(Row(
-      children: <Widget>[
-        SizedBox(
-          width: 15.0,
-        ),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1.0))),
-            child: InkResponse(
-                highlightColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                onTap: tabController != null
-                    ? () {
-                        tabController.animateTo(5);
-                      }
-                    : null,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+    widgetList.insert(
+        0,
+        Row(
+          children: <Widget>[
+            SizedBox(
+              width: 15.0,
+            ),
+            Expanded(
+              child: Container(
+                child: InkResponse(
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: tabController != null
+                        ? () {
+                            tabController.animateTo(5);
+                          }
+                        : null,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text(
-                          '歌单',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        Icon(Icons.keyboard_arrow_right)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              '歌单',
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.w600),
+                            ),
+                            Icon(Icons.keyboard_arrow_right)
+                          ],
+                        )
                       ],
-                    )
-                  ],
-                )),
-          ),
-        ),
-        SizedBox(
-          width: 15.0,
-        )
-      ],
-    ));
-    return widgetList.reversed.toList();
+                    )),
+              ),
+            ),
+            SizedBox(
+              width: 15.0,
+            )
+          ],
+        ));
+    return widgetList;
   }
 
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: _buildWidget(),
+    );
+  }
+}
+
+class ListTail extends StatelessWidget {
+  final List<Map<String, dynamic>> tails;
+  ListTail({this.tails});
+
+  List<Padding> _buildTail() {
+    List<Padding> _widgetlist = [];
+
+    tails.asMap().forEach((int index, dynamic item) {
+      _widgetlist.add(Padding(
+        padding: EdgeInsets.only(left: 12.0),
+        child: InkResponse(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          child: Icon(
+            item['iconData'],
+            color: Color(0xFFD6D6D6),
+          ),
+          onTap: item['iconPress'],
+        ),
+      ));
+    });
+    return _widgetlist;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: _buildTail(),
     );
   }
 }
