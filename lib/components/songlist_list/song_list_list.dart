@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:netease_music/components/songlist/song_list_item.dart';
+import 'song_list_item.dart';
 
 class SongListList extends StatefulWidget {
   @override
