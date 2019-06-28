@@ -90,9 +90,19 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  _initFluwx() async {
+    await fluwx.register(
+        appId: "wx6c75e0c403d1d801",
+        doOnAndroid: true,
+        doOnIOS: true,
+        enableMTA: false);
+    await fluwx.isWeChatInstalled();
+  }
+
   @override
   void initState() {
     super.initState();
+    _initFluwx();
     likelist.asMap().forEach((index, item) {
       getSongDetail(item);
     });

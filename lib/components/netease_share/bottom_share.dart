@@ -105,16 +105,6 @@ Widget _buildShareIcons(BuildContext context) {
                 ],
               ),
               onTap: () {
-                // print('share');
-                // var model = new fluwx.WeChatShareVideoModel(
-                //     videoUrl: 'http://www.qq.com',
-                //     transaction: "video",
-                //     videoLowBandUrl: 'http://www.qq.com',
-                //     thumbnail: 'assets://assets/code.png',
-                //     description: 'A Popular Rock Band From China',
-                //     scene: scene,
-                //     title: 'Beyond');
-
                 fluwx.share(fluwx.WeChatShareTextModel(
                     text: '_____',
                     transaction: "text${DateTime.now().millisecondsSinceEpoch}",
