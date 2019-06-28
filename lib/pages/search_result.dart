@@ -208,30 +208,40 @@ class SearchResultState extends State<SearchResult>
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Flex(
+                    direction: Axis.horizontal,
                     children: <Widget>[
-                      Icon(
-                        Icons.search,
-                        color: Colors.white24,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 2.0),
-                        child: Text(
-                          widget.keyword,
-                          style: TextStyle(fontSize: 14.0),
-                        ),
+                      Row(
+                        children: <Widget>[
+                          Icon(
+                            Icons.search,
+                            color: Colors.white24,
+                          ),
+                          Container(
+                            width: 200.0,
+                            padding: EdgeInsets.fromLTRB(8.0, 0.0, 0.0, 2.0),
+                            child: Text(
+                              widget.keyword,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 14.0),
+                            ),
+                          )
+                        ],
                       )
                     ],
                   ),
-                  IconButton(
-                      icon: Icon(
-                        Icons.cancel,
-                        color: Colors.black26,
-                        size: 16.0,
-                      ),
-                      onPressed: () {
-                        Routes.router.navigateTo(context, '/home/searchpage');
-                      })
+                  Flexible(
+                      child: IconButton(
+                          icon: Icon(
+                            Icons.cancel,
+                            color: Colors.black26,
+                            size: 16.0,
+                          ),
+                          onPressed: () {
+                            Routes.router
+                                .navigateTo(context, '/home/searchpage');
+                          }))
                 ]),
           ),
         ),
@@ -286,23 +296,31 @@ class Album extends StatelessWidget {
         var _keywordLen = keyword.length;
         _nameWidget = DefaultTextStyle(
           style: TextStyle(fontSize: 14.0, color: Colors.black),
-          child: Row(
-            children: <Widget>[
-              Text(
-                item.name.substring(0, _startIndex),
-              ),
-              Text(
-                keyword,
-                style: TextStyle(color: Color(0xff0c73c2)),
-              ),
-              Text(item.name.substring(_startIndex + _keywordLen, _itemNameLen))
-            ],
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            text: TextSpan(
+              text: item.name.substring(0, _startIndex),
+              style: TextStyle(color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                    text: keyword, style: TextStyle(color: Color(0xff0c73c2))),
+                TextSpan(
+                    text: item.name
+                        .substring(_startIndex + _keywordLen, _itemNameLen),
+                    style: TextStyle(color: Colors.black)),
+              ],
+            ),
           ),
         );
       } else {
         _nameWidget = DefaultTextStyle(
           style: TextStyle(fontSize: 14.0, color: Colors.black),
-          child: Text(item.name),
+          child: Text(
+            item.name,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         );
       }
 
@@ -311,20 +329,24 @@ class Album extends StatelessWidget {
         var _itemNameLen = item.albumName.length;
         var _keywordLen = keyword.length;
 
-        _albumnameWidget = Row(
-          children: <Widget>[
-            Text(
-              item.name.substring(0, _startIndex),
-            ),
-            Text(
-              keyword,
-              style: TextStyle(color: Color(0xff0c73c2)),
-            ),
-            Text(item.name.substring(_startIndex + _keywordLen, _itemNameLen))
-          ],
+        _albumnameWidget = RichText(
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          text: TextSpan(
+            text: item.name.substring(0, _startIndex),
+            style: DefaultTextStyle.of(context).style,
+            children: <TextSpan>[
+              TextSpan(
+                  text: keyword, style: TextStyle(color: Color(0xff0c73c2))),
+              TextSpan(
+                  text: item.albumName
+                      .substring(_startIndex + _keywordLen, _itemNameLen)),
+            ],
+          ),
         );
       } else {
-        _albumnameWidget = Text(item.albumName);
+        _albumnameWidget =
+            Text(item.albumName, maxLines: 1, overflow: TextOverflow.ellipsis);
       }
       widgetList.add(InkWell(
         onTap: () {},
@@ -343,130 +365,149 @@ class Album extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 2.0),
-                          child: _nameWidget,
+                    Flexible(
+                      flex: 7,
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 2.0),
+                              child: _nameWidget,
+                            ),
+                            DefaultTextStyle(
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 10.0,
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Text(
+                                    item.aritstName,
+                                  ),
+                                  SizedBox(
+                                    width: 4.0,
+                                  ),
+                                  Text('-'),
+                                  SizedBox(
+                                    width: 4.0,
+                                  ),
+                                  Flexible(
+                                    child: _albumnameWidget,
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
                         ),
-                        DefaultTextStyle(
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 10.0,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Text(
-                                item.aritstName,
-                              ),
-                              SizedBox(
-                                width: 4.0,
-                              ),
-                              Text('-'),
-                              SizedBox(
-                                width: 4.0,
-                              ),
-                              _albumnameWidget
-                            ],
-                          ),
-                        )
-                      ],
+                      ),
                     ),
-                    ListTail(
-                      tails: [
-                        {
-                          'iconData': Icons.play_circle_outline,
-                          'iconPress': () {}
-                        },
-                        {
-                          'iconData': Icons.more_vert,
-                          'iconPress': () async {
-                            print(item.commentCount);
-                            var detail = item.detail;
-                            var commentCount = item.commentCount;
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return SongDetailDialog(
-                                      detail['name'],
-                                      detail['al']['name'],
-                                      detail['ar'][0]['name'],
-                                      detail['al']['picUrl'],
-                                      detail['alia'].length == 0
-                                          ? ''
-                                          : '（${detail['alia'][0]}）',
-                                      [
-                                        {
-                                          'leadingIcon': AntDesign.getIconData(
-                                              'playcircleo'),
-                                          'title': '下一首播放',
-                                          'callback': null
-                                        },
-                                        {
-                                          'leadingIcon': AntDesign.getIconData(
-                                              'plussquareo'),
-                                          'title': '收藏到歌单',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('download'),
-                                          'title': '下载',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('message1'),
-                                          'title': '评论($commentCount)',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('sharealt'),
-                                          'title': '分享',
-                                          'callback': () {
-                                            // Navigator.of(context).pop();
-                                            // BottomShare.showBottomShare(
-                                            //     context);
+                    Flexible(
+                      flex: 2,
+                      child: ListTail(
+                        tails: [
+                          {
+                            'iconData': Icons.play_circle_outline,
+                            'iconPress': () {}
+                          },
+                          {
+                            'iconData': Icons.more_vert,
+                            'iconPress': () async {
+                              var detail = item.detail;
+                              var commentCount = item.commentCount;
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SongDetailDialog(
+                                        detail['name'],
+                                        detail['al']['name'],
+                                        detail['ar'][0]['name'],
+                                        detail['al']['picUrl'],
+                                        detail['alia'].length == 0
+                                            ? ''
+                                            : '（${detail['alia'][0]}）',
+                                        [
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'playcircleo'),
+                                            'title': '下一首播放',
+                                            'callback': null
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'plussquareo'),
+                                            'title': '收藏到歌单',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'download'),
+                                            'title': '下载',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'message1'),
+                                            'title': '评论($commentCount)',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'sharealt'),
+                                            'title': '分享',
+                                            'callback': () {
+                                              // Navigator.of(context).pop();
+                                              // BottomShare.showBottomShare(
+                                              //     context);
+                                            }
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'adduser'),
+                                            'title':
+                                                '歌手：${detail['ar'][0]['name']}',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'adduser'),
+                                            'title':
+                                                '专辑：${detail['al']['name']}',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'youtube'),
+                                            'title': '查看视频',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData(
+                                                    'barchart'),
+                                            'title': '人气榜应援',
+                                            'callback': () {}
+                                          },
+                                          {
+                                            'leadingIcon':
+                                                AntDesign.getIconData('delete'),
+                                            'title': '删除',
+                                            'callback': () {}
                                           }
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('adduser'),
-                                          'title':
-                                              '歌手：${detail['ar'][0]['name']}',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('adduser'),
-                                          'title': '专辑：${detail['al']['name']}',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('youtube'),
-                                          'title': '查看视频',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('barchart'),
-                                          'title': '人气榜应援',
-                                          'callback': () {}
-                                        },
-                                        {
-                                          'leadingIcon':
-                                              AntDesign.getIconData('delete'),
-                                          'title': '删除',
-                                          'callback': () {}
-                                        }
-                                      ]);
-                                });
+                                        ]);
+                                  });
+                            }
                           }
-                        }
-                      ],
+                        ],
+                      ),
                     )
                   ],
                 ),
@@ -577,23 +618,21 @@ class Playlist extends StatelessWidget {
             fontSize: 15.0,
             color: Colors.black,
           ),
-          child: Row(
-            children: <Widget>[
-              Text(
-                item.name.substring(0, startIndex),
-              ),
-              Text(
-                keyword,
-                style: TextStyle(color: Color(0xff0c73c2)),
-              ),
-              Flexible(
-                flex: 1,
-                child: Text(
-                    item.name.substring(startIndex + keywordLen, itemNameLen),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
-              )
-            ],
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            text: TextSpan(
+              text: item.name.substring(0, startIndex),
+              style: TextStyle(color: Colors.black),
+              children: <TextSpan>[
+                TextSpan(
+                    text: keyword, style: TextStyle(color: Color(0xff0c73c2))),
+                TextSpan(
+                    text: item.name
+                        .substring(startIndex + keywordLen, itemNameLen),
+                    style: TextStyle(color: Colors.black)),
+              ],
+            ),
           ),
         );
       } else {
@@ -631,39 +670,29 @@ class Playlist extends StatelessWidget {
                         )),
                   ),
                   Container(
-                    child: Flex(
-                      direction: Axis.horizontal,
+                    width: 250.0,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Container(
-                          width: 260.0,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        _nameWidget,
+                        DefaultTextStyle(
+                          style: TextStyle(
+                              fontSize: 10.0, color: Color(0xFFBDBDBD)),
+                          child: Row(
                             children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.only(bottom: 2.0),
-                                child: _nameWidget,
+                              Text(
+                                '${item.trackCount}首音乐',
                               ),
-                              DefaultTextStyle(
-                                style: TextStyle(
-                                    fontSize: 10.0, color: Color(0xFFBDBDBD)),
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(
-                                      '${item.trackCount}首音乐',
-                                    ),
-                                    SizedBox(
-                                      width: 6.0,
-                                    ),
-                                    Text('by ${item.creatorName}'),
-                                    SizedBox(
-                                      width: 6.0,
-                                    ),
-                                    Text(
-                                        '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
-                                  ],
-                                ),
-                              )
+                              SizedBox(
+                                width: 6.0,
+                              ),
+                              Text('by ${item.creatorName}'),
+                              SizedBox(
+                                width: 6.0,
+                              ),
+                              Text(
+                                  '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
                             ],
                           ),
                         )
