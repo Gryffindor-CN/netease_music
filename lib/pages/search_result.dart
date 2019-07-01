@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'dart:convert';
 import '../components/song_detail_dialog.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import '../components/bottom_share.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
 
 class SearchResult extends StatefulWidget {
   final String keyword;
@@ -24,6 +26,7 @@ class Music {
   final int albumId;
   final Map<String, dynamic> detail;
   final int commentCount;
+  final String songUrl;
   Music(
       {@required this.name,
       this.id,
@@ -32,7 +35,8 @@ class Music {
       this.albumName,
       this.albumId,
       this.detail,
-      this.commentCount});
+      this.commentCount,
+      this.songUrl});
 }
 
 class PlayList {
@@ -53,8 +57,8 @@ class PlayList {
 
 class SearchResultState extends State<SearchResult>
     with TickerProviderStateMixin {
-  List<Music> songs = [];
-  List<PlayList> playlist = [];
+  List<Music> songs = []; // 单曲
+  List<PlayList> playlist = []; // 歌单
   TabController _tabController;
   List<Widget> _viewWidget = [];
 
@@ -157,28 +161,35 @@ class SearchResultState extends State<SearchResult>
     _viewWidget = [
       SingleChildScrollView(
         physics: BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              child: Album(
-                widget.keyword,
-                songs,
-                tabController: _tabController,
+        child: (this.songs.length == 0 || this.playlist.length == 0)
+            ? Center(
+                child: Container(
+                  padding: EdgeInsets.only(top: 20.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    child: Album(
+                      widget.keyword,
+                      songs,
+                      tabController: _tabController,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  Container(
+                    child: Playlist(
+                      widget.keyword,
+                      playlist,
+                      tabController: _tabController,
+                    ),
+                  )
+                ],
               ),
-            ),
-            SizedBox(
-              height: 25.0,
-            ),
-            Container(
-              child: Playlist(
-                widget.keyword,
-                playlist,
-                tabController: _tabController,
-              ),
-            )
-          ],
-        ),
       ),
       Center(child: Text('单曲')),
       Center(child: Text('视频')),
@@ -286,6 +297,16 @@ class Album extends StatelessWidget {
   });
   static Widget _nameWidget;
   static Widget _albumnameWidget;
+
+  // 获取歌曲播放url
+  _getSongUrl(int id) async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
+      var data = json.decode(response.toString())['data'][0];
+      return data['url'];
+    } catch (e) {}
+  }
 
   List<Widget> _buildWidget(BuildContext context) {
     List<Widget> widgetList = [];
@@ -415,6 +436,8 @@ class Album extends StatelessWidget {
                             'iconPress': () async {
                               var detail = item.detail;
                               var commentCount = item.commentCount;
+                              var res = await _getSongUrl(detail['id']);
+                              detail['songUrl'] = res;
                               showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -462,8 +485,21 @@ class Album extends StatelessWidget {
                                             'title': '分享',
                                             'callback': () {
                                               // Navigator.of(context).pop();
+                                              // // BottomShare.showBottomShare(
+                                              // //     context);
                                               // BottomShare.showBottomShare(
                                               //     context);
+                                              var model =
+                                                  fluwx.WeChatShareMusicModel(
+                                                title:
+                                                    '${detail['name']}（${detail['al']['name']}）}',
+                                                description:
+                                                    '${detail['ar'][0]['name']}',
+                                                transaction: "music",
+                                                musicUrl: detail['songUrl'],
+                                              );
+
+                                              fluwx.share(model);
                                             }
                                           },
                                           {

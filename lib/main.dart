@@ -5,6 +5,7 @@ import './components/circle_bottom_bar.dart';
 // import 'dart:ui';
 import './pages/home_page.dart';
 import 'components/netease_navigation_bar.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
 
 void main() => runApp(MyApp());
 
@@ -48,6 +49,16 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     _globalKey = GlobalKey<_MyStatefulWidgetState>();
     this._pageController =
         PageController(initialPage: this._tabIndex, keepPage: true);
+    _initFluwx();
+  }
+
+  _initFluwx() async {
+    await fluwx.register(
+        appId: "wx6c75e0c403d1d801",
+        doOnAndroid: true,
+        doOnIOS: true,
+        enableMTA: false);
+    await fluwx.isWeChatInstalled();
   }
 
   Widget renderCircleTab(IconData iconData) {
