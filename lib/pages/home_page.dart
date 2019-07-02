@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import '../components/netease_toast.dart';
 import '../router/Routes.dart';
-import './search.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb});

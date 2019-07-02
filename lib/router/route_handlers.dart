@@ -2,8 +2,8 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/another_page.dart';
 import 'package:netease_music/pages/my_music.dart';
-import 'package:netease_music/pages/search.dart';
-import 'package:netease_music/pages/search_result.dart';
+import 'package:netease_music/pages/search/search.dart';
+import 'package:netease_music/pages/search/search_result.dart';
 
 var anotherPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {

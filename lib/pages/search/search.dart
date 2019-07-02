@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart' as prefix1;
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/rendering.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../router/Routes.dart';
+import '../../router/Routes.dart';
+import '../../model/music.dart';
 
 class SearchPage extends StatefulWidget {
   final String keyword;
@@ -319,7 +318,6 @@ class SearchPageState extends State<SearchPage> {
                             callback: (list) {
                               setState(() {
                                 list.asMap().forEach((int index, String item) {
-                                  print(item);
                                   searchhistorylists.add(Music(name: item));
                                 });
                               });
@@ -503,12 +501,12 @@ class SearchListTitle extends StatelessWidget {
 }
 
 // 歌曲
-class Music {
-  final String name;
-  final int id;
+// class Music {
+//   final String name;
+//   final int id;
 
-  Music({@required this.name, this.id});
-}
+//   Music({@required this.name, this.id});
+// }
 
 // 搜索历史列表
 class SearchHistoryList extends StatelessWidget {

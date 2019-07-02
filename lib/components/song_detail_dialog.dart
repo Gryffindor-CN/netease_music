@@ -118,7 +118,8 @@ class ListViewItem extends StatelessWidget {
                       padding: EdgeInsets.only(bottom: 14.0),
                       decoration: BoxDecoration(
                           border: Border(
-                              bottom: BorderSide(color: Color(0x3caaaaaa)))),
+                              bottom: BorderSide(
+                                  color: Color(0xFFE0E0E0), width: 0.5))),
                       child: Text(
                         title,
                         maxLines: 1,

@@ -22,8 +22,14 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       // onGenerateRoute: Routes.router.generator,
       theme: ThemeData(
-        canvasColor: Colors.transparent,
+        // canvasColor: Colors.transparent,
         primaryColor: Color(0xffC20C0C),
+        textTheme: TextTheme(
+            body1: TextStyle(color: Color(0xff271416)),
+            title: TextStyle(
+              fontSize: 15.0,
+            ),
+            subtitle: TextStyle(color: Color(0xffaaaaaa), fontSize: 11.0)),
       ),
       home: MyStatefulWidget(),
     );
