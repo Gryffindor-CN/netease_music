@@ -305,7 +305,21 @@ class Album extends StatelessWidget {
           await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
       var data = json.decode(response.toString())['data'][0];
       return data['url'];
-    } catch (e) {}
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 获取歌曲详情
+  _getSongDetail(int id) async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/song/detail?ids=$id");
+      var data = json.decode(response.toString())['songs'][0];
+      return data['al']['picUrl'];
+    } catch (e) {
+      print(e);
+    }
   }
 
   List<Widget> _buildWidget(BuildContext context) {
@@ -437,7 +451,10 @@ class Album extends StatelessWidget {
                               var detail = item.detail;
                               var commentCount = item.commentCount;
                               var res = await _getSongUrl(detail['id']);
+                              var picUrl = await _getSongDetail(detail['id']);
+                              print(picUrl);
                               detail['songUrl'] = res;
+                              detail['picUrl'] = picUrl;
                               showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -484,22 +501,80 @@ class Album extends StatelessWidget {
                                                     'sharealt'),
                                             'title': '分享',
                                             'callback': () {
-                                              // Navigator.of(context).pop();
-                                              // // BottomShare.showBottomShare(
-                                              // //     context);
-                                              // BottomShare.showBottomShare(
-                                              //     context);
-                                              var model =
-                                                  fluwx.WeChatShareMusicModel(
-                                                title:
-                                                    '${detail['name']}（${detail['al']['name']}）}',
-                                                description:
-                                                    '${detail['ar'][0]['name']}',
-                                                transaction: "music",
-                                                musicUrl: detail['songUrl'],
-                                              );
+                                              Navigator.of(context).pop();
+                                              BottomShare.showBottomShare(
+                                                  context, [
+                                                {
+                                                  'shareLogo':
+                                                      'assets/icons/friend_circle_32.png',
+                                                  'shareText': '微信朋友圈',
+                                                  'shareEvent': () {
+                                                    var model = fluwx
+                                                        .WeChatShareMusicModel(
+                                                      scene: fluwx
+                                                          .WeChatScene.TIMELINE,
+                                                      thumbnail:
+                                                          detail['picUrl'],
+                                                      title:
+                                                          '${detail['name']}（${detail['al']['name']}）',
+                                                      description:
+                                                          '${detail['ar'][0]['name']}',
+                                                      transaction: "music",
+                                                      musicUrl:
+                                                          detail['songUrl'],
+                                                    );
 
-                                              fluwx.share(model);
+                                                    fluwx.share(model);
+                                                  }
+                                                },
+                                                {
+                                                  'shareLogo':
+                                                      'assets/icons/wechat_32.png',
+                                                  'shareText': '微信好友',
+                                                  'shareEvent': () {
+                                                    var model = fluwx
+                                                        .WeChatShareMusicModel(
+                                                      thumbnail:
+                                                          detail['picUrl'],
+                                                      scene: fluwx
+                                                          .WeChatScene.SESSION,
+                                                      title:
+                                                          '${detail['name']}（${detail['al']['name']}）',
+                                                      description:
+                                                          '${detail['ar'][0]['name']}',
+                                                      transaction: "music",
+                                                      musicUrl:
+                                                          detail['songUrl'],
+                                                    );
+
+                                                    fluwx.share(model);
+                                                  }
+                                                },
+                                                {
+                                                  'shareLogo':
+                                                      'assets/icons/qq_zone_32.png',
+                                                  'shareText': 'QQ空间',
+                                                  'shareEvent': () {}
+                                                },
+                                                {
+                                                  'shareLogo':
+                                                      'assets/icons/qq_friend_32.png',
+                                                  'shareText': 'QQ好友',
+                                                  'shareEvent': () {}
+                                                },
+                                                {
+                                                  'shareLogo':
+                                                      'assets/icons/weibo_32.png',
+                                                  'shareText': '微薄',
+                                                  'shareEvent': () {}
+                                                },
+                                                {
+                                                  'shareLogo':
+                                                      'assets/icons/qq_friend_32.png',
+                                                  'shareText': '大神圈子',
+                                                  'shareEvent': () {}
+                                                }
+                                              ]);
                                             }
                                           },
                                           {
