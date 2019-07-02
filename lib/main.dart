@@ -71,7 +71,38 @@ class DemoWidgetState extends State<DemoWidget> {
             RaisedButton(
               child: Text('普通分享'),
               onPressed: () {
-                BottomShare.showBottomShare(context);
+                BottomShare.showBottomShare(context, [
+                  {
+                    'shareLogo': 'assets/icons/friend_circle_32.png',
+                    'shareText': '微信朋友圈',
+                    'shareEvent': () {}
+                  },
+                  {
+                    'shareLogo': 'assets/icons/wechat_32.png',
+                    'shareText': '微信好友',
+                    'shareEvent': () {}
+                  },
+                  {
+                    'shareLogo': 'assets/icons/qq_zone_32.png',
+                    'shareText': 'QQ空间',
+                    'shareEvent': () {}
+                  },
+                  {
+                    'shareLogo': 'assets/icons/qq_friend_32.png',
+                    'shareText': 'QQ好友',
+                    'shareEvent': () {}
+                  },
+                  {
+                    'shareLogo': 'assets/icons/weibo_32.png',
+                    'shareText': '微薄',
+                    'shareEvent': () {}
+                  },
+                  {
+                    'shareLogo': 'assets/icons/qq_friend_32.png',
+                    'shareText': '大神圈子',
+                    'shareEvent': () {}
+                  }
+                ]);
               },
             ),
             RaisedButton(

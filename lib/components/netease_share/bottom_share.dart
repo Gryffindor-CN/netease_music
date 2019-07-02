@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
 class ShareWidget extends StatefulWidget {
+  final List<dynamic> shareBars;
+  ShareWidget(this.shareBars);
+
   @override
   ShareWidgetState createState() => ShareWidgetState();
 }
@@ -40,9 +43,8 @@ class ShareWidgetState extends State<ShareWidget>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
-                    _buildShareIcons(context),
+                    _buildShareIcons(context, widget.shareBars),
                     Container(
-                      // margin: EdgeInsets.only(top: 10.0),
                       width: MediaQuery.of(context).size.width,
                       height: 60.0,
                       child: InkWell(
@@ -68,157 +70,49 @@ class ShareWidgetState extends State<ShareWidget>
 }
 
 class BottomShare {
-  static showBottomShare(BuildContext context) {
+  static showBottomShare(BuildContext context, List<dynamic> shareBars) {
     showModalBottomSheet<Null>(
         context: context,
         builder: (BuildContext context) {
-          return ShareWidget();
+          return ShareWidget(shareBars);
         });
   }
 }
 
-Widget _buildShareIcons(BuildContext context) {
+Widget _buildShareIcons(BuildContext context, List<dynamic> shareBars) {
+  List<Padding> _shareWidget = [];
+  shareBars.asMap().forEach((int index, dynamic item) {
+    _shareWidget.add(Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      child: InkWell(
+        child: Column(
+          children: <Widget>[
+            Container(
+              width: 46.0,
+              height: 46.0,
+              decoration: BoxDecoration(
+                  color: Color(0xfff7f7f7), shape: BoxShape.circle),
+              child: Image.asset(
+                item['shareLogo'],
+              ),
+            ),
+            Text(item['shareText'], style: TextStyle(fontSize: 10.0))
+          ],
+        ),
+        onTap: item['shareEvent'] != null ? item['shareEvent'] : null,
+      ),
+    ));
+  });
+
   return Container(
     width: MediaQuery.of(context).size.width,
     child: SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.horizontal,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: InkWell(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 46.0,
-                    height: 46.0,
-                    decoration: BoxDecoration(
-                        color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                    child: Image.asset(
-                      'assets/icons/friend_circle_32.png',
-                    ),
-                  ),
-                  Text('微信朋友圈', style: TextStyle(fontSize: 10.0))
-                ],
-              ),
-              onTap: () {
-                print('share');
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: InkWell(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 46.0,
-                    height: 46.0,
-                    decoration: BoxDecoration(
-                        color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                    child: Image.asset(
-                      'assets/icons/wechat_32.png',
-                    ),
-                  ),
-                  Text('微信好友', style: TextStyle(fontSize: 10.0))
-                ],
-              ),
-              onTap: () {
-                print('share');
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: InkWell(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 46.0,
-                    height: 46.0,
-                    decoration: BoxDecoration(
-                        color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                    child: Image.asset(
-                      'assets/icons/qq_zone_32.png',
-                    ),
-                  ),
-                  Text('QQ空间', style: TextStyle(fontSize: 10.0))
-                ],
-              ),
-              onTap: () {
-                print('share');
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: InkWell(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 46.0,
-                    height: 46.0,
-                    decoration: BoxDecoration(
-                        color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                    child: Image.asset(
-                      'assets/icons/qq_friend_32.png',
-                    ),
-                  ),
-                  Text('QQ好友', style: TextStyle(fontSize: 10.0))
-                ],
-              ),
-              onTap: () {
-                print('share');
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: InkWell(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 44.0,
-                    height: 44.0,
-                    decoration: BoxDecoration(
-                        color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                    child: Image.asset(
-                      'assets/icons/weibo_32.png',
-                    ),
-                  ),
-                  Text('微薄', style: TextStyle(fontSize: 10.0))
-                ],
-              ),
-              onTap: () {
-                print('share');
-              },
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: InkWell(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    width: 46.0,
-                    height: 46.0,
-                    decoration: BoxDecoration(
-                        color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                    child: Icon(Icons.airline_seat_legroom_reduced),
-                  ),
-                  Text('大神圈子', style: TextStyle(fontSize: 10.0))
-                ],
-              ),
-              onTap: () {
-                print('share');
-              },
-            ),
-          ),
-        ],
-      ),
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _shareWidget),
     ),
   );
 }
@@ -253,8 +147,7 @@ Widget _buildShareInterior(BuildContext context) {
                         height: 46.0,
                         decoration: BoxDecoration(
                             color: Color(0xfff7f7f7), shape: BoxShape.circle),
-                        // child: Icon(Icons.mail_outline),
-                        child: Icon(AntDesign.getIconData("mail")),
+                        child: Image.asset('assets/icons/music_logo_32.png'),
                       ),
                       Text('云音乐动态', style: TextStyle(fontSize: 10.0))
                     ],

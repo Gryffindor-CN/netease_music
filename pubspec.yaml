@@ -56,6 +56,7 @@ flutter:
    - assets/icons/qq_zone_32.png
    - assets/icons/wechat_32.png
    - assets/icons/weibo_32.png
+   - assets/icons/music_logo_32.png
    - assets/code.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
