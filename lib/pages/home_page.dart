@@ -179,7 +179,8 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                   color: Colors.white,
                                   border: Border(
                                       bottom: BorderSide(
-                                          color: Colors.grey, width: 0.0))),
+                                          color: Color(0xFFE0E0E0),
+                                          width: 0.5))),
                               width: MediaQuery.of(context).size.width,
                               height: 80.0,
                               child: Row(
