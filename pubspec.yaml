@@ -26,6 +26,8 @@ dependencies:
   fluro: ^1.4.0
 
 dev_dependencies:
+  shared_preferences: ^0.5.3+2
+  audioplayers: ^0.13.0
   flutter_test:
     sdk: flutter
 

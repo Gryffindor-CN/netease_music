@@ -5,11 +5,15 @@ import 'package:netease_music/router/Routes.dart';
 // import 'package:flutter/animation.dart';
 import './model/music.dart';
 // import './components/playing_album_cover.dart';
-import './components/player.dart';
-import 'components/music_player.dart';
+
+import './components/inherited_demo.dart';
+import './components/playing_album_cover.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(StateContainer(
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -18,6 +22,7 @@ class MyApp extends StatelessWidget {
     Routes.configureRoutes(router);
     Routes.router = router;
   }
+  GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -27,159 +32,186 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ValueNotifierCommunication(),
-    );
-  }
-}
-
-// class Home extends StatefulWidget {
-//   HomeState createState() => HomeState();
-// }
-
-// class HomeState extends State<Home> with TickerProviderStateMixin {
-//   Widget build(BuildContext context) {
-//     return AlbumCover(
-//         music: Music(
-//             name: '天空',
-//             albumCoverImg:
-//                 'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg'));
-//   }
-// }
-
-class ValueNotifierCommunication extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Value Notifier Communication'),
+      // home: StateContainer(
+      //   child: ValueNotifierCommunication(),
+      // ),
+      home: Scaffold(
+        key: _globalKey,
+        appBar: AppBar(
+          title: Text('qiang'),
+        ),
+        body: MusicDetail(),
       ),
-      body: _WidgetOne(),
     );
   }
 }
 
-class _WidgetOne extends StatefulWidget {
-  _WidgetOne({this.data});
-  final ValueNotifierData data;
+class MusicDetail extends StatefulWidget {
   @override
-  _WidgetOneState createState() => _WidgetOneState();
+  _MusicDetailState createState() => _MusicDetailState();
 }
 
-class _WidgetOneState extends State<_WidgetOne> {
-  String info;
-  String playMode;
-
-  ValueNotifierData vd = ValueNotifierData(PlayerControllerState(
-      current: Music(name: '1', id: 1),
-      playMode: PlayMode.sequence,
-      playingList: [
-        Music(name: '1', id: 1),
-        Music(name: '2', id: 2),
-        Music(name: '3', id: 3),
-        Music(name: '4', id: 4),
-        Music(name: '5', id: 5),
-        Music(name: '6', id: 6),
-        Music(name: '7', id: 7),
-        Music(name: '8', id: 8),
-      ]));
-
+class _MusicDetailState extends State<MusicDetail> {
+  AudioPlayer audioPlayer;
   @override
-  initState() {
+  void initState() {
     super.initState();
-    vd.addListener(_handleValueChanged);
-    info = 'current music name: ' + vd.value.current.name;
-    playMode = 'current music playmode: ' + vd.value.playMode.toString();
-  }
-
-  @override
-  dispose() {
-    widget.data.removeListener(_handleValueChanged);
-    super.dispose();
+    audioPlayer = AudioPlayer();
   }
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
+
     return Center(
         child: Column(
       children: <Widget>[
-        Text(info),
-        Text(playMode),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                int _currentIndex;
-                vd.value.playingList.asMap().forEach((int index, Music music) {
-                  if (music.id == vd.value.current.id) _currentIndex = index;
-                });
-                if (_currentIndex - 1 < 0) {
-                  _currentIndex = vd.value.playingList.length - 1;
-                } else {
-                  _currentIndex = _currentIndex - 1;
-                }
-                vd.value = PlayerControllerState(
-                    current: vd.value.playingList[_currentIndex],
-                    playingList: vd.value.playingList,
-                    playMode: vd.value.playMode);
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.play_circle_outline),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.arrow_forward),
-              onPressed: () {
-                int _currentIndex;
-                vd.value.playingList.asMap().forEach((int index, Music music) {
-                  if (music.id == vd.value.current.id) _currentIndex = index;
-                });
-                if (_currentIndex + 1 >= vd.value.playingList.length) {
-                  _currentIndex = 0;
-                } else {
-                  _currentIndex = _currentIndex + 1;
-                }
-                vd.value = PlayerControllerState(
-                    current: vd.value.playingList[_currentIndex],
-                    playingList: vd.value.playingList,
-                    playMode: vd.value.playMode);
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.shuffle),
-              onPressed: () {
-                if (vd.value.playMode == PlayMode.single) {
-                  vd.value = PlayerControllerState(
-                      current: vd.value.current,
-                      playingList: vd.value.playingList,
-                      playMode: PlayMode.sequence);
-                } else if (vd.value.playMode == PlayMode.sequence) {
-                  vd.value = PlayerControllerState(
-                      current: vd.value.current,
-                      playingList: vd.value.playingList,
-                      playMode: PlayMode.shuffle);
-                } else if (vd.value.playMode == PlayMode.shuffle) {
-                  vd.value = PlayerControllerState(
-                      current: vd.value.current,
-                      playingList: vd.value.playingList,
-                      playMode: PlayMode.single);
-                }
-              },
-            )
-          ],
+        RaisedButton(
+          child: Text('go'),
+          onPressed: () {
+            store.play(Music(
+                name: '海阔天空',
+                id: 347230,
+                aritstId: 11127,
+                aritstName: 'Beyond',
+                albumName: '海阔天空',
+                albumId: 34430029,
+                albumCoverImg:
+                    'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg',
+                songUrl:
+                    'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3'));
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return AlbumCover(
+                  music: Music(
+                      name: '海阔天空',
+                      id: 347230,
+                      aritstId: 11127,
+                      aritstName: 'Beyond',
+                      albumName: '海阔天空',
+                      albumId: 34430029,
+                      albumCoverImg:
+                          'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg'));
+            }));
+          },
         ),
-        MusicItem()
+        RaisedButton(
+          child: Text('go2'),
+          onPressed: () {
+            store.play(Music(
+                name: '遗憾',
+                id: 25650033,
+                aritstId: 4393,
+                aritstName: '李代沫',
+                albumName: '遗憾',
+                albumId: 2266009,
+                albumCoverImg:
+                    'http://p1.music.126.net/jEoJh6uUBsZCC_zncoPp2w==/938982930173076.jpg',
+                songUrl:
+                    'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3'));
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return AlbumCover(
+                  music: Music(
+                      name: '遗憾',
+                      id: 25650033,
+                      aritstId: 4393,
+                      aritstName: '李代沫',
+                      albumName: '遗憾',
+                      albumId: 2266009,
+                      albumCoverImg:
+                          'http://p1.music.126.net/jEoJh6uUBsZCC_zncoPp2w==/938982930173076.jpg'));
+            }));
+          },
+        ),
+        RaisedButton(
+          child: Text('list'),
+          onPressed: () async {
+            // Navigator.of(context)
+            //     .push(MaterialPageRoute(builder: (BuildContext context) {
+            //   return AlbumCover();
+            // }));
+            int result = await audioPlayer.play(
+                'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3');
+          },
+        )
       ],
     ));
   }
-
-  void _handleValueChanged() {
-    print(vd.value.playMode.toString());
-    setState(() {
-      info = vd.value.current.name;
-      playMode = vd.value.playMode.toString();
-    });
-  }
 }
+
+// class ValueNotifierCommunication extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     final store = StateContainer.of(context);
+
+//     return Scaffold(
+//         appBar: AppBar(
+//           title: Text('Value Notifier Communication'),
+//         ),
+//         body: Center(
+//           child: Column(
+//             children: <Widget>[
+//               store.player == null
+//                   ? Text('')
+//                   : Text('current:${store.player.current.name}'),
+//               store.player == null
+//                   ? Text('')
+//                   : Text('playmode:${store.player.playMode.toString()}'),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: <Widget>[
+//                   IconButton(
+//                     icon: Icon(Icons.arrow_back),
+//                     onPressed: () {
+//                       store.playPrev();
+//                     },
+//                   ),
+//                   IconButton(
+//                     icon: Icon(Icons.play_circle_outline),
+//                     onPressed: () async {},
+//                   ),
+//                   IconButton(
+//                     icon: Icon(Icons.arrow_forward),
+//                     onPressed: () {
+//                       store.playNext();
+//                     },
+//                   ),
+//                   IconButton(
+//                     icon: Icon(Icons.shuffle),
+//                     onPressed: () {
+//                       store.switchPlayMode();
+//                     },
+//                   )
+//                 ],
+//               ),
+//               RaisedButton(
+//                 onPressed: () {
+//                   store.play(Music(
+//                       name: '海阔天空',
+//                       id: 347230,
+//                       aritstId: 11127,
+//                       aritstName: 'Beyond',
+//                       albumName: '海阔天空',
+//                       albumCoverImg:
+//                           'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg'));
+//                   Navigator.of(context)
+//                       .push(MaterialPageRoute(builder: (BuildContext context) {
+//                     return AlbumCover(
+//                         music: Music(
+//                             name: '海阔天空',
+//                             id: 347230,
+//                             aritstId: 11127,
+//                             aritstName: 'Beyond',
+//                             albumName: '海阔天空',
+//                             albumCoverImg:
+//                                 'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg'));
+//                   }));
+//                 },
+//                 child: Text('22'),
+//               )
+//             ],
+//           ),
+//         ));
+//   }
+// }

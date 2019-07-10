@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../model/music.dart';
 import 'dart:ui';
+import '../components/bottom_player_bar.dart';
+import '../components/inherited_demo.dart';
 
 class AlbumCover extends StatefulWidget {
   final Music music;
 
-  const AlbumCover({Key key, @required this.music}) : super(key: key);
+  const AlbumCover({Key key, this.music}) : super(key: key);
 
   @override
   State createState() => _AlbumCoverState();
@@ -23,7 +25,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    print(widget.music.albumCoverImg);
     controller_record = new AnimationController(
         duration: const Duration(milliseconds: 15000), vsync: this);
     animation_record =
@@ -34,7 +35,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
     animation_neddle =
         new CurvedAnimation(parent: controller_needle, curve: Curves.linear);
-    // controller_record.forward();
+
     animation_record.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         controller_record.repeat();
@@ -46,14 +47,16 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
+
     return Stack(
       children: <Widget>[
         Container(
           decoration: BoxDecoration(
             image: DecorationImage(
               image: NetworkImage(
-                widget.music.albumCoverImg,
-              ),
+                  // widget.music.albumCoverImg,
+                  store.player.current.albumCoverImg),
               fit: BoxFit.cover,
               colorFilter: ColorFilter.mode(
                 Colors.black54,
@@ -89,10 +92,21 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
                   ),
                 ),
                 RotateRecord(
-                    music: widget.music,
+                    music: store.player.current,
                     animation: _commonTween.animate(controller_record)),
               ],
             ),
+          ),
+        ),
+        Positioned(
+          left: 0.0,
+          right: 0.0,
+          bottom: 0.0,
+          child: BottomPlayerBar(
+            play: () {
+              controller_record.forward();
+              controller_needle.forward();
+            },
           ),
         )
       ],
