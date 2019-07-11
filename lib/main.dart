@@ -8,7 +8,6 @@ import './model/music.dart';
 
 import './components/inherited_demo.dart';
 import './components/playing_album_cover.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(StateContainer(
@@ -32,9 +31,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: StateContainer(
-      //   child: ValueNotifierCommunication(),
-      // ),
       home: Scaffold(
         key: _globalKey,
         appBar: AppBar(
@@ -52,11 +48,9 @@ class MusicDetail extends StatefulWidget {
 }
 
 class _MusicDetailState extends State<MusicDetail> {
-  AudioPlayer audioPlayer;
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer();
   }
 
   @override
@@ -79,7 +73,7 @@ class _MusicDetailState extends State<MusicDetail> {
                 albumCoverImg:
                     'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg',
                 songUrl:
-                    'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3'));
+                    'http://m10.music.126.net/20190711185712/ea8b6be7c2b302c3f3cba3671bc5c35d/ymusic/603f/2799/ea87/0ac26d0e219c049b2c5a12fd6be2826f.mp3'));
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return AlbumCover(
@@ -107,8 +101,7 @@ class _MusicDetailState extends State<MusicDetail> {
                 albumId: 2266009,
                 albumCoverImg:
                     'http://p1.music.126.net/jEoJh6uUBsZCC_zncoPp2w==/938982930173076.jpg',
-                songUrl:
-                    'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3'));
+                songUrl: 'http://mpge.5nd.com/2019/2019-7-5/92476/1.mp3'));
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return AlbumCover(
@@ -127,14 +120,14 @@ class _MusicDetailState extends State<MusicDetail> {
         RaisedButton(
           child: Text('list'),
           onPressed: () async {
-            // Navigator.of(context)
-            //     .push(MaterialPageRoute(builder: (BuildContext context) {
-            //   return AlbumCover();
-            // }));
-            int result = await audioPlayer.play(
-                'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3');
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return AlbumCover();
+            }));
+            // int result = await audioPlayer.play(
+            //     'http://m10.music.126.net/20190710182906/624c40d94cde3ad8ec87976428e6f21e/ymusic/0fd6/4f65/43ed/a8772889f38dfcb91c04da915b301617.mp3');
           },
-        )
+        ),
       ],
     ));
   }

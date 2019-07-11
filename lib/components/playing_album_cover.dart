@@ -102,12 +102,15 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
           left: 0.0,
           right: 0.0,
           bottom: 0.0,
-          child: BottomPlayerBar(
-            play: () {
-              controller_record.forward();
-              controller_needle.forward();
-            },
-          ),
+          child: BottomPlayerBar(play: () {
+            controller_record.forward();
+            controller_needle.forward();
+          }, pause: () {
+            controller_record.stop(canceled: false);
+            controller_needle.reverse();
+          }, finish: () {
+            store.playNext();
+          }),
         )
       ],
     );
