@@ -5,9 +5,10 @@ import 'package:netease_music/router/Routes.dart';
 // import 'package:flutter/animation.dart';
 import './model/music.dart';
 // import './components/playing_album_cover.dart';
-
+import 'package:dio/dio.dart';
 import './components/inherited_demo.dart';
 import './components/playing_album_cover.dart';
+import 'dart:convert';
 
 void main() {
   runApp(StateContainer(
@@ -48,9 +49,26 @@ class MusicDetail extends StatefulWidget {
 }
 
 class _MusicDetailState extends State<MusicDetail> {
+  String songUrl;
+
   @override
   void initState() {
     super.initState();
+    _getSongUrl();
+  }
+
+  void _getSongUrl() async {
+    try {
+      Response response = await Dio().get(
+          'http://192.168.206.133:3000/song/url?id=178895&timestamp=${DateTime.now().millisecondsSinceEpoch}');
+      var result = json.decode(response.toString())['data'][0]['url'];
+      print(result);
+      setState(() {
+        songUrl = result;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -65,15 +83,14 @@ class _MusicDetailState extends State<MusicDetail> {
           onPressed: () {
             store.play(Music(
                 name: '海阔天空',
-                id: 347230,
+                id: 178895,
                 aritstId: 11127,
                 aritstName: 'Beyond',
                 albumName: '海阔天空',
                 albumId: 34430029,
                 albumCoverImg:
                     'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg',
-                songUrl:
-                    'http://m10.music.126.net/20190711185712/ea8b6be7c2b302c3f3cba3671bc5c35d/ymusic/603f/2799/ea87/0ac26d0e219c049b2c5a12fd6be2826f.mp3'));
+                songUrl: songUrl));
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return AlbumCover(

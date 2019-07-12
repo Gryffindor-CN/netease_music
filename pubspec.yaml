@@ -27,7 +27,7 @@ dependencies:
 
 dev_dependencies:
   shared_preferences: ^0.5.3+2
-  # audioplayer: ^0.5.2
+  dio: ^2.1.13
   audioplayers: ^0.13.1
   flutter_test:
     sdk: flutter

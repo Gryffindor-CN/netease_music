@@ -1,9 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../model/music.dart';
-import '../components/player.dart';
 import '../components/inherited_demo.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BottomPlayerBar extends StatefulWidget {
   final VoidCallback play;
@@ -17,11 +17,13 @@ class BottomPlayerBar extends StatefulWidget {
 
 class _BottomPlayerBarState extends State<BottomPlayerBar> {
   AudioPlayer audioPlayer;
-  bool _playingState = false;
+  bool _playingState = false; // 播放器播放icon切换
   Duration position;
   Duration duration;
   double time = 0.0;
-  bool loaded = false;
+  bool loaded = false; // 记录是否已经加载过音乐
+  double volumn; // 音量控制
+  int mode;
   StreamSubscription _positionSubscription;
   StreamSubscription _durationSubscription;
   StreamSubscription _audioPlayerStateSubscription;
@@ -29,9 +31,8 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   StreamSubscription _playerErrorSubscription;
   AudioPlayerState _audioPlayerState;
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
-
-  get isPlaying => playerState == AudioPlayerState.PLAYING;
-  get isPaused => playerState == AudioPlayerState.PAUSED;
+  get _durationText => duration?.toString()?.split('.')?.first ?? '';
+  get _positionText => position?.toString()?.split('.')?.first ?? '';
 
   @override
   void initState() {
@@ -41,7 +42,14 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
 
   void initAudioPlayer() async {
     audioPlayer = new AudioPlayer();
-
+    var preference = await SharedPreferences.getInstance();
+    var _mode = preference.getInt('player_play_mode');
+    mode = _mode;
+    if (mode == 0) {
+      audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+    } else {
+      audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+    }
     // 播放进度改变
     _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) {
       if (position != null &&
@@ -57,33 +65,46 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
       });
     });
 
-    _durationSubscription = audioPlayer.onDurationChanged.listen((d) {
-      print('d===$d');
-      if (loaded == false) {
-        audioPlayer.resume();
-        widget.play();
-        loaded = true;
-        setState(() {
-          duration = d;
-          _playingState = true;
-        });
-      }
+    _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
+      setState(() {
+        duration = d;
+      });
     });
 
     // 播放完成
     _playerCompleteSubscription =
-        audioPlayer.onPlayerCompletion.listen((event) {
-      print('finished');
-
+        audioPlayer.onPlayerCompletion.listen((event) async {
+      final store = StateContainer.of(context);
       _audioPlayerState = AudioPlayerState.COMPLETED;
-      // widget.finish();
-      // widget.pause();
-      // setState(() {
-      //   _playingState = !_playingState;
-      //   duration = Duration(seconds: 0);
-      //   position = Duration(seconds: 0);
-      //   time = 0.0;
-      // });
+
+      if (store.player.playMode.toString() == 'PlayMode.single') {
+        audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+        audioPlayer.resume();
+        return;
+      }
+      audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+      var res = await audioPlayer.stop();
+      if (res == 1) {
+        setState(() {
+          duration = Duration(seconds: 0);
+          position = Duration(seconds: 0);
+          time = 0.0;
+          _playingState = false;
+        });
+        loaded = false;
+
+        widget.finish();
+
+        var res = await audioPlayer.play(store.player.current.songUrl);
+
+        if (res == 1) {
+          widget.play();
+          loaded = true;
+          setState(() {
+            _playingState = true;
+          });
+        }
+      }
     });
 
     // 播放状态
@@ -120,7 +141,6 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
         ? IconButton(
             icon: Icon(Icons.play_circle_outline, size: 30.0),
             onPressed: () async {
-              print(loaded);
               if (loaded == true) {
                 audioPlayer.resume();
                 setState(() {
@@ -128,20 +148,16 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                   _playingState = true;
                 });
               } else {
-                await audioPlayer.setUrl(store.player.current.songUrl);
+                var result =
+                    await audioPlayer.play(store.player.current.songUrl);
+                if (result == 1) {
+                  widget.play();
+                  loaded = true;
+                  setState(() {
+                    _playingState = true;
+                  });
+                }
               }
-
-              // int result = await audioPlayer.play(
-              //     // 'http://m10.music.126.net/20190711172551/5ab2e85c63866c56fdbc8d615415a654/ymusic/603f/2799/ea87/0ac26d0e219c049b2c5a12fd6be2826f.mp3',
-              //     store.player.current.songUrl);
-              // if (result == 1) {
-              //   if (duration != null && duration.inMilliseconds > 0) {
-              //     widget.play();
-              //     setState(() {
-              //       _playingState = true;
-              //     });
-              //   }
-              // }
             },
           )
         : IconButton(
@@ -156,10 +172,37 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
           );
   }
 
+  // 切换歌曲
+  void switchSong(StateContainerState store, String flag) async {
+    setState(() {
+      duration = Duration();
+      position = Duration();
+      time = 0.0;
+      _playingState = false;
+    });
+    loaded = false;
+    switch (flag) {
+      case 'prev':
+        store.playPrev();
+        break;
+      case 'next':
+        store.playNext();
+        break;
+    }
+
+    var res = await audioPlayer.play(store.player.current.songUrl);
+    if (res == 1) {
+      widget.play();
+      loaded = true;
+      setState(() {
+        _playingState = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
-
     return Material(
       color: Colors.transparent,
       child: Theme(
@@ -169,57 +212,57 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                 )),
         child: Container(
             width: MediaQuery.of(context).size.width,
-            height: 200.0,
+            height: 130.0,
             decoration: BoxDecoration(color: Colors.transparent),
             child: Column(
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 10.0),
-                  child: Slider(
-                      activeColor: Colors.white,
-                      inactiveColor: Color(0x64ffffff),
-                      value: (position != null &&
-                              duration != null &&
-                              position.inMilliseconds > 0 &&
-                              position.inMilliseconds < duration.inMilliseconds)
-                          ? time
-                          : 0.0,
-                      onChanged: (position != null &&
-                              duration != null &&
-                              position.inMilliseconds > 0 &&
-                              position.inMilliseconds < duration.inMilliseconds)
-                          ? (double value) {
-                              audioPlayer.seek(Duration(
-                                  milliseconds:
-                                      (value * duration.inMilliseconds)
-                                          .round()));
+                  child: Row(
+                    children: <Widget>[
+                      Text(position != null ? '${_positionText ?? ''}' : '',
+                          style: TextStyle(color: Colors.white)),
+                      Expanded(
+                        child: Slider(
+                            activeColor: Colors.white,
+                            inactiveColor: Color(0x64ffffff),
+                            value: (position != null &&
+                                    duration != null &&
+                                    position.inMilliseconds > 0 &&
+                                    position.inMilliseconds <
+                                        duration.inMilliseconds)
+                                ? time
+                                : 0.0,
+                            onChanged: (position != null &&
+                                    duration != null &&
+                                    position.inMilliseconds > 0 &&
+                                    position.inMilliseconds <
+                                        duration.inMilliseconds)
+                                ? (double value) {
+                                    audioPlayer.seek(Duration(
+                                        milliseconds:
+                                            (value * duration.inMilliseconds)
+                                                .round()));
 
-                              setState(() {
-                                position = Duration(
-                                    milliseconds:
-                                        (value * duration.inMilliseconds)
-                                            .round());
-                              });
-                              setState(() {
-                                time = value;
-                              });
-                            }
-                          : (double value) {},
-                      min: 0.0,
-                      max: 1.0),
-                ),
-                Container(
-                  width: 40.0,
-                  height: 40.0,
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.white,
-                    value: (position != null &&
-                            duration != null &&
-                            position.inMilliseconds > 0 &&
-                            position.inMilliseconds < duration.inMilliseconds)
-                        ? position.inMilliseconds / duration.inMilliseconds
-                        : 0.0,
-                    valueColor: new AlwaysStoppedAnimation(Colors.red),
+                                    setState(() {
+                                      position = Duration(
+                                          milliseconds:
+                                              (value * duration.inMilliseconds)
+                                                  .round());
+                                    });
+                                    setState(() {
+                                      time = value;
+                                    });
+                                  }
+                                : (double value) {},
+                            min: 0.0,
+                            max: 1.0),
+                      ),
+                      Text(
+                        duration != null ? '$_durationText' : '',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
                 Row(
@@ -227,51 +270,40 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                   children: <Widget>[
                     IconButton(
                       icon: Icon(Icons.arrow_back, size: 30.0),
-                      onPressed: () {
-                        audioPlayer.release();
+                      onPressed: () async {
                         widget.pause();
-                        setState(() {
-                          _playingState = false;
-                          duration = Duration(seconds: 0);
-                          position = Duration(seconds: 0);
-                          time = 0.0;
-                        });
-                        store.playPrev();
+                        final result = await audioPlayer.stop();
+
+                        if (result == 1) {
+                          switchSong(store, 'prev');
+                        }
                       },
                     ),
                     _buildPlayButton(_playingState, store),
                     IconButton(
                       icon: Icon(Icons.arrow_forward, size: 30.0),
                       onPressed: () async {
-                        loaded = false;
-                        // audioPlayer.resume();
-                        audioPlayer.stop();
-                        widget.pause();
-                        setState(() {
-                          duration = Duration(seconds: 0);
-                          position = Duration(seconds: 0);
-                          time = 0.0;
-                          _playingState = false;
-                        });
-                        store.playNext();
+                        final result = await audioPlayer.stop();
 
-                        // audioPlayer.stop();
-                        // await audioPlayer.play(
-                        //     'http://m10.music.126.net/20190711163224/a31f1c150e5ec198611050aba33cc1af/ymusic/603f/2799/ea87/0ac26d0e219c049b2c5a12fd6be2826f.mp3');
-                        // setState(() {
-                        //   _playingState = false;
-                        //   duration = Duration(seconds: 0);
-                        //   position = Duration(seconds: 0);
-                        //   time = 0.0;
-                        // });
+                        if (result == 1) {
+                          switchSong(store, 'next');
+                        }
                       },
                     ),
-                    IconButton(
-                      icon: Icon(Icons.shuffle, size: 30.0),
-                      onPressed: () {
+                    InkResponse(
+                      onTap: () async {
                         store.switchPlayMode();
+                        if (store.player.playMode == PlayMode.single) {
+                          await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+                        } else {
+                          await audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+                        }
                       },
-                    ),
+                      child: Text(
+                        store.player.playMode.toString(),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )
                   ],
                 )
               ],
@@ -279,4 +311,15 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
       ),
     );
   }
+}
+
+enum PlayMode {
+  ///aways play single song
+  single,
+
+  ///play current list sequence
+  sequence,
+
+  ///random to play next song
+  shuffle
 }

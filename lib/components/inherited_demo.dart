@@ -200,9 +200,9 @@ class StateContainerState extends State<StateContainer> {
   }
 
   void _getSavedInfo() async {
-    // var pref = await SharedPreferences.getInstance();
+    var pref = await SharedPreferences.getInstance();
     // pref.remove(_PREF_KEY_PLAYLIST);
-    // pref.remove(_PREF_KEY_PLAYING);
+    // pref.remove(_PREF_KEY_PLAY_MODE);
     var preference = await SharedPreferences.getInstance();
     Music current = Music(name: '');
     List<Music> playingList = [];
