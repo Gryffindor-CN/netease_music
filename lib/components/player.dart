@@ -123,60 +123,7 @@ class _QuietState extends State<Quiet> {
       _playingList.add(Music(name: 'world', id: 1));
     });
 
-    vd.addListener(() {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    });
+    vd.addListener(() {});
   }
 
   @override

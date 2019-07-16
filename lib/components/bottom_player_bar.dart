@@ -4,11 +4,12 @@ import '../components/inherited_demo.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import './position_event.dart';
 
 class BottomPlayerBar extends StatefulWidget {
   final VoidCallback play;
   final VoidCallback pause;
-  final VoidCallback finish;
+  final ValueChanged<String> finish;
   BottomPlayerBar({this.play, this.pause, this.finish});
 
   @override
@@ -16,6 +17,7 @@ class BottomPlayerBar extends StatefulWidget {
 }
 
 class _BottomPlayerBarState extends State<BottomPlayerBar> {
+  bool _isMusicLoading = false;
   AudioPlayer audioPlayer;
   bool _playingState = false; // 播放器播放icon切换
   Duration position;
@@ -38,6 +40,16 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   void initState() {
     super.initState();
     initAudioPlayer();
+  }
+
+  Future<int> _play(String source) async {
+    var result;
+    try {
+      result = await audioPlayer.play(source);
+      return result;
+    } catch (e) {
+      print(e);
+    }
   }
 
   void initAudioPlayer() async {
@@ -63,6 +75,8 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
       setState(() {
         position = p;
       });
+      // print(Duration().inMilliseconds);
+      Player.handleMusicPosFire(p);
     });
 
     _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
@@ -78,11 +92,13 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
       _audioPlayerState = AudioPlayerState.COMPLETED;
 
       if (store.player.playMode.toString() == 'PlayMode.single') {
+        // 循环播放
         audioPlayer.setReleaseMode(ReleaseMode.LOOP);
         audioPlayer.resume();
         return;
       }
       audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+
       var res = await audioPlayer.stop();
       if (res == 1) {
         setState(() {
@@ -92,12 +108,22 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
           _playingState = false;
         });
         loaded = false;
-
-        widget.finish();
-
-        var res = await audioPlayer.play(store.player.current.songUrl);
-
+        if (store.player.playMode.toString() == 'PlayMode.sequence') {
+          // 顺序播放
+          widget.finish('sequence');
+        } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
+          // 随机播放
+          widget.finish('shuffle');
+        }
+        setState(() {
+          _isMusicLoading = true;
+        });
+        var res = await _play(store.player.current.songUrl);
         if (res == 1) {
+          Player.handleSongidFire(store.player.current.id);
+          setState(() {
+            _isMusicLoading = false;
+          });
           widget.play();
           loaded = true;
           setState(() {
@@ -123,6 +149,17 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
         position = Duration(seconds: 0);
       });
     });
+
+    final store = StateContainer.of(context);
+    var res = await _play(store.player.current.songUrl);
+    if (res == 1) {
+      Player.handleSongidFire(store.player.current.id);
+      widget.play();
+      loaded = true;
+      setState(() {
+        _playingState = true;
+      });
+    }
   }
 
   @override
@@ -139,7 +176,9 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   IconButton _buildPlayButton(bool state, StateContainerState store) {
     return state == false
         ? IconButton(
-            icon: Icon(Icons.play_circle_outline, size: 30.0),
+            icon: _isMusicLoading == true
+                ? CircularProgressIndicator()
+                : Icon(Icons.play_circle_outline, size: 30.0),
             onPressed: () async {
               if (loaded == true) {
                 audioPlayer.resume();
@@ -148,9 +187,14 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                   _playingState = true;
                 });
               } else {
-                var result =
-                    await audioPlayer.play(store.player.current.songUrl);
+                setState(() {
+                  _isMusicLoading = true;
+                });
+                var result = await _play(store.player.current.songUrl);
                 if (result == 1) {
+                  setState(() {
+                    _isMusicLoading = false;
+                  });
                   widget.play();
                   loaded = true;
                   setState(() {
@@ -190,8 +234,9 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
         break;
     }
 
-    var res = await audioPlayer.play(store.player.current.songUrl);
+    var res = await _play(store.player.current.songUrl);
     if (res == 1) {
+      Player.handleSongidFire(store.player.current.id);
       widget.play();
       loaded = true;
       setState(() {
@@ -203,6 +248,20 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
+    final playmode = store.player.playMode.toString();
+
+    IconData icon;
+    switch (playmode) {
+      case 'PlayMode.single':
+        icon = Icons.repeat_one;
+        break;
+      case 'PlayMode.sequence':
+        icon = Icons.repeat;
+        break;
+      case 'PlayMode.shuffle':
+        icon = Icons.shuffle;
+        break;
+    }
     return Material(
       color: Colors.transparent,
       child: Theme(
@@ -212,6 +271,7 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                 )),
         child: Container(
             width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.symmetric(horizontal: 15.0),
             height: 130.0,
             decoration: BoxDecoration(color: Colors.transparent),
             child: Column(
@@ -265,46 +325,58 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                     ],
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.arrow_back, size: 30.0),
-                      onPressed: () async {
-                        widget.pause();
-                        final result = await audioPlayer.stop();
-
-                        if (result == 1) {
-                          switchSong(store, 'prev');
-                        }
-                      },
-                    ),
-                    _buildPlayButton(_playingState, store),
-                    IconButton(
-                      icon: Icon(Icons.arrow_forward, size: 30.0),
-                      onPressed: () async {
-                        final result = await audioPlayer.stop();
-
-                        if (result == 1) {
-                          switchSong(store, 'next');
-                        }
-                      },
-                    ),
-                    InkResponse(
-                      onTap: () async {
-                        store.switchPlayMode();
-                        if (store.player.playMode == PlayMode.single) {
-                          await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
-                        } else {
-                          await audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
-                        }
-                      },
-                      child: Text(
-                        store.player.playMode.toString(),
-                        style: TextStyle(color: Colors.white),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.skip_previous, size: 30.0),
+                        onPressed: () {
+                          widget.pause();
+                          Future.delayed(Duration(milliseconds: 150), () async {
+                            final result = await audioPlayer.stop();
+                            if (result == 1) {
+                              switchSong(store, 'prev');
+                            }
+                          });
+                        },
                       ),
-                    )
-                  ],
+                      _buildPlayButton(_playingState, store),
+                      IconButton(
+                        icon: Icon(Icons.skip_next, size: 30.0),
+                        onPressed: () {
+                          widget.pause();
+                          Future.delayed(Duration(milliseconds: 150), () async {
+                            final result = await audioPlayer.stop();
+                            if (result == 1) {
+                              switchSong(store, 'next');
+                            }
+                          });
+                        },
+                      ),
+                      InkResponse(
+                        onTap: () async {
+                          store.switchPlayMode();
+                          if (store.player.playMode == PlayMode.single) {
+                            await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+                          } else {
+                            await audioPlayer
+                                .setReleaseMode(ReleaseMode.RELEASE);
+                          }
+                        },
+                        // child: Text(
+                        //   store.player.playMode.toString(),
+                        //   style: TextStyle(color: Colors.white),
+                        // ),
+                        child: Icon(icon),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.menu),
+                        onPressed: () {},
+                      )
+                    ],
+                  ),
                 )
               ],
             )),

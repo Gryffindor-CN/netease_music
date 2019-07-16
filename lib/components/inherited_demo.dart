@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../model/music.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:math';
 
 const String _PREF_KEY_PLAYING = "player_playing";
 
@@ -10,14 +11,6 @@ const String _PREF_KEY_PLAYLIST = "player_playlist";
 
 ///key which save playing mode to local preference
 const String _PREF_KEY_PLAY_MODE = "player_play_mode";
-
-class User {
-  String firstName;
-  String lastName;
-  String email;
-
-  User(this.firstName, this.lastName, this.email);
-}
 
 class PlayerControllerState {
   PlayerControllerState({this.current, this.playMode, this.playingList});
@@ -29,7 +22,6 @@ class PlayerControllerState {
 }
 
 class _InheritedStateContainer extends InheritedWidget {
-  // Data 是你整个的状态(state). 在我们的例子中就是 'User'
   final StateContainerState data;
 
   // 必须传入一个 孩子widget 和你的状态.
@@ -100,12 +92,47 @@ class StateContainerState extends State<StateContainer> {
       });
     } else {
       setState(() {
-        player = (PlayerControllerState(
-            current: music,
-            playMode: player.playMode,
-            playingList: player.playingList));
+        _playingList = player.playingList;
+        _playingList[_currentIndex].songUrl = music.songUrl;
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString(
+            _PREF_KEY_PLAYING,
+            json.encode(music, toEncodable: (e) => e.toMap()),
+          );
+          prefs.setString(_PREF_KEY_PLAYLIST,
+              json.encode(_playingList, toEncodable: (e) => e.toMap()));
+
+          player = (PlayerControllerState(
+              current: music,
+              playMode: player.playMode,
+              playingList: player.playingList));
+        });
       });
     }
+  }
+
+  void playShuffle() {
+    final _random = new Random();
+    int next(int min, int max) => min + _random.nextInt(max - min);
+    int _currentIndex;
+    int ran;
+    player.playingList.asMap().forEach((int index, Music music) {
+      if (music.id == player.current.id) {
+        _currentIndex = index;
+      }
+    });
+    ran = next(0, player.playingList.length);
+    player.playingList.asMap().forEach((int index, Music music) {
+      if (ran == _currentIndex) {
+        ran = next(0, player.playingList.length);
+      }
+    });
+    setState(() {
+      player = (PlayerControllerState(
+          current: player.playingList[ran ?? 0],
+          playMode: player.playMode,
+          playingList: player.playingList));
+    });
   }
 
   void playNext() {
@@ -200,7 +227,7 @@ class StateContainerState extends State<StateContainer> {
   }
 
   void _getSavedInfo() async {
-    var pref = await SharedPreferences.getInstance();
+    // var pref = await SharedPreferences.getInstance();
     // pref.remove(_PREF_KEY_PLAYLIST);
     // pref.remove(_PREF_KEY_PLAY_MODE);
     var preference = await SharedPreferences.getInstance();

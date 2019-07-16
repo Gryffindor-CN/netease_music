@@ -54,18 +54,16 @@ class _MusicDetailState extends State<MusicDetail> {
   @override
   void initState() {
     super.initState();
-    _getSongUrl();
   }
 
-  void _getSongUrl() async {
+  Future<String> _getSongUrl(int id) async {
+    var _songUrl = '';
     try {
       Response response = await Dio().get(
-          'http://192.168.206.133:3000/song/url?id=178895&timestamp=${DateTime.now().millisecondsSinceEpoch}');
+          'http://192.168.206.133:3000/song/url?id=$id&timestamp=${DateTime.now().millisecondsSinceEpoch}');
       var result = json.decode(response.toString())['data'][0]['url'];
-      print(result);
-      setState(() {
-        songUrl = result;
-      });
+      _songUrl = result;
+      return _songUrl;
     } catch (e) {
       print(e);
     }
@@ -79,8 +77,10 @@ class _MusicDetailState extends State<MusicDetail> {
         child: Column(
       children: <Widget>[
         RaisedButton(
-          child: Text('go'),
-          onPressed: () {
+          child: Text('海阔天空'),
+          onPressed: () async {
+            var _url = await _getSongUrl(178895);
+
             store.play(Music(
                 name: '海阔天空',
                 id: 178895,
@@ -90,7 +90,7 @@ class _MusicDetailState extends State<MusicDetail> {
                 albumId: 34430029,
                 albumCoverImg:
                     'https://p1.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg',
-                songUrl: songUrl));
+                songUrl: _url));
             Navigator.of(context)
                 .push(MaterialPageRoute(builder: (BuildContext context) {
               return AlbumCover(
@@ -107,7 +107,65 @@ class _MusicDetailState extends State<MusicDetail> {
           },
         ),
         RaisedButton(
-          child: Text('go2'),
+          child: Text('你瞒我瞒'),
+          onPressed: () async {
+            var _url = await _getSongUrl(25718007);
+            store.play(Music(
+                name: '你瞒我瞒',
+                id: 25718007,
+                aritstId: 2127,
+                aritstName: '陈柏宇',
+                albumName: 'Can’t Be Half',
+                albumId: 2292012,
+                albumCoverImg:
+                    'http://p1.music.126.net/PLPrwYq-7fN1zqzoDT8Lhg==/109951163676678119.jpg',
+                songUrl: _url));
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return AlbumCover(
+                  music: Music(
+                      name: '你瞒我瞒',
+                      id: 25718007,
+                      aritstId: 2127,
+                      aritstName: '陈柏宇',
+                      albumName: 'Can’t Be Half',
+                      albumId: 2292012,
+                      albumCoverImg:
+                          'http://p1.music.126.net/PLPrwYq-7fN1zqzoDT8Lhg==/109951163676678119.jpg'));
+            }));
+          },
+        ),
+        RaisedButton(
+          child: Text('我走后'),
+          onPressed: () async {
+            var _url = await _getSongUrl(1370047789);
+            store.play(Music(
+                name: '我走后',
+                id: 1370047789,
+                aritstId: 30616479,
+                aritstName: '小咪',
+                albumName: '我走后',
+                albumId: 79634961,
+                albumCoverImg:
+                    'http://p1.music.126.net/NqiiABaxJQFQeWkLd_sKzQ==/109951163842098152.jpg',
+                songUrl: _url));
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return AlbumCover(
+                  music: Music(
+                      name: '我走后',
+                      id: 1370047789,
+                      aritstId: 30616479,
+                      aritstName: '小咪',
+                      albumName: '我走后',
+                      albumId: 79634961,
+                      albumCoverImg:
+                          'http://p1.music.126.net/NqiiABaxJQFQeWkLd_sKzQ==/109951163842098152.jpg'));
+            }));
+          },
+        ),
+        RaisedButton(
+          child: Text('遗憾'),
           onPressed: () {
             store.play(Music(
                 name: '遗憾',
