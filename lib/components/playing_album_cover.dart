@@ -439,15 +439,11 @@ class __CenterSectionState extends State<_CenterSection> {
           return Stack(
             overflow: Overflow.visible,
             children: <Widget>[
-              Container(
-                alignment: Alignment.topCenter,
-                padding: EdgeInsets.only(top: 30.0),
+              Center(
                 key: bottomChildKey,
                 child: bottomChild,
               ),
-              Container(
-                alignment: Alignment.topCenter,
-                padding: EdgeInsets.only(top: 30.0),
+              Center(
                 key: topChildKey,
                 child: topChild,
               ),
@@ -504,6 +500,7 @@ class __CenterSectionState extends State<_CenterSection> {
                       id: songidNotifierData,
                       songId: widget.music.id,
                       position: lyricNotifierData,
+                      isShow: !_first,
                     )
                   : Text('')),
         ),

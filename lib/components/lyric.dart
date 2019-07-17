@@ -11,7 +11,8 @@ class Lyric extends StatefulWidget {
   final int songId;
   final LyricNotifierData position;
   final SongidNotifierData id;
-  Lyric({@required this.songId, this.position, this.id});
+  final bool isShow;
+  Lyric({@required this.songId, this.position, this.id, this.isShow});
 
   @override
   State<StatefulWidget> createState() => LyricState();
@@ -94,8 +95,11 @@ class LyricState extends State<Lyric> {
             _lyric = lyricList[lyricTimestampList[i]['index']]
                 .replaceAll(RegExp(r"\[\d{2}:\d{2}.\d{2,3}]"), '');
           });
-          _controller.animateTo(highlightIndex * 50.toDouble() + 60.0,
-              duration: Duration(milliseconds: 150), curve: Curves.ease);
+          if (widget.isShow) {
+            _controller.animateTo(highlightIndex * 50.toDouble() + 60.0,
+                duration: Duration(milliseconds: 150), curve: Curves.ease);
+          }
+
           continue;
         }
         if (widget.position.value.inMilliseconds.toDouble() >

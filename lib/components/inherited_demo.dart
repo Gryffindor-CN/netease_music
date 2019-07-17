@@ -3,6 +3,7 @@ import '../model/music.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'package:dio/dio.dart';
 
 const String _PREF_KEY_PLAYING = "player_playing";
 
@@ -220,6 +221,18 @@ class StateContainerState extends State<StateContainer> {
     }
   }
 
+// 获取歌曲播放url
+  _getSongUrl(int id) async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
+      var data = json.decode(response.toString())['data'][0];
+      return data['url'];
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -237,6 +250,8 @@ class StateContainerState extends State<StateContainer> {
 
     if (preference.getString(_PREF_KEY_PLAYING) != null) {
       current = Music.fromMap(json.decode(preference.get(_PREF_KEY_PLAYING)));
+      var _url = await _getSongUrl(current.id);
+      current.songUrl = _url;
     }
 
     if (preference.get(_PREF_KEY_PLAYLIST) != null) {
@@ -244,6 +259,10 @@ class StateContainerState extends State<StateContainer> {
           .cast<Map>()
           .map(Music.fromMap)
           .toList();
+      playingList.asMap().forEach((int index, Music music) async {
+        var _url = await _getSongUrl(music.id);
+        playingList[index].songUrl = _url;
+      });
     }
     if (preference.get(_PREF_KEY_PLAY_MODE) != null) {
       playMode = PlayMode.values[preference.getInt(_PREF_KEY_PLAY_MODE) ?? 0];
