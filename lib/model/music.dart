@@ -9,6 +9,7 @@ class Music {
   int commentCount;
   String songUrl;
   String albumCoverImg;
+  String lyrics;
   Music(
       {this.name,
       this.id,
@@ -19,7 +20,8 @@ class Music {
       this.detail,
       this.commentCount,
       this.songUrl,
-      this.albumCoverImg});
+      this.albumCoverImg,
+      this.lyrics});
 
   @override
   String toString() {
@@ -40,7 +42,8 @@ class Music {
         detail: map["detail"],
         commentCount: map["commentCount"],
         songUrl: map["songUrl"],
-        albumCoverImg: map["albumCoverImg"]);
+        albumCoverImg: map["albumCoverImg"],
+        lyrics: map["lyrics"]);
   }
 
   Map toMap() {
@@ -54,7 +57,8 @@ class Music {
       'commentCount': commentCount,
       "album": detail,
       "songUrl": songUrl,
-      "albumCoverImg": albumCoverImg
+      "albumCoverImg": albumCoverImg,
+      "lyrics": lyrics
     };
   }
 }

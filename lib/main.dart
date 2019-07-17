@@ -49,8 +49,6 @@ class MusicDetail extends StatefulWidget {
 }
 
 class _MusicDetailState extends State<MusicDetail> {
-  String songUrl;
-
   @override
   void initState() {
     super.initState();

@@ -8,6 +8,8 @@ import 'lyric.dart';
 import 'dart:async';
 import './position_event.dart';
 import './lyricNotifierData.dart';
+import 'package:audioplayers/audioplayers.dart';
+// import 'package:event_bus/event_bus.dart';
 
 class AlbumCover extends StatefulWidget {
   final Music music;
@@ -26,16 +28,60 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   AnimationController controller_needle;
   Animation<double> animation_neddle;
   StreamSubscription stream;
-  Duration _position;
   PositionNotifierData vd = PositionNotifierData(Duration());
+  AudioPlayer audioPlayer;
+  double volumn = 0.5; // 音量控制
+  bool showVolumnController = false;
+  Duration position;
+  Duration duration;
+  double time = 0.0;
+  StreamSubscription _positionSubscription;
+  StreamSubscription _durationSubscription;
+  StreamSubscription _playerErrorSubscription;
+
+  initAudioPlayer() {
+    audioPlayer = AudioPlayer();
+    // 播放进度改变
+    _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) {
+      if (position != null &&
+          duration != null &&
+          position.inMilliseconds > 0 &&
+          position.inMilliseconds < duration.inMilliseconds) {
+        setState(() {
+          time = position.inMilliseconds / duration.inMilliseconds;
+        });
+      }
+      setState(() {
+        position = p;
+      });
+      // vd.value =
+      // print(p);
+      // print(Duration().inMilliseconds);
+      // _stream = Player.handleMusicPosFire(p);
+      vd.value = p;
+    });
+
+    // 获取歌曲播放时间
+    _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
+      setState(() {
+        duration = d;
+      });
+    });
+
+    // 播放出错
+    _playerErrorSubscription = audioPlayer.onPlayerError.listen((msg) {
+      print('audioPlayer error : $msg');
+      setState(() {
+        duration = Duration(seconds: 0);
+        position = Duration(seconds: 0);
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-
-    stream = Player.eventBus.on<Duration>().listen((e) {
-      vd.value = e;
-    });
+    initAudioPlayer();
 
     controller_record = new AnimationController(
         duration: const Duration(milliseconds: 15000), vsync: this);
@@ -59,6 +105,12 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    vd.dispose();
+    audioPlayer.dispose();
+
+    _positionSubscription.cancel();
+    _durationSubscription.cancel();
+    _playerErrorSubscription.cancel();
     controller_record.dispose();
     controller_needle.dispose();
     super.dispose();
@@ -69,43 +121,118 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
     final store = StateContainer.of(context);
     final _music = store.player.current;
 
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          _BlurBackground(
-            music: store.player.current,
-          ),
-          Material(
-            color: Colors.transparent,
-            child: Column(
-              children: <Widget>[
-                _PlayingTitle(music: _music),
-                Expanded(
-                  child: _CenterSection(
-                    vd: vd,
-                    position: _position,
-                    music: _music,
-                    commonTween: _commonTween,
-                    rotateTween: _rotateTween,
-                    controllerRecord: controller_record,
-                    controllerNeedle: controller_needle,
-                  ),
+    return NotificationListener<ShowVolumnControllerNotification>(
+        onNotification: (notification) {
+          setState(() {
+            showVolumnController = notification.isShow;
+          });
+        },
+        child: Scaffold(
+          body: Stack(
+            children: <Widget>[
+              _BlurBackground(
+                music: store.player.current,
+              ),
+              Material(
+                color: Colors.transparent,
+                child: Column(
+                  children: <Widget>[
+                    _PlayingTitle(audioPlayer: audioPlayer, music: _music),
+                    showVolumnController == true
+                        ? Container(
+                            padding: EdgeInsets.only(left: 15.0),
+                            width: MediaQuery.of(context).size.width,
+                            height: 28.0,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Icon(
+                                  volumn == 0.0
+                                      ? Icons.volume_off
+                                      : Icons.volume_up,
+                                  color: Colors.white,
+                                  size: 20.0,
+                                ),
+                                Expanded(
+                                    child: Slider(
+                                  activeColor: Colors.white,
+                                  inactiveColor: Color(0x64ffffff),
+                                  value: volumn,
+                                  max: 1.0,
+                                  onChanged: (double value) {
+                                    setState(() {
+                                      volumn = value;
+                                      audioPlayer.setVolume(value);
+                                    });
+                                  },
+                                ))
+                              ],
+                            ),
+                          )
+                        : Container(),
+                    Expanded(
+                      child: _CenterSection(
+                        audioPlayer: audioPlayer,
+                        vd: vd,
+                        position: position,
+                        music: _music,
+                        commonTween: _commonTween,
+                        rotateTween: _rotateTween,
+                        controllerRecord: controller_record,
+                        controllerNeedle: controller_needle,
+                      ),
+                    ),
+                    _OperationBar(
+                      music: _music,
+                    ),
+                    Padding(padding: EdgeInsets.only(top: 10)),
+                    _ControllerBar(
+                      audioPlayer: audioPlayer,
+                      position: position,
+                      duration: duration,
+                      handleSlider: (double value) {
+                        setState(() {
+                          position = Duration(
+                              milliseconds:
+                                  (value * duration.inMilliseconds).round());
+                          time = value;
+                        });
+                      },
+                      complete: () {
+                        setState(() {
+                          duration = Duration(seconds: 0);
+                          position = Duration(seconds: 0);
+                          time = 0.0;
+                        });
+                      },
+                      toggle: (String playmode) {
+                        setState(() {
+                          duration = Duration();
+                          position = Duration();
+                          time = 0.0;
+                        });
+                        switch (playmode) {
+                          case 'prev':
+                            store.playPrev();
+                            Player.idEventBus.fire(store.player.current.id);
+                            break;
+                          case 'next':
+                            store.playNext();
+                            Player.idEventBus.fire(store.player.current.id);
+                            break;
+                        }
+                      },
+                      time: time,
+                      store: store,
+                      controllerNeedle: controller_needle,
+                      controllerRecord: controller_record,
+                    )
+                  ],
                 ),
-                _OperationBar(
-                  music: _music,
-                ),
-                Padding(padding: EdgeInsets.only(top: 10)),
-                _ControllerBar(
-                  store: store,
-                  controllerNeedle: controller_needle,
-                  controllerRecord: controller_record,
-                )
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }
 
@@ -233,6 +360,7 @@ class _CenterSection extends StatefulWidget {
   final AnimationController controllerRecord;
   final AnimationController controllerNeedle;
   final PositionNotifierData vd;
+  final AudioPlayer audioPlayer;
   const _CenterSection({
     Key key,
     this.rotateTween,
@@ -241,6 +369,7 @@ class _CenterSection extends StatefulWidget {
     this.controllerNeedle,
     this.position,
     this.vd,
+    this.audioPlayer,
     @required this.music,
   }) : super(key: key);
 
@@ -251,9 +380,13 @@ class _CenterSection extends StatefulWidget {
 class __CenterSectionState extends State<_CenterSection> {
   bool _first = true;
   LyricNotifierData lyricNotifierData = LyricNotifierData(Duration());
+  SongidNotifierData songidNotifierData = SongidNotifierData(-1);
+
   GlobalKey _containerKey = GlobalKey();
   Size _containerSize = Size(0, 0);
   Offset _containerPosition = Offset(0, 0);
+  StreamSubscription stream;
+
   _getContainerSize() {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
@@ -262,7 +395,6 @@ class __CenterSectionState extends State<_CenterSection> {
         'Size: width = ${containerSize.width} - height = ${containerSize.height}');
   }
 
-  /// New
   _getContainerPosition() {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
@@ -271,9 +403,13 @@ class __CenterSectionState extends State<_CenterSection> {
         'Position: x = ${containerPosition.dx} - y = ${containerPosition.dy}');
   }
 
-  initState() {
+  @override
+  void initState() {
     widget.vd.addListener(() {
       lyricNotifierData.value = widget.vd.value;
+    });
+    stream = Player.idEventBus.on<int>().listen((int res) {
+      songidNotifierData.value = res;
     });
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(_onBuildCompleted);
@@ -281,86 +417,95 @@ class __CenterSectionState extends State<_CenterSection> {
 
   _onBuildCompleted(_) {
     _getContainerSize();
-
     _getContainerPosition();
   }
 
   @override
+  void dispose() {
+    stream.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        key: _containerKey,
-        alignment: Alignment.topCenter,
-        width: MediaQuery.of(context).size.width,
-        height: 400.0,
-        // decoration: BoxDecoration(color: Colors.red),
-        child: AnimatedCrossFade(
-          crossFadeState:
-              _first ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-          layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild,
-              Key bottomChildKey) {
-            return Stack(
-              overflow: Overflow.visible,
-              children: <Widget>[
-                Center(
-                  key: bottomChildKey,
-                  child: bottomChild,
-                ),
-                Center(
-                  key: topChildKey,
-                  child: topChild,
-                ),
-              ],
-            );
-          },
-          duration: Duration(milliseconds: 300),
-          firstChild: Stack(
-            overflow: Overflow.clip,
+    return Container(
+      key: _containerKey,
+      width: MediaQuery.of(context).size.width,
+      child: AnimatedCrossFade(
+        crossFadeState:
+            _first ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild,
+            Key bottomChildKey) {
+          return Stack(
+            overflow: Overflow.visible,
             children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _first = false;
-                  });
-                },
-                child: Container(
-                  margin: EdgeInsets.only(top: 60.0),
-                  child: RotateRecord(
-                      music: widget.music,
-                      animation:
-                          widget.commonTween.animate(widget.controllerRecord)),
-                ),
+              Container(
+                alignment: Alignment.topCenter,
+                padding: EdgeInsets.only(top: 30.0),
+                key: bottomChildKey,
+                child: bottomChild,
               ),
-              Positioned(
-                child: Container(
-                    padding: EdgeInsets.only(left: 80.0),
-                    child: PivotTransition(
-                      turns:
-                          widget.rotateTween.animate(widget.controllerNeedle),
-                      alignment: FractionalOffset.topLeft,
-                      child: Container(
-                        width: 100.0,
-                        child: Image.asset("assets/play_needle.png"),
-                      ),
-                    )),
+              Container(
+                alignment: Alignment.topCenter,
+                padding: EdgeInsets.only(top: 30.0),
+                key: topChildKey,
+                child: topChild,
               ),
             ],
-          ),
-          secondChild: Center(
-            child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _first = true;
-                  });
-                },
-                child: (widget.vd.value != null &&
-                        widget.vd.value.inMilliseconds > 0)
-                    ? Lyric(
-                        songId: widget.music.id,
-                        data: lyricNotifierData,
-                      )
-                    : Text('')),
-          ),
+          );
+        },
+        duration: Duration(milliseconds: 300),
+        firstChild: Stack(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                ShowVolumnControllerNotification(isShow: true)
+                    .dispatch(context);
+                setState(() {
+                  _first = false;
+                });
+              },
+              child: Container(
+                margin: EdgeInsets.only(top: 60.0),
+                child: RotateRecord(
+                    music: widget.music,
+                    animation:
+                        widget.commonTween.animate(widget.controllerRecord)),
+              ),
+            ),
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              child: Container(
+                  padding: EdgeInsets.only(left: 80.0),
+                  child: PivotTransition(
+                    turns: widget.rotateTween.animate(widget.controllerNeedle),
+                    alignment: FractionalOffset.topLeft,
+                    child: Container(
+                      width: 100.0,
+                      child: Image.asset("assets/play_needle.png"),
+                    ),
+                  )),
+            ),
+          ],
+        ),
+        secondChild: Center(
+          child: GestureDetector(
+              onTap: () {
+                ShowVolumnControllerNotification(isShow: false)
+                    .dispatch(context);
+                setState(() {
+                  _first = true;
+                });
+              },
+              child: (widget.vd.value != null &&
+                      widget.vd.value.inMilliseconds > 0)
+                  ? Lyric(
+                      id: songidNotifierData,
+                      songId: widget.music.id,
+                      position: lyricNotifierData,
+                    )
+                  : Text('')),
         ),
       ),
     );
@@ -371,31 +516,57 @@ class _ControllerBar extends StatelessWidget {
   final AnimationController controllerRecord;
   final AnimationController controllerNeedle;
   final StateContainerState store;
+  final AudioPlayer audioPlayer;
+  final Duration position;
+  final Duration duration;
+  final double time;
+  final ValueChanged<double> handleSlider;
+  final ValueChanged<String> toggle;
+  final VoidCallback complete;
   const _ControllerBar({
     Key key,
     this.controllerRecord,
     this.controllerNeedle,
+    this.position,
+    this.duration,
+    this.time,
+    this.handleSlider,
+    this.toggle,
+    this.complete,
     @required this.store,
+    @required this.audioPlayer,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BottomPlayerBar(play: () {
-      controllerRecord.forward();
-      controllerNeedle.forward();
-    }, pause: () {
-      controllerRecord.stop(canceled: false);
-      controllerNeedle.reverse();
-    }, finish: (String playmode) {
-      switch (playmode) {
-        case 'sequence':
-          store.playNext();
-          break;
-        case 'shuffle':
-          store.playShuffle();
-          break;
-      }
-    });
+    return BottomPlayerBar(
+        audioPlayer: audioPlayer,
+        handleSlider: handleSlider,
+        position: position,
+        duration: duration,
+        time: time,
+        play: () {
+          controllerRecord.forward();
+          controllerNeedle.forward();
+        },
+        pause: () {
+          controllerRecord.stop(canceled: false);
+          controllerNeedle.reverse();
+        },
+        complete: complete,
+        toggle: (String playmode) {
+          toggle(playmode);
+        },
+        finish: (String playmode) {
+          switch (playmode) {
+            case 'sequence':
+              store.playNext();
+              break;
+            case 'shuffle':
+              store.playShuffle();
+              break;
+          }
+        });
   }
 }
 
@@ -441,8 +612,9 @@ class _OperationBar extends StatelessWidget {
 
 class _PlayingTitle extends StatelessWidget {
   final Music music;
-
-  const _PlayingTitle({Key key, @required this.music}) : super(key: key);
+  final AudioPlayer audioPlayer;
+  const _PlayingTitle({Key key, this.audioPlayer, @required this.music})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -454,7 +626,10 @@ class _PlayingTitle extends StatelessWidget {
             Icons.arrow_back,
             color: Theme.of(context).primaryIconTheme.color,
           ),
-          onPressed: () => Navigator.pop(context)),
+          onPressed: () {
+            audioPlayer.release();
+            Navigator.pop(context);
+          }),
       titleSpacing: 0,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,4 +684,11 @@ class _PlayingTitle extends StatelessWidget {
 
 class PositionNotifierData extends ValueNotifier<Duration> {
   PositionNotifierData(value) : super(value);
+}
+
+class ShowVolumnControllerNotification extends Notification {
+  ShowVolumnControllerNotification({
+    @required this.isShow,
+  });
+  final bool isShow;
 }

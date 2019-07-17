@@ -1,15 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import './lyricNotifierData.dart';
 import './position_event.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class Lyric extends StatefulWidget {
   final int songId;
-
-  final LyricNotifierData data;
-
-  Lyric({@required this.songId, this.data});
+  final LyricNotifierData position;
+  final SongidNotifierData id;
+  Lyric({@required this.songId, this.position, this.id});
 
   @override
   State<StatefulWidget> createState() => LyricState();
@@ -27,6 +29,7 @@ class LyricState extends State<Lyric> {
   Offset _containerPosition = Offset(0, 0);
   String _lyric;
   int highlightIndex = 0;
+
   _getContainerSize() {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
@@ -54,20 +57,22 @@ class LyricState extends State<Lyric> {
   void initState() {
     _controller = ScrollController();
     _getLyric(widget.songId);
-    widget.data.addListener(_scrollToCurrentPosition);
-    _controller.addListener(() {});
-    Player.eventBus.on<int>().listen((e) {
+    widget.position.addListener(() {
+      if (this.mounted) _scrollToCurrentPosition();
+    });
+    widget.id.addListener(() {
       if (this.mounted) {
-        _getLyric(e);
+        _getLyric(widget.id.value);
       }
     });
+    _controller.addListener(() {});
     offset = 0.0;
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.data.removeListener(_scrollToCurrentPosition);
+    widget.position.removeListener(_scrollToCurrentPosition);
     _controller.dispose();
     super.dispose();
   }
@@ -76,8 +81,8 @@ class LyricState extends State<Lyric> {
     for (int i = 0, size = lyricTimestampList.length; i < size; i++) {
       if (lyricTimestampList[i]['position'] != null) {
         if (lyricTimestampList[i]['position'] <
-                widget.data.value.inMilliseconds.toDouble() &&
-            widget.data.value.inMilliseconds.toDouble() <
+                widget.position.value.inMilliseconds.toDouble() &&
+            widget.position.value.inMilliseconds.toDouble() <
                 lyricTimestampList[i + 1]['position']) {
           if (_lyric == lyricList[lyricTimestampList[i]['index']]) continue;
           if (lyricList[lyricTimestampList[i]['index']] == null) {
@@ -89,21 +94,15 @@ class LyricState extends State<Lyric> {
             _lyric = lyricList[lyricTimestampList[i]['index']]
                 .replaceAll(RegExp(r"\[\d{2}:\d{2}.\d{2,3}]"), '');
           });
-          _controller.animateTo(highlightIndex * 50.toDouble(),
-              duration: Duration(milliseconds: 1), curve: Curves.ease);
+          _controller.animateTo(highlightIndex * 50.toDouble() + 60.0,
+              duration: Duration(milliseconds: 150), curve: Curves.ease);
           continue;
         }
-        if (widget.data.value.inMilliseconds.toDouble() >
+        if (widget.position.value.inMilliseconds.toDouble() >
             lyricTimestampList[lyricTimestampList.length - 1]['position']) {
           break;
         }
       }
-    }
-
-    if (this.mounted && lyricList.length > 0) {
-      // _controller.jumpTo(offset);
-      // offset += 1.0;
-      // WidgetsBinding.instance.addPostFrameCallback(_onBuildCompleted);
     }
   }
 

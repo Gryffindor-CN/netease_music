@@ -7,10 +7,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './position_event.dart';
 
 class BottomPlayerBar extends StatefulWidget {
+  final Duration position;
+  final Duration duration;
+  final double time;
   final VoidCallback play;
   final VoidCallback pause;
+  final VoidCallback complete;
+  final ValueChanged<String> toggle;
   final ValueChanged<String> finish;
-  BottomPlayerBar({this.play, this.pause, this.finish});
+  final ValueChanged<double> handleSlider;
+  final AudioPlayer audioPlayer;
+  BottomPlayerBar(
+      {this.play,
+      this.pause,
+      this.finish,
+      this.complete,
+      this.toggle,
+      this.position,
+      this.duration,
+      this.time,
+      this.handleSlider,
+      @required this.audioPlayer});
 
   @override
   _BottomPlayerBarState createState() => _BottomPlayerBarState();
@@ -20,21 +37,22 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   bool _isMusicLoading = false;
   AudioPlayer audioPlayer;
   bool _playingState = false; // 播放器播放icon切换
-  Duration position;
-  Duration duration;
-  double time = 0.0;
+  // Duration position;
+  // Duration duration;
+  // double time = 0.0;
   bool loaded = false; // 记录是否已经加载过音乐
-  double volumn; // 音量控制
+
   int mode;
-  StreamSubscription _positionSubscription;
-  StreamSubscription _durationSubscription;
+  // StreamSubscription _positionSubscription;
+  // StreamSubscription _durationSubscription;
   StreamSubscription _audioPlayerStateSubscription;
   StreamSubscription _playerCompleteSubscription;
-  StreamSubscription _playerErrorSubscription;
-  AudioPlayerState _audioPlayerState;
+  // StreamSubscription _playerErrorSubscription;
+  // StreamSubscription _stream;
+
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
-  get _durationText => duration?.toString()?.split('.')?.first ?? '';
-  get _positionText => position?.toString()?.split('.')?.first ?? '';
+  get _durationText => widget.duration?.toString()?.split('.')?.first ?? '';
+  get _positionText => widget.position?.toString()?.split('.')?.first ?? '';
 
   @override
   void initState() {
@@ -45,15 +63,27 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   Future<int> _play(String source) async {
     var result;
     try {
-      result = await audioPlayer.play(source);
+      result = await widget.audioPlayer.play(source);
       return result;
     } catch (e) {
       print(e);
     }
   }
 
+  @override
+  void dispose() {
+    // _stream.cancel();
+    // _positionSubscription.cancel();
+    _audioPlayerStateSubscription.cancel();
+    // _durationSubscription.cancel();
+    _playerCompleteSubscription.cancel();
+    // _playerErrorSubscription.cancel();
+
+    super.dispose();
+  }
+
   void initAudioPlayer() async {
-    audioPlayer = new AudioPlayer();
+    audioPlayer = widget.audioPlayer;
     var preference = await SharedPreferences.getInstance();
     var _mode = preference.getInt('player_play_mode');
     mode = _mode;
@@ -63,33 +93,34 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
       audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
     }
     // 播放进度改变
-    _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) {
-      if (position != null &&
-          duration != null &&
-          position.inMilliseconds > 0 &&
-          position.inMilliseconds < duration.inMilliseconds) {
-        setState(() {
-          time = position.inMilliseconds / duration.inMilliseconds;
-        });
-      }
-      setState(() {
-        position = p;
-      });
-      // print(Duration().inMilliseconds);
-      Player.handleMusicPosFire(p);
-    });
+    // _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) {
+    //   if (position != null &&
+    //       duration != null &&
+    //       position.inMilliseconds > 0 &&
+    //       position.inMilliseconds < duration.inMilliseconds) {
+    //     setState(() {
+    //       time = position.inMilliseconds / duration.inMilliseconds;
+    //     });
+    //   }
+    //   setState(() {
+    //     position = p;
+    //   });
+    //   // print(Duration().inMilliseconds);
+    //   _stream = Player.handleMusicPosFire(p);
+    // });
 
-    _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
-      setState(() {
-        duration = d;
-      });
-    });
+    // // 获取歌曲播放时间
+    // _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
+    //   setState(() {
+    //     duration = d;
+    //   });
+    // });
 
     // 播放完成
     _playerCompleteSubscription =
         audioPlayer.onPlayerCompletion.listen((event) async {
       final store = StateContainer.of(context);
-      _audioPlayerState = AudioPlayerState.COMPLETED;
+      // _audioPlayerState = AudioPlayerState.COMPLETED;
 
       if (store.player.playMode.toString() == 'PlayMode.single') {
         // 循环播放
@@ -101,10 +132,8 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
 
       var res = await audioPlayer.stop();
       if (res == 1) {
+        widget.complete();
         setState(() {
-          duration = Duration(seconds: 0);
-          position = Duration(seconds: 0);
-          time = 0.0;
           _playingState = false;
         });
         loaded = false;
@@ -120,7 +149,6 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
         });
         var res = await _play(store.player.current.songUrl);
         if (res == 1) {
-          Player.handleSongidFire(store.player.current.id);
           setState(() {
             _isMusicLoading = false;
           });
@@ -137,23 +165,13 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
     _audioPlayerStateSubscription =
         audioPlayer.onPlayerStateChanged.listen((state) {
       setState(() {
-        _audioPlayerState = state;
-      });
-    });
-
-    // 播放出错
-    _playerErrorSubscription = audioPlayer.onPlayerError.listen((msg) {
-      print('audioPlayer error : $msg');
-      setState(() {
-        duration = Duration(seconds: 0);
-        position = Duration(seconds: 0);
+        // _audioPlayerState = state;
       });
     });
 
     final store = StateContainer.of(context);
     var res = await _play(store.player.current.songUrl);
     if (res == 1) {
-      Player.handleSongidFire(store.player.current.id);
       widget.play();
       loaded = true;
       setState(() {
@@ -162,18 +180,8 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
     }
   }
 
-  @override
-  void dispose() {
-    _positionSubscription.cancel();
-    _audioPlayerStateSubscription.cancel();
-    _durationSubscription.cancel();
-    _playerCompleteSubscription.cancel();
-    _playerErrorSubscription.cancel();
-    audioPlayer.stop();
-    super.dispose();
-  }
-
-  IconButton _buildPlayButton(bool state, StateContainerState store) {
+  IconButton _buildPlayButton(
+      bool state, StateContainerState store, BuildContext ctx) {
     return state == false
         ? IconButton(
             icon: _isMusicLoading == true
@@ -219,24 +227,13 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   // 切换歌曲
   void switchSong(StateContainerState store, String flag) async {
     setState(() {
-      duration = Duration();
-      position = Duration();
-      time = 0.0;
       _playingState = false;
     });
     loaded = false;
-    switch (flag) {
-      case 'prev':
-        store.playPrev();
-        break;
-      case 'next':
-        store.playNext();
-        break;
-    }
+    widget.toggle(flag);
 
     var res = await _play(store.player.current.songUrl);
     if (res == 1) {
-      Player.handleSongidFire(store.player.current.id);
       widget.play();
       loaded = true;
       setState(() {
@@ -280,46 +277,41 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                   padding: EdgeInsets.symmetric(vertical: 10.0),
                   child: Row(
                     children: <Widget>[
-                      Text(position != null ? '${_positionText ?? ''}' : '',
+                      Text(
+                          widget.position != null
+                              ? '${_positionText ?? ''}'
+                              : '',
                           style: TextStyle(color: Colors.white)),
                       Expanded(
                         child: Slider(
                             activeColor: Colors.white,
                             inactiveColor: Color(0x64ffffff),
-                            value: (position != null &&
-                                    duration != null &&
-                                    position.inMilliseconds > 0 &&
-                                    position.inMilliseconds <
-                                        duration.inMilliseconds)
-                                ? time
+                            value: (widget.position != null &&
+                                    widget.duration != null &&
+                                    widget.position.inMilliseconds > 0 &&
+                                    widget.position.inMilliseconds <
+                                        widget.duration.inMilliseconds)
+                                ? widget.time
                                 : 0.0,
-                            onChanged: (position != null &&
-                                    duration != null &&
-                                    position.inMilliseconds > 0 &&
-                                    position.inMilliseconds <
-                                        duration.inMilliseconds)
+                            onChanged: (widget.position != null &&
+                                    widget.duration != null &&
+                                    widget.position.inMilliseconds > 0 &&
+                                    widget.position.inMilliseconds <
+                                        widget.duration.inMilliseconds)
                                 ? (double value) {
                                     audioPlayer.seek(Duration(
-                                        milliseconds:
-                                            (value * duration.inMilliseconds)
-                                                .round()));
-
-                                    setState(() {
-                                      position = Duration(
-                                          milliseconds:
-                                              (value * duration.inMilliseconds)
-                                                  .round());
-                                    });
-                                    setState(() {
-                                      time = value;
-                                    });
+                                        milliseconds: (value *
+                                                widget.duration.inMilliseconds)
+                                            .round()));
                                   }
-                                : (double value) {},
+                                : (double value) {
+                                    widget.handleSlider(value);
+                                  },
                             min: 0.0,
                             max: 1.0),
                       ),
                       Text(
-                        duration != null ? '$_durationText' : '',
+                        widget.duration != null ? '$_durationText' : '',
                         style: TextStyle(color: Colors.white),
                       ),
                     ],
@@ -342,7 +334,7 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                           });
                         },
                       ),
-                      _buildPlayButton(_playingState, store),
+                      _buildPlayButton(_playingState, store, context),
                       IconButton(
                         icon: Icon(Icons.skip_next, size: 30.0),
                         onPressed: () {
