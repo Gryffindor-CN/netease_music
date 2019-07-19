@@ -10,9 +10,8 @@ import 'package:audioplayers/audioplayers.dart';
 class Lyric extends StatefulWidget {
   final int songId;
   final LyricNotifierData position;
-  final SongidNotifierData id;
   final bool isShow;
-  Lyric({@required this.songId, this.position, this.id, this.isShow});
+  Lyric({@required this.songId, this.position, this.isShow});
 
   @override
   State<StatefulWidget> createState() => LyricState();
@@ -35,8 +34,8 @@ class LyricState extends State<Lyric> {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
     final containerSize = containerRenderBox.size;
-    print(
-        'Size: width = ${containerSize.width} - height = ${containerSize.height}');
+    // print(
+    //     'Size: width = ${containerSize.width} - height = ${containerSize.height}');
   }
 
   /// New
@@ -44,8 +43,8 @@ class LyricState extends State<Lyric> {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
     final containerPosition = containerRenderBox.localToGlobal(Offset.zero);
-    print(
-        'Position: x = ${containerPosition.dx} - y = ${containerPosition.dy}');
+    // print(
+    //     'Position: x = ${containerPosition.dx} - y = ${containerPosition.dy}');
   }
 
   _onBuildCompleted(_) {
@@ -57,24 +56,24 @@ class LyricState extends State<Lyric> {
   @override
   void initState() {
     _controller = ScrollController();
-    _getLyric(widget.songId);
     widget.position.addListener(() {
       if (this.mounted) _scrollToCurrentPosition();
     });
-    widget.id.addListener(() {
-      if (this.mounted) {
-        _getLyric(widget.id.value);
-      }
-    });
-    _controller.addListener(() {});
+
     offset = 0.0;
     super.initState();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getLyric(widget.songId);
+  }
+
+  @override
   void dispose() {
-    widget.position.removeListener(_scrollToCurrentPosition);
-    _controller.dispose();
+    // widget.position.removeListener(_scrollToCurrentPosition);
+    // _controller.dispose();
     super.dispose();
   }
 
@@ -99,7 +98,6 @@ class LyricState extends State<Lyric> {
             _controller.animateTo(highlightIndex * 50.toDouble() + 60.0,
                 duration: Duration(milliseconds: 150), curve: Curves.ease);
           }
-
           continue;
         }
         if (widget.position.value.inMilliseconds.toDouble() >
@@ -111,7 +109,6 @@ class LyricState extends State<Lyric> {
   }
 
   measureStartTimeMillis(String str) {
-    // double minute = Long.parseLong(str.substring(1, 3));
     double minute = double.parse(str.substring(1, 3));
     double second = double.parse(str.substring(4, 6));
     double millisecond = double.parse(str.substring(7, 9));
@@ -123,10 +120,13 @@ class LyricState extends State<Lyric> {
     lyricList.clear();
     lyricTimestampList.clear();
     try {
-      setState(() {
-        lyricLoading = true;
-        _lyric = '';
-      });
+      if (this.mounted) {
+        setState(() {
+          lyricLoading = true;
+          _lyric = '';
+        });
+      }
+
       Response response =
           await Dio().get('http://192.168.206.133:3000/lyric?id=$id');
       var result = json.decode(response.toString())['lrc']['lyric'];
@@ -134,9 +134,6 @@ class LyricState extends State<Lyric> {
       _lyricList =
           result.toString().replaceAll(new RegExp(r'[\r\n]'), '^^').split('^^');
       _lyricList.asMap().forEach((int index, String value) {
-        // if (value.replaceAll(RegExp(r"\[\d{2}:\d{2}.\d{2,3}]"), '') != '') {
-        //   lyricList.add(value);
-        // }
         lyricList.add(value);
       });
       _lyricList.asMap().forEach((int index, String value) {
@@ -153,14 +150,18 @@ class LyricState extends State<Lyric> {
         }
       });
       offset = 0.0;
-      setState(() {
-        lyricLoading = false;
-      });
+      if (this.mounted) {
+        setState(() {
+          lyricLoading = false;
+        });
+      }
     } catch (e) {
       print(e);
-      setState(() {
-        lyricLoading = false;
-      });
+      if (this.mounted) {
+        setState(() {
+          lyricLoading = false;
+        });
+      }
     }
   }
 

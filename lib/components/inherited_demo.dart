@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:dio/dio.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 const String _PREF_KEY_PLAYING = "player_playing";
 
@@ -14,17 +15,29 @@ const String _PREF_KEY_PLAYLIST = "player_playlist";
 const String _PREF_KEY_PLAY_MODE = "player_play_mode";
 
 class PlayerControllerState {
-  PlayerControllerState({this.current, this.playMode, this.playingList});
-  Music current;
-  List<Music> playingList;
-  PlayMode playMode;
+  PlayerControllerState(
+      {this.audioPlayer,
+      this.current,
+      this.playMode,
+      this.playingList,
+      this.isPlaying = false,
+      this.position = Duration.zero,
+      this.duration,
+      this.time = 0.0});
+  final AudioPlayer audioPlayer;
+  final Music current;
+  final List<Music> playingList;
+  final PlayMode playMode;
+  final bool isPlaying;
+  final Duration position;
+  final Duration duration;
+  final double time;
 
   PlayerControllerState.uninitialized() : this();
 }
 
 class _InheritedStateContainer extends InheritedWidget {
   final StateContainerState data;
-
   // 必须传入一个 孩子widget 和你的状态.
   _InheritedStateContainer({
     Key key,
@@ -32,7 +45,6 @@ class _InheritedStateContainer extends InheritedWidget {
     @required Widget child,
   }) : super(key: key, child: child);
 
-  // 这个一个内建方法可以在这里检查状态是否有变化. 如果没有变化就不需要重新创建所有Widget.
   @override
   bool updateShouldNotify(_InheritedStateContainer old) => true;
 }
@@ -47,8 +59,6 @@ class StateContainer extends StatefulWidget {
     this.player,
   });
 
-  // 这个是所有一切的秘诀. 写一个你自己的'of'方法，像MediaQuery.of and Theme.of
-  // 简单的说，就是：从指定的Widget类型获取data.
   static StateContainerState of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_InheritedStateContainer)
             as _InheritedStateContainer)
@@ -63,7 +73,7 @@ class StateContainerState extends State<StateContainer> {
   // Whichever properties you wanna pass around your app as state
   PlayerControllerState player;
 
-  void play(Music music) {
+  Future<void> play(Music music) async {
     int _currentIndex = -1;
     List<Music> _playingList;
 
@@ -75,7 +85,13 @@ class StateContainerState extends State<StateContainer> {
 
     if (_currentIndex == -1) {
       _playingList = player.playingList;
+      var _url = await _getSongUrl(music.id);
+      var _comment = await _getSongComment(music.id);
+
+      music.songUrl = _url;
+      music.commentCount = _comment;
       _playingList.add(music);
+
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString(
           _PREF_KEY_PLAYING,
@@ -86,9 +102,14 @@ class StateContainerState extends State<StateContainer> {
 
         setState(() {
           player = (PlayerControllerState(
+              audioPlayer: player.audioPlayer,
               current: music,
               playMode: player.playMode,
-              playingList: _playingList));
+              playingList: _playingList,
+              isPlaying: player.isPlaying,
+              position: player.position,
+              duration: player.duration,
+              time: player.time));
         });
       });
     } else {
@@ -112,7 +133,7 @@ class StateContainerState extends State<StateContainer> {
     }
   }
 
-  void playShuffle() {
+  Future<void> playShuffle() {
     final _random = new Random();
     int next(int min, int max) => min + _random.nextInt(max - min);
     int _currentIndex;
@@ -130,13 +151,17 @@ class StateContainerState extends State<StateContainer> {
     });
     setState(() {
       player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
           current: player.playingList[ran ?? 0],
           playMode: player.playMode,
-          playingList: player.playingList));
+          playingList: player.playingList,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
     });
   }
 
-  void playNext() {
+  Future<void> playNext() {
     int _currentIndex;
     player.playingList.asMap().forEach((int index, Music music) {
       if (music.id == player.current.id) {
@@ -151,13 +176,18 @@ class StateContainerState extends State<StateContainer> {
     }
     setState(() {
       player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
           current: player.playingList[_currentIndex ?? 0],
           playMode: player.playMode,
-          playingList: player.playingList));
+          playingList: player.playingList,
+          isPlaying: player.isPlaying,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
     });
   }
 
-  void playPrev() {
+  Future<void> playPrev() {
     int _currentIndex;
     player.playingList.asMap().forEach((int index, Music music) {
       if (music.id == player.current.id) {
@@ -172,24 +202,34 @@ class StateContainerState extends State<StateContainer> {
 
     setState(() {
       player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
           current: player.playingList[_currentIndex ?? 0],
           playMode: player.playMode,
-          playingList: player.playingList));
+          playingList: player.playingList,
+          isPlaying: player.isPlaying,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
     });
   }
 
   void pause(Music music) {}
 
-  void switchPlayMode() {
+  Future<void> switchPlayMode() {
     switch (player.playMode) {
       case PlayMode.single:
         SharedPreferences.getInstance().then((prefs) {
           prefs.setInt(_PREF_KEY_PLAY_MODE, 1);
           setState(() {
             player = (PlayerControllerState(
+                audioPlayer: player.audioPlayer,
                 current: player.current,
                 playMode: PlayMode.sequence,
-                playingList: player.playingList));
+                playingList: player.playingList,
+                isPlaying: player.isPlaying,
+                position: player.position,
+                duration: player.duration,
+                time: player.time));
           });
         });
 
@@ -199,9 +239,14 @@ class StateContainerState extends State<StateContainer> {
           prefs.setInt(_PREF_KEY_PLAY_MODE, 2);
           setState(() {
             player = (PlayerControllerState(
+                audioPlayer: player.audioPlayer,
                 current: player.current,
                 playMode: PlayMode.shuffle,
-                playingList: player.playingList));
+                playingList: player.playingList,
+                isPlaying: player.isPlaying,
+                position: player.position,
+                duration: player.duration,
+                time: player.time));
           });
         });
 
@@ -211,9 +256,14 @@ class StateContainerState extends State<StateContainer> {
           prefs.setInt(_PREF_KEY_PLAY_MODE, 0);
           setState(() {
             player = (PlayerControllerState(
+                audioPlayer: player.audioPlayer,
                 current: player.current,
                 playMode: PlayMode.single,
-                playingList: player.playingList));
+                playingList: player.playingList,
+                isPlaying: player.isPlaying,
+                position: player.position,
+                duration: player.duration,
+                time: player.time));
           });
         });
 
@@ -221,13 +271,68 @@ class StateContainerState extends State<StateContainer> {
     }
   }
 
-// 获取歌曲播放url
+  Future<void> switchPlayingState(bool state) {
+    setState(() {
+      player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
+          current: player.current,
+          playMode: player.playMode,
+          playingList: player.playingList,
+          isPlaying: state,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
+    });
+  }
+
+  Future<void> setPlayingState(Duration pos, Duration dur, double time) {
+    setState(() {
+      player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
+          current: player.current,
+          playMode: player.playMode,
+          playingList: player.playingList,
+          isPlaying: player.isPlaying,
+          position: pos,
+          duration: dur,
+          time: time));
+    });
+  }
+
+  void setPlayer(AudioPlayer audioPlayer) {
+    setState(() {
+      player = (PlayerControllerState(
+          audioPlayer: audioPlayer,
+          current: player.current,
+          playMode: player.playMode,
+          playingList: player.playingList,
+          isPlaying: player.isPlaying,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
+    });
+  }
+
+  // 获取歌曲播放url
   _getSongUrl(int id) async {
     try {
       Response response =
           await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
       var data = json.decode(response.toString())['data'][0];
       return data['url'];
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 获取歌曲评论数
+  _getSongComment(int id) async {
+    try {
+      Response response =
+          await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
+      var result = json.decode(response.toString())['total'];
+
+      return result;
     } catch (e) {
       print(e);
     }
@@ -251,7 +356,9 @@ class StateContainerState extends State<StateContainer> {
     if (preference.getString(_PREF_KEY_PLAYING) != null) {
       current = Music.fromMap(json.decode(preference.get(_PREF_KEY_PLAYING)));
       var _url = await _getSongUrl(current.id);
+      var _comment = await _getSongComment(current.id);
       current.songUrl = _url;
+      current.commentCount = _comment;
     }
 
     if (preference.get(_PREF_KEY_PLAYLIST) != null) {
@@ -259,18 +366,26 @@ class StateContainerState extends State<StateContainer> {
           .cast<Map>()
           .map(Music.fromMap)
           .toList();
+
       playingList.asMap().forEach((int index, Music music) async {
         var _url = await _getSongUrl(music.id);
+        var _comment = await _getSongComment(music.id);
+
         playingList[index].songUrl = _url;
+        playingList[index].commentCount = _comment;
       });
     }
+
     if (preference.get(_PREF_KEY_PLAY_MODE) != null) {
       playMode = PlayMode.values[preference.getInt(_PREF_KEY_PLAY_MODE) ?? 0];
     }
 
     setState(() {
       player = (PlayerControllerState(
-          current: current, playMode: playMode, playingList: playingList));
+          audioPlayer: AudioPlayer(),
+          current: current,
+          playMode: playMode,
+          playingList: playingList));
     });
   }
 

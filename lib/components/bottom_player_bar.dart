@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../components/inherited_demo.dart';
+import './inherited_demo.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,9 +13,11 @@ class BottomPlayerBar extends StatefulWidget {
   final VoidCallback play;
   final VoidCallback pause;
   final VoidCallback complete;
+  final VoidCallback setMode;
   final ValueChanged<String> toggle;
   final ValueChanged<String> finish;
   final ValueChanged<double> handleSlider;
+  final ValueChanged<double> seek;
   final AudioPlayer audioPlayer;
   BottomPlayerBar(
       {this.play,
@@ -27,6 +29,8 @@ class BottomPlayerBar extends StatefulWidget {
       this.duration,
       this.time,
       this.handleSlider,
+      this.setMode,
+      this.seek,
       @required this.audioPlayer});
 
   @override
@@ -37,27 +41,27 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
   bool _isMusicLoading = false;
   AudioPlayer audioPlayer;
   bool _playingState = false; // 播放器播放icon切换
-  // Duration position;
-  // Duration duration;
-  // double time = 0.0;
   bool loaded = false; // 记录是否已经加载过音乐
-
   int mode;
-  // StreamSubscription _positionSubscription;
-  // StreamSubscription _durationSubscription;
-  StreamSubscription _audioPlayerStateSubscription;
-  StreamSubscription _playerCompleteSubscription;
-  // StreamSubscription _playerErrorSubscription;
-  // StreamSubscription _stream;
+
+  // StreamSubscription _audioPlayerStateSubscription;
 
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
   get _durationText => widget.duration?.toString()?.split('.')?.first ?? '';
-  get _positionText => widget.position?.toString()?.split('.')?.first ?? '';
+  // get _positionText => widget.position?.toString()?.split('.')?.first ?? '';
 
   @override
   void initState() {
     super.initState();
     initAudioPlayer();
+  }
+
+  @override
+  void dispose() {
+    // _audioPlayerStateSubscription.cancel();
+    // _playerCompleteSubscription.cancel();
+
+    super.dispose();
   }
 
   Future<int> _play(String source) async {
@@ -70,183 +74,114 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
     }
   }
 
-  @override
-  void dispose() {
-    // _stream.cancel();
-    // _positionSubscription.cancel();
-    _audioPlayerStateSubscription.cancel();
-    // _durationSubscription.cancel();
-    _playerCompleteSubscription.cancel();
-    // _playerErrorSubscription.cancel();
-
-    super.dispose();
-  }
-
   void initAudioPlayer() async {
-    audioPlayer = widget.audioPlayer;
-    var preference = await SharedPreferences.getInstance();
-    var _mode = preference.getInt('player_play_mode');
-    mode = _mode;
-    if (mode == 0) {
-      audioPlayer.setReleaseMode(ReleaseMode.LOOP);
-    } else {
-      audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
-    }
-    // 播放进度改变
-    // _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) {
-    //   if (position != null &&
-    //       duration != null &&
-    //       position.inMilliseconds > 0 &&
-    //       position.inMilliseconds < duration.inMilliseconds) {
-    //     setState(() {
-    //       time = position.inMilliseconds / duration.inMilliseconds;
-    //     });
-    //   }
-    //   setState(() {
-    //     position = p;
-    //   });
-    //   // print(Duration().inMilliseconds);
-    //   _stream = Player.handleMusicPosFire(p);
-    // });
-
-    // // 获取歌曲播放时间
-    // _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
-    //   setState(() {
-    //     duration = d;
-    //   });
-    // });
+    // final store = StateContainer.of(context);
+    // audioPlayer = widget.audioPlayer;
+    // var preference = await SharedPreferences.getInstance();
+    // var _mode = preference.getInt('player_play_mode');
+    // mode = _mode;
+    // if (mode == 0) {
+    //   audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+    // } else {
+    //   audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+    // }
 
     // 播放完成
-    _playerCompleteSubscription =
-        audioPlayer.onPlayerCompletion.listen((event) async {
-      final store = StateContainer.of(context);
-      // _audioPlayerState = AudioPlayerState.COMPLETED;
+    // _playerCompleteSubscription =
+    //     audioPlayer.onPlayerCompletion.listen((event) async {
+    //   final store = StateContainer.of(context);
+    //   // _audioPlayerState = AudioPlayerState.COMPLETED;
 
-      if (store.player.playMode.toString() == 'PlayMode.single') {
-        // 循环播放
-        audioPlayer.setReleaseMode(ReleaseMode.LOOP);
-        audioPlayer.resume();
-        return;
-      }
-      audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+    //   if (store.player.playMode.toString() == 'PlayMode.single') {
+    //     // 循环播放
+    //     audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+    //     audioPlayer.resume();
+    //     return;
+    //   }
+    //   audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
 
-      var res = await audioPlayer.stop();
-      if (res == 1) {
-        widget.complete();
-        setState(() {
-          _playingState = false;
-        });
-        loaded = false;
-        if (store.player.playMode.toString() == 'PlayMode.sequence') {
-          // 顺序播放
-          widget.finish('sequence');
-        } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
-          // 随机播放
-          widget.finish('shuffle');
-        }
-        setState(() {
-          _isMusicLoading = true;
-        });
-        var res = await _play(store.player.current.songUrl);
-        if (res == 1) {
-          setState(() {
-            _isMusicLoading = false;
-          });
-          widget.play();
-          loaded = true;
-          setState(() {
-            _playingState = true;
-          });
-        }
-      }
-    });
+    //   var res = await audioPlayer.stop();
+    //   if (res == 1) {
+    //     widget.complete();
+    //     setState(() {
+    //       _playingState = false;
+    //     });
+    //     loaded = false;
+    //     if (store.player.playMode.toString() == 'PlayMode.sequence') {
+    //       // 顺序播放
+    //       widget.finish('sequence');
+    //     } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
+    //       // 随机播放
+    //       widget.finish('shuffle');
+    //     }
+    //     setState(() {
+    //       _isMusicLoading = true;
+    //     });
+    //     var res = await _play(store.player.current.songUrl);
+    //     if (res == 1) {
+    //       setState(() {
+    //         _isMusicLoading = false;
+    //       });
+    //       widget.play();
+    //       loaded = true;
+    //       setState(() {
+    //         _playingState = true;
+    //       });
+    //     }
+    //   }
+    // });
 
     // 播放状态
-    _audioPlayerStateSubscription =
-        audioPlayer.onPlayerStateChanged.listen((state) {
-      setState(() {
-        // _audioPlayerState = state;
-      });
-    });
+    // _audioPlayerStateSubscription =
+    //     audioPlayer.onPlayerStateChanged.listen((state) {
+    //   setState(() {
+    //     // _audioPlayerState = state;
+    //   });
+    // });
 
-    final store = StateContainer.of(context);
-    var res = await _play(store.player.current.songUrl);
-    if (res == 1) {
-      widget.play();
-      loaded = true;
-      setState(() {
-        _playingState = true;
-      });
-    }
+    // if (store.player.isPlaying == true) {
+    //   widget.play();
+    //   loaded = true;
+    //   setState(() {
+    //     _playingState = true;
+    //   });
+    //   return;
+    // }
+    // var res = await _play(store.player.current.songUrl);
+    // if (res == 1) {
+    //   widget.play();
+    //   loaded = true;
+    //   setState(() {
+    //     _playingState = true;
+    //   });
+    // }
   }
 
   IconButton _buildPlayButton(
       bool state, StateContainerState store, BuildContext ctx) {
     return state == false
         ? IconButton(
-            icon: _isMusicLoading == true
-                ? CircularProgressIndicator()
-                : Icon(Icons.play_circle_outline, size: 30.0),
-            onPressed: () async {
-              if (loaded == true) {
-                audioPlayer.resume();
-                setState(() {
-                  widget.play();
-                  _playingState = true;
-                });
-              } else {
-                setState(() {
-                  _isMusicLoading = true;
-                });
-                var result = await _play(store.player.current.songUrl);
-                if (result == 1) {
-                  setState(() {
-                    _isMusicLoading = false;
-                  });
-                  widget.play();
-                  loaded = true;
-                  setState(() {
-                    _playingState = true;
-                  });
-                }
-              }
-            },
+            icon: Icon(Icons.play_circle_outline, size: 30.0),
+            onPressed: widget.play,
           )
         : IconButton(
             icon: Icon(Icons.pause_circle_outline, size: 30.0),
-            onPressed: () async {
-              await audioPlayer.pause();
-              widget.pause();
-              setState(() {
-                _playingState = false;
-              });
-            },
+            onPressed: widget.pause,
           );
-  }
-
-  // 切换歌曲
-  void switchSong(StateContainerState store, String flag) async {
-    setState(() {
-      _playingState = false;
-    });
-    loaded = false;
-    widget.toggle(flag);
-
-    var res = await _play(store.player.current.songUrl);
-    if (res == 1) {
-      widget.play();
-      loaded = true;
-      setState(() {
-        _playingState = true;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
     final playmode = store.player.playMode.toString();
-
+    String _positionText = '';
+    setState(() {
+      _playingState = store.player.isPlaying;
+      if (store.player.position != null) {
+        _positionText =
+            store.player.position?.toString()?.split('.')?.first ?? '';
+      }
+    });
     IconData icon;
     switch (playmode) {
       case 'PlayMode.single':
@@ -277,10 +212,7 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                   padding: EdgeInsets.symmetric(vertical: 10.0),
                   child: Row(
                     children: <Widget>[
-                      Text(
-                          widget.position != null
-                              ? '${_positionText ?? ''}'
-                              : '',
+                      Text(_positionText,
                           style: TextStyle(color: Colors.white)),
                       Expanded(
                         child: Slider(
@@ -299,10 +231,7 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                                     widget.position.inMilliseconds <
                                         widget.duration.inMilliseconds)
                                 ? (double value) {
-                                    audioPlayer.seek(Duration(
-                                        milliseconds: (value *
-                                                widget.duration.inMilliseconds)
-                                            .round()));
+                                    widget.seek(value);
                                   }
                                 : (double value) {
                                     widget.handleSlider(value);
@@ -325,42 +254,18 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                       IconButton(
                         icon: Icon(Icons.skip_previous, size: 30.0),
                         onPressed: () {
-                          widget.pause();
-                          Future.delayed(Duration(milliseconds: 150), () async {
-                            final result = await audioPlayer.stop();
-                            if (result == 1) {
-                              switchSong(store, 'prev');
-                            }
-                          });
+                          widget.toggle('prev');
                         },
                       ),
                       _buildPlayButton(_playingState, store, context),
                       IconButton(
                         icon: Icon(Icons.skip_next, size: 30.0),
                         onPressed: () {
-                          widget.pause();
-                          Future.delayed(Duration(milliseconds: 150), () async {
-                            final result = await audioPlayer.stop();
-                            if (result == 1) {
-                              switchSong(store, 'next');
-                            }
-                          });
+                          widget.toggle('next');
                         },
                       ),
                       InkResponse(
-                        onTap: () async {
-                          store.switchPlayMode();
-                          if (store.player.playMode == PlayMode.single) {
-                            await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
-                          } else {
-                            await audioPlayer
-                                .setReleaseMode(ReleaseMode.RELEASE);
-                          }
-                        },
-                        // child: Text(
-                        //   store.player.playMode.toString(),
-                        //   style: TextStyle(color: Colors.white),
-                        // ),
+                        onTap: widget.setMode,
                         child: Icon(icon),
                       ),
                       IconButton(
@@ -375,15 +280,4 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
       ),
     );
   }
-}
-
-enum PlayMode {
-  ///aways play single song
-  single,
-
-  ///play current list sequence
-  sequence,
-
-  ///random to play next song
-  shuffle
 }

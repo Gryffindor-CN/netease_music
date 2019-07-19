@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../model/music.dart';
 import 'dart:ui';
-import '../components/bottom_player_bar.dart';
-import '../components/inherited_demo.dart';
+import './bottom_player_bar.dart';
+import './inherited_demo.dart';
 import 'lyric.dart';
 import 'dart:async';
-import './position_event.dart';
+
 import './lyricNotifierData.dart';
 import 'package:audioplayers/audioplayers.dart';
-// import 'package:event_bus/event_bus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AlbumCover extends StatefulWidget {
   final Music music;
+  final bool isNew;
 
-  const AlbumCover({Key key, this.music}) : super(key: key);
+  const AlbumCover({
+    Key key,
+    this.music,
+    this.isNew,
+  }) : super(key: key);
 
   @override
   State createState() => _AlbumCoverState();
@@ -27,7 +32,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   Animation<double> animation_record;
   AnimationController controller_needle;
   Animation<double> animation_neddle;
-  StreamSubscription stream;
+
   PositionNotifierData vd = PositionNotifierData(Duration());
   AudioPlayer audioPlayer;
   double volumn = 0.5; // 音量控制
@@ -35,54 +40,104 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   Duration position;
   Duration duration;
   double time = 0.0;
+  int mode;
+  bool loaded = false;
   StreamSubscription _positionSubscription;
   StreamSubscription _durationSubscription;
   StreamSubscription _playerErrorSubscription;
+  StreamSubscription _playerCompleteSubscription;
 
-  initAudioPlayer() {
-    audioPlayer = AudioPlayer();
+  initAudioPlayer(StateContainerState store, AudioPlayer audioPlayer,
+      BuildContext ctx) async {
     // 播放进度改变
     _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) {
       if (position != null &&
-          duration != null &&
+          position != null &&
           position.inMilliseconds > 0 &&
           position.inMilliseconds < duration.inMilliseconds) {
-        setState(() {
-          time = position.inMilliseconds / duration.inMilliseconds;
-        });
+        time = position.inMilliseconds / duration.inMilliseconds;
       }
-      setState(() {
-        position = p;
-      });
-      // vd.value =
-      // print(p);
-      // print(Duration().inMilliseconds);
-      // _stream = Player.handleMusicPosFire(p);
+
+      if (duration != null) {
+        store.setPlayingState(p, duration, time);
+      }
+      position = p;
       vd.value = p;
     });
 
     // 获取歌曲播放时间
     _durationSubscription = audioPlayer.onDurationChanged.listen((d) async {
-      setState(() {
-        duration = d;
-      });
+      duration = d;
+      store.setPlayingState(position, d, time);
     });
 
     // 播放出错
     _playerErrorSubscription = audioPlayer.onPlayerError.listen((msg) {
       print('audioPlayer error : $msg');
+      final store = StateContainer.of(context);
+      store.switchPlayingState(false);
       setState(() {
         duration = Duration(seconds: 0);
         position = Duration(seconds: 0);
       });
     });
+
+    // 播放完成
+    _playerCompleteSubscription =
+        audioPlayer.onPlayerCompletion.listen((event) async {
+      final store = StateContainer.of(ctx);
+
+      if (store.player.playMode.toString() == 'PlayMode.single') {
+        // 循环播放
+        audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+        audioPlayer.resume();
+        return;
+      }
+      audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+
+      var res = await audioPlayer.stop();
+      if (res == 1) {
+        store.setPlayingState(Duration.zero, Duration.zero, 0.0);
+        store.switchPlayingState(false);
+
+        if (store.player.playMode.toString() == 'PlayMode.sequence') {
+          // 顺序播放
+
+          await store.playNext();
+        } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
+          // 随机播放
+          await store.playShuffle();
+        }
+
+        var res = await audioPlayer.play(store.player.current.songUrl);
+        if (res == 1) {
+          store.switchPlayingState(true);
+          controller_record.forward();
+          controller_needle.forward();
+        }
+      }
+    });
+
+    var preference = await SharedPreferences.getInstance();
+    var _mode = preference.getInt('player_play_mode');
+    mode = _mode;
+    if (mode == 0) {
+      audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+    } else {
+      audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+    }
+    var res = await audioPlayer.play(store.player.current.songUrl);
+    if (res == 1) {
+      store.switchPlayingState(true);
+      store.setPlayingState(Duration.zero, Duration.zero, 0.0);
+      controller_record.forward();
+      controller_needle.forward();
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    initAudioPlayer();
-
     controller_record = new AnimationController(
         duration: const Duration(milliseconds: 15000), vsync: this);
     animation_record =
@@ -105,14 +160,9 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    vd.dispose();
-    audioPlayer.dispose();
-
-    _positionSubscription.cancel();
-    _durationSubscription.cancel();
-    _playerErrorSubscription.cancel();
     controller_record.dispose();
     controller_needle.dispose();
+
     super.dispose();
   }
 
@@ -120,7 +170,44 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
     final _music = store.player.current;
+    final _duration = store.player.duration;
+    final _position = store.player.position;
+    final _time = store.player.time;
 
+    if (store.player.audioPlayer == null && loaded == false) {
+      store.setPlayer(AudioPlayer());
+      audioPlayer = AudioPlayer();
+    } else {
+      audioPlayer = store.player.audioPlayer;
+    }
+
+    // 从歌曲搜索页面跳转过来
+    if (widget.isNew != null && loaded == false) {
+      if (store.player.isPlaying) {
+        audioPlayer.stop();
+      }
+      initAudioPlayer(store, audioPlayer, context);
+      loaded = true;
+    }
+
+    if (store.player.isPlaying == true) {
+      controller_record.forward();
+      controller_needle.forward();
+      loaded = true;
+      vd.value = _position;
+    }
+    if (store.player.isPlaying == false &&
+        loaded == false &&
+        _position.inMilliseconds == 0) {
+      initAudioPlayer(store, audioPlayer, context);
+      loaded = true;
+    }
+
+    setState(() {
+      position = _position;
+      duration = _duration;
+      time = _time;
+    });
     return NotificationListener<ShowVolumnControllerNotification>(
         onNotification: (notification) {
           setState(() {
@@ -191,34 +278,92 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
                       position: position,
                       duration: duration,
                       handleSlider: (double value) {
-                        setState(() {
-                          position = Duration(
-                              milliseconds:
-                                  (value * duration.inMilliseconds).round());
-                          time = value;
-                        });
+                        store.setPlayingState(
+                            Duration(
+                                milliseconds:
+                                    (value * duration.inMilliseconds).round()),
+                            duration,
+                            value);
                       },
-                      complete: () {
-                        setState(() {
-                          duration = Duration(seconds: 0);
-                          position = Duration(seconds: 0);
-                          time = 0.0;
-                        });
+                      seek: (double value) {
+                        audioPlayer.seek(Duration(
+                            milliseconds:
+                                (value * _duration.inMilliseconds).round()));
                       },
-                      toggle: (String playmode) {
-                        setState(() {
-                          duration = Duration();
-                          position = Duration();
-                          time = 0.0;
-                        });
+                      setMode: () async {
+                        await store.switchPlayMode();
+                        if (store.player.playMode == PlayMode.single) {
+                          await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+                        } else {
+                          await audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
+                        }
+                      },
+                      pause: () async {
+                        var res = await audioPlayer.pause();
+                        if (res == 1) {
+                          store.switchPlayingState(false);
+                          controller_record.stop(canceled: false);
+                          controller_needle.reverse();
+                        }
+                      },
+                      complete: () async {
+                        await store.setPlayingState(
+                            Duration.zero, Duration.zero, 0.0);
+                        await store.switchPlayingState(false);
+                      },
+                      play: () async {
+                        var res = await audioPlayer
+                            .play(store.player.current.songUrl);
+                        if (res == 1) {
+                          store.switchPlayingState(true);
+                          controller_record.forward();
+                          controller_needle.forward();
+                        }
+                      },
+                      toggle: (String playmode) async {
                         switch (playmode) {
                           case 'prev':
-                            store.playPrev();
-                            Player.idEventBus.fire(store.player.current.id);
+                            final result = await audioPlayer.stop();
+                            if (result == 1) {
+                              await store.setPlayingState(
+                                  Duration.zero, Duration.zero, 0.0);
+
+                              await store.switchPlayingState(false);
+
+                              controller_record.stop(canceled: false);
+                              controller_needle.reverse();
+                              await store.playPrev();
+                              final res = await audioPlayer
+                                  .play(store.player.current.songUrl);
+                              if (res == 1) {
+                                store.switchPlayingState(true);
+                                controller_record.forward();
+                                controller_needle.forward();
+                                // Player.idEventBus.fire(store.player.current.id);
+                              }
+                            }
+
                             break;
                           case 'next':
-                            store.playNext();
-                            Player.idEventBus.fire(store.player.current.id);
+                            final result = await audioPlayer.stop();
+                            if (result == 1) {
+                              await store.setPlayingState(
+                                  Duration.zero, Duration.zero, 0.0);
+
+                              await store.switchPlayingState(false);
+
+                              controller_record.stop(canceled: false);
+                              controller_needle.reverse();
+                              await store.playNext();
+                              final res = await audioPlayer
+                                  .play(store.player.current.songUrl);
+                              if (res == 1) {
+                                store.switchPlayingState(true);
+                                controller_record.forward();
+                                controller_needle.forward();
+                                // Player.idEventBus.fire(store.player.current.id);
+                              }
+                            }
                             break;
                         }
                       },
@@ -252,11 +397,13 @@ class RotateRecord extends AnimatedWidget {
       children: <Widget>[
         Container(
           margin: EdgeInsets.symmetric(vertical: 10.0),
+          // decoration: BoxDecoration(color: Colors.red,borderRadius: BorderRadius.all(Radius.circular(20.0))),
           height: 250.0,
           width: 250.0,
           child: RotationTransition(
               turns: animation,
               child: Stack(
+                alignment: AlignmentDirectional.center,
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(
@@ -266,17 +413,14 @@ class RotateRecord extends AnimatedWidget {
                       ),
                     ),
                   ),
-                  Positioned(
-                    left: 40.0,
-                    top: 40.0,
-                    // right: 0.0,
-                    child: Container(
-                      width: 170,
-                      height: 170,
-                      child: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                        music.albumCoverImg,
-                      )),
+                  Container(
+                    width: 170.0,
+                    height: 170.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          image: NetworkImage(music.albumCoverImg),
+                          fit: BoxFit.fill),
                     ),
                   )
                 ],
@@ -380,27 +524,21 @@ class _CenterSection extends StatefulWidget {
 class __CenterSectionState extends State<_CenterSection> {
   bool _first = true;
   LyricNotifierData lyricNotifierData = LyricNotifierData(Duration());
-  SongidNotifierData songidNotifierData = SongidNotifierData(-1);
 
   GlobalKey _containerKey = GlobalKey();
   Size _containerSize = Size(0, 0);
   Offset _containerPosition = Offset(0, 0);
-  StreamSubscription stream;
 
   _getContainerSize() {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
     final containerSize = containerRenderBox.size;
-    print(
-        'Size: width = ${containerSize.width} - height = ${containerSize.height}');
   }
 
   _getContainerPosition() {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
     final containerPosition = containerRenderBox.localToGlobal(Offset.zero);
-    print(
-        'Position: x = ${containerPosition.dx} - y = ${containerPosition.dy}');
   }
 
   @override
@@ -408,9 +546,7 @@ class __CenterSectionState extends State<_CenterSection> {
     widget.vd.addListener(() {
       lyricNotifierData.value = widget.vd.value;
     });
-    stream = Player.idEventBus.on<int>().listen((int res) {
-      songidNotifierData.value = res;
-    });
+
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(_onBuildCompleted);
   }
@@ -422,7 +558,6 @@ class __CenterSectionState extends State<_CenterSection> {
 
   @override
   void dispose() {
-    stream.cancel();
     super.dispose();
   }
 
@@ -439,14 +574,18 @@ class __CenterSectionState extends State<_CenterSection> {
           return Stack(
             overflow: Overflow.visible,
             children: <Widget>[
-              Center(
+              Container(
+                alignment: Alignment.topCenter,
+                padding: EdgeInsets.only(top: 10.0),
                 key: bottomChildKey,
                 child: bottomChild,
               ),
-              Center(
+              Container(
+                alignment: Alignment.topCenter,
+                padding: EdgeInsets.only(top: 10.0),
                 key: topChildKey,
                 child: topChild,
-              ),
+              )
             ],
           );
         },
@@ -497,7 +636,6 @@ class __CenterSectionState extends State<_CenterSection> {
               child: (widget.vd.value != null &&
                       widget.vd.value.inMilliseconds > 0)
                   ? Lyric(
-                      id: songidNotifierData,
                       songId: widget.music.id,
                       position: lyricNotifierData,
                       isShow: !_first,
@@ -519,7 +657,11 @@ class _ControllerBar extends StatelessWidget {
   final double time;
   final ValueChanged<double> handleSlider;
   final ValueChanged<String> toggle;
+  final ValueChanged<double> seek;
   final VoidCallback complete;
+  final VoidCallback play;
+  final VoidCallback pause;
+  final VoidCallback setMode;
   const _ControllerBar({
     Key key,
     this.controllerRecord,
@@ -528,8 +670,12 @@ class _ControllerBar extends StatelessWidget {
     this.duration,
     this.time,
     this.handleSlider,
+    this.play,
     this.toggle,
     this.complete,
+    this.pause,
+    this.setMode,
+    this.seek,
     @required this.store,
     @required this.audioPlayer,
   }) : super(key: key);
@@ -542,17 +688,15 @@ class _ControllerBar extends StatelessWidget {
         position: position,
         duration: duration,
         time: time,
-        play: () {
-          controllerRecord.forward();
-          controllerNeedle.forward();
-        },
-        pause: () {
-          controllerRecord.stop(canceled: false);
-          controllerNeedle.reverse();
-        },
+        play: play,
+        pause: pause,
         complete: complete,
+        setMode: setMode,
         toggle: (String playmode) {
           toggle(playmode);
+        },
+        seek: (double value) {
+          seek(value);
         },
         finish: (String playmode) {
           switch (playmode) {
@@ -602,6 +746,12 @@ class _OperationBar extends StatelessWidget {
               color: iconColor,
             ),
             onPressed: () {}),
+        IconButton(
+            icon: Icon(
+              Icons.more_vert,
+              color: iconColor,
+            ),
+            onPressed: () {}),
       ],
     );
   }
@@ -624,7 +774,8 @@ class _PlayingTitle extends StatelessWidget {
             color: Theme.of(context).primaryIconTheme.color,
           ),
           onPressed: () {
-            audioPlayer.release();
+            // audioPlayer.dispose();
+
             Navigator.pop(context);
           }),
       titleSpacing: 0,
@@ -688,4 +839,15 @@ class ShowVolumnControllerNotification extends Notification {
     @required this.isShow,
   });
   final bool isShow;
+}
+
+enum PlayMode {
+  ///aways play single song
+  single,
+
+  ///play current list sequence
+  sequence,
+
+  ///random to play next song
+  shuffle
 }
