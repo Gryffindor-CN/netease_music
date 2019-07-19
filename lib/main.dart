@@ -2,12 +2,15 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/router/Routes.dart';
 import './components/circle_bottom_bar.dart';
-// import 'dart:ui';
+import './components/musicplayer/inherited_demo.dart';
 import './pages/home_page.dart';
 import 'components/netease_navigation_bar.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
+import 'package:audioplayers/audioplayers.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(StateContainer(
+      child: MyApp(),
+    ));
 
 class MyApp extends StatelessWidget {
   MyApp() {
@@ -48,7 +51,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   int currentIndex = 0;
   int _tabIndex = 0;
   PageController _pageController;
-
+  AudioPlayer audioPlayer;
   @override
   void initState() {
     super.initState();

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:dio/dio.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../router/Routes.dart';
 import '../../model/music.dart';
+import '../../repository/netease.dart';
 
 class SearchPage extends StatefulWidget {
   final String keyword;
@@ -54,40 +54,27 @@ class SearchPageState extends State<SearchPage> {
 
   // 获取热搜榜
   void _getSearchHot() async {
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/search/hot");
-      var hots = json.decode(response.toString())['result']['hots'];
-
-      setState(() {
-        hots.forEach((item) {
-          hotlists.add(Music(name: item['first']));
-        });
+    var hots = await NeteaseRepository.getSearchHot();
+    setState(() {
+      hots.forEach((item) {
+        hotlists.add(Music(name: item['first']));
       });
-    } catch (e) {
-      print(e);
-    }
+    });
   }
 
   // 获取输入建议
   void _getSearchSuggest(String keywords) async {
-    try {
-      Response response = await Dio().get(
-          "http://192.168.206.133:3000/search/suggest?keywords=$keywords&type=mobile");
-      var result = json.decode(response.toString())['result']['allMatch'];
-      if (result == null) {
-        setState(() {
-          isSuggestLoading = false;
-          suggestlists = [];
-        });
-      } else {
-        setState(() {
-          isSuggestLoading = false;
-          suggestlists = result;
-        });
-      }
-    } catch (e) {
-      print(e);
+    var result = await NeteaseRepository.getSearchSuggest(keywords);
+    if (result == null) {
+      setState(() {
+        isSuggestLoading = false;
+        suggestlists = [];
+      });
+    } else {
+      setState(() {
+        isSuggestLoading = false;
+        suggestlists = result;
+      });
     }
   }
 
@@ -499,14 +486,6 @@ class SearchListTitle extends StatelessWidget {
     );
   }
 }
-
-// 歌曲
-// class Music {
-//   final String name;
-//   final int id;
-
-//   Music({@required this.name, this.id});
-// }
 
 // 搜索历史列表
 class SearchHistoryList extends StatelessWidget {

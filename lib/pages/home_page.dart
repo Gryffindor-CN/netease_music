@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:netease_music/components/musicplayer/inherited_demo.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'dart:ui';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -7,6 +8,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import '../components/netease_toast.dart';
 import '../router/Routes.dart';
+import '../components/musicplayer/playing_album_cover.dart';
+
+import '../repository/netease.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb});
@@ -32,16 +36,10 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
   }
 
   void _getBanner() async {
-    var url = 'http://192.168.206.133:3000/banner';
-    var response = await http.get(url);
-    if (response.statusCode == 200) {
-      var jsonResponse = convert.jsonDecode(response.body);
-      setState(() {
-        banners = jsonResponse['banners'];
-      });
-    } else {
-      print("Request failed with status: ${response.statusCode}.");
-    }
+    var res = await NeteaseRepository.getBanner();
+    setState(() {
+      banners = res;
+    });
   }
 
   @override
@@ -350,6 +348,7 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
   bool isShow = false;
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
@@ -380,12 +379,19 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
             ),
           ),
         ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.sort),
-          )
-        ],
+        actions: (store.player != null && store.player.playingList.length > 0)
+            ? <Widget>[
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return AlbumCover();
+                    }));
+                  },
+                  icon: Icon(Icons.sort),
+                )
+              ]
+            : [],
       ),
       body: NeteaseToast(
         toastText: '已为你推荐新的个性化内容!!!',

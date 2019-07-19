@@ -12,6 +12,7 @@ import './search_songs.dart';
 import '../../model/music.dart';
 import './music_item.dart';
 import './search_playlist.dart';
+import '../../repository/netease.dart';
 
 class SearchResult extends StatefulWidget {
   final String keyword;
@@ -45,87 +46,62 @@ class SearchResultState extends State<SearchResult>
 
   // 获取单曲
   void _doSearchSingAlbum(String keyword) async {
-    try {
-      Response response = await Dio()
-          .get("http://192.168.206.133:3000/search?keywords=$keyword&limit=5");
-      var songRes = json.decode(response.toString())['result']['songs'];
-
-      songRes.asMap().forEach((int index, item) async {
-        var res = await getSongDetail(item['id']);
-        setState(() {
-          songs.add(
-            Music(
-                name: item['name'],
-                id: item['id'],
-                aritstName: item['artists'][0]['name'],
-                aritstId: item['artists'][0]['id'],
-                albumName: item['album']['name'],
-                albumId: item['album']['id'],
-                detail: res['detail'],
-                commentCount: res['commentCount']),
-          );
-        });
-        if (songs.length == songRes.asMap().length) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+    var songRes = await NeteaseRepository.doSearchSingAlbum(keyword);
+    songRes.asMap().forEach((int index, item) async {
+      var res = await getSongDetail(item['id']);
+      setState(() {
+        songs.add(
+          Music(
+              name: item['name'],
+              id: item['id'],
+              aritstName: item['artists'][0]['name'],
+              aritstId: item['artists'][0]['id'],
+              albumName: item['album']['name'],
+              albumId: item['album']['id'],
+              albumCoverImg: res['detail']['al']['picUrl'],
+              detail: res['detail'],
+              commentCount: res['commentCount']),
+        );
       });
-    } catch (e) {
-      print(e);
-    }
+      if (songs.length == songRes.asMap().length) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
   }
 
   // 获取歌单
   void _doSearchPlaylist(String keyword) async {
-    try {
-      Response response = await Dio().get(
-          "http://192.168.206.133:3000/search?keywords=$keyword&type=1000&limit=5");
-      var plays = json.decode(response.toString())['result']['playlists'];
-      setState(() {
-        plays.asMap().forEach((int index, item) {
-          playlist.add(PlayList(
-            name: item['name'],
-            id: item['id'],
-            coverImgUrl: item['coverImgUrl'],
-            playCount: item['playCount'],
-            trackCount: item['trackCount'],
-            creatorName: item['creator']['nickname'],
-          ));
-        });
+    var plays = await NeteaseRepository.doSearchPlaylist(keyword);
+    setState(() {
+      plays.asMap().forEach((int index, item) {
+        playlist.add(PlayList(
+          name: item['name'],
+          id: item['id'],
+          coverImgUrl: item['coverImgUrl'],
+          playCount: item['playCount'],
+          trackCount: item['trackCount'],
+          creatorName: item['creator']['nickname'],
+        ));
       });
-    } catch (e) {
-      print(e);
-    }
+    });
   }
 
-// 获取单曲详情
+  // 获取单曲详情
   getSongDetail(int id) async {
     Map<String, dynamic> songDetail = {};
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/song/detail?ids=$id");
-      var result = json.decode(response.toString());
-      await getSongComment(id).then((data) {
-        songDetail.addAll(
-            {'detail': result['songs'][0], 'commentCount': data['total']});
-      });
-      return songDetail;
-    } catch (e) {
-      print(e);
-    }
+    var result = await NeteaseRepository.getSongDetail(id);
+    var comment = await getSongComment(id);
+    songDetail.addAll(
+        {'detail': result['songs'][0], 'commentCount': comment['total']});
+    return songDetail;
   }
 
   // 获取歌曲论数量
   getSongComment(int id) async {
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
-      var result = json.decode(response.toString());
-      return result;
-    } catch (e) {
-      print(e);
-    }
+    var result = await NeteaseRepository.getSongComment(id);
+    return result;
   }
 
   @override
@@ -277,17 +253,11 @@ class Album extends StatelessWidget {
 
   // 获取歌曲播放url
   _getSongUrl(int id) async {
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
-      var data = json.decode(response.toString())['data'][0];
-      return data['url'];
-    } catch (e) {
-      print(e);
-    }
+    var result = await NeteaseRepository.getSongUrl(id);
+    return result;
   }
 
-  // 获取歌曲详情
+  // 获取歌曲详情图片
   _getSongDetail(int id) async {
     try {
       Response response =
@@ -591,34 +561,35 @@ class Playlist extends StatelessWidget {
                           item.coverImgUrl,
                         )),
                   ),
-                  Container(
-                    width: 250.0,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        _nameWidget,
-                        DefaultTextStyle(
-                          style: TextStyle(
-                              fontSize: 10.0, color: Color(0xFFBDBDBD)),
-                          child: Row(
-                            children: <Widget>[
-                              Text(
-                                '${item.trackCount}首音乐',
-                              ),
-                              SizedBox(
-                                width: 6.0,
-                              ),
-                              Text('by ${item.creatorName}'),
-                              SizedBox(
-                                width: 6.0,
-                              ),
-                              Text(
-                                  '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
-                            ],
-                          ),
-                        )
-                      ],
+                  Expanded(
+                    child: Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _nameWidget,
+                          DefaultTextStyle(
+                            style: TextStyle(
+                                fontSize: 10.0, color: Color(0xFFBDBDBD)),
+                            child: Row(
+                              children: <Widget>[
+                                Text(
+                                  '${item.trackCount}首音乐',
+                                ),
+                                SizedBox(
+                                  width: 6.0,
+                                ),
+                                Text('by ${item.creatorName}'),
+                                SizedBox(
+                                  width: 6.0,
+                                ),
+                                Text(
+                                    '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],

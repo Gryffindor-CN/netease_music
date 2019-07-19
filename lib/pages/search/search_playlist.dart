@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:netease_music/repository/netease.dart';
 import '../../model/music.dart';
-import 'package:dio/dio.dart';
-import 'dart:convert';
 import 'dart:math';
 
 class SearchPlaylistTab extends StatefulWidget {
@@ -17,33 +16,37 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab> {
   @override
   void initState() {
     super.initState();
-    _getPlaylist(widget.keyword);
+    if (this.mounted) {
+      _getPlaylist(widget.keyword);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (this.mounted) {
+      // _getPlaylist(widget.keyword);
+    }
   }
 
   void _getPlaylist(String keyword) async {
-    try {
-      Response response = await Dio().get(
-          "http://192.168.206.133:3000/search?keywords=$keyword&type=1000&limit=5");
-      var plays = json.decode(response.toString())['result']['playlists'];
-      setState(() {
-        plays.asMap().forEach((int index, item) {
-          playlist.add(PlayList(
-            name: item['name'],
-            id: item['id'],
-            coverImgUrl: item['coverImgUrl'],
-            playCount: item['playCount'],
-            trackCount: item['trackCount'],
-            creatorName: item['creator']['nickname'],
-          ));
-        });
+    var plays = await NeteaseRepository.getPlaylist(keyword);
+    setState(() {
+      plays.asMap().forEach((int index, item) {
+        playlist.add(PlayList(
+          name: item['name'],
+          id: item['id'],
+          coverImgUrl: item['coverImgUrl'],
+          playCount: item['playCount'],
+          trackCount: item['trackCount'],
+          creatorName: item['creator']['nickname'],
+        ));
       });
-      if (playlist.length == plays.asMap().length) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      print(e);
+    });
+    if (playlist.length == plays.asMap().length) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -111,34 +114,35 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab> {
                         item.coverImgUrl,
                       )),
                 ),
-                Container(
-                  width: 250.0,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _nameWidget,
-                      DefaultTextStyle(
-                        style:
-                            TextStyle(fontSize: 10.0, color: Color(0xFFBDBDBD)),
-                        child: Row(
-                          children: <Widget>[
-                            Text(
-                              '${item.trackCount}首音乐',
-                            ),
-                            SizedBox(
-                              width: 6.0,
-                            ),
-                            Text('by ${item.creatorName}'),
-                            SizedBox(
-                              width: 6.0,
-                            ),
-                            Text(
-                                '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
-                          ],
-                        ),
-                      )
-                    ],
+                Expanded(
+                  child: Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _nameWidget,
+                        DefaultTextStyle(
+                          style: TextStyle(
+                              fontSize: 10.0, color: Color(0xFFBDBDBD)),
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                '${item.trackCount}首音乐',
+                              ),
+                              SizedBox(
+                                width: 6.0,
+                              ),
+                              Text('by ${item.creatorName}'),
+                              SizedBox(
+                                width: 6.0,
+                              ),
+                              Text(
+                                  '播放${((item.playCount / 10000) * (pow(10, 1))).round() / (pow(10, 1))}万次'),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 )
               ],

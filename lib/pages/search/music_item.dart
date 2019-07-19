@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
+import '../../components/musicplayer/inherited_demo.dart';
+import '../../components/musicplayer/playing_album_cover.dart';
 
 class MusicItem extends StatelessWidget {
   final Music item;
@@ -12,6 +14,8 @@ class MusicItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
+
     if (item.name.contains(keyword)) {
       var _startIndex = item.name.indexOf(keyword);
       var _itemNameLen = item.name.length;
@@ -55,7 +59,7 @@ class MusicItem extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
         text: TextSpan(
-          text: item.name.substring(0, _startIndex),
+          text: item.albumName.substring(0, _startIndex),
           style: TextStyle(color: Colors.grey, fontSize: 10.0),
           children: <TextSpan>[
             TextSpan(
@@ -75,7 +79,33 @@ class MusicItem extends StatelessWidget {
     }
     if (tailsList != null) {
       return InkWell(
-        onTap: () {},
+        onTap: () async {
+          await store.play(Music(
+            name: item.name,
+            id: item.id,
+            aritstId: item.aritstId,
+            aritstName: item.aritstName,
+            albumName: item.albumName,
+            albumId: item.albumId,
+            albumCoverImg: item.albumCoverImg,
+          ));
+
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (BuildContext context) {
+            return AlbumCover(
+              music: Music(
+                name: item.name,
+                id: item.id,
+                aritstId: item.aritstId,
+                aritstName: item.aritstName,
+                albumName: item.albumName,
+                albumId: item.albumId,
+                albumCoverImg: item.albumCoverImg,
+              ),
+              isNew: true,
+            );
+          }));
+        },
         child: Row(
           children: <Widget>[
             SizedBox(

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:sticky_headers/sticky_headers.dart';
-import 'dart:convert';
 import '../../components/selection/select_all.dart';
 import '../../model/music.dart';
 import './music_item.dart';
@@ -10,6 +9,7 @@ import '../../components/song_detail_dialog.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
+import '../../repository/netease.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
@@ -26,58 +26,38 @@ class SearchSongTabState extends State<SearchSongTab> {
   @override
   void initState() {
     super.initState();
-    _getSongs();
+    if (this.mounted) {
+      _getSongs();
+    }
   }
 
   // 获取歌曲论数量
   getSongComment(int id) async {
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
-      var result = json.decode(response.toString());
-      return result;
-    } catch (e) {
-      print(e);
-    }
+    var result = await NeteaseRepository.getSongComment(id);
+    return result;
   }
 
   // 获取单曲详情
   _getSongDetail(int id) async {
     Map<String, dynamic> songDetail = {};
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/song/detail?ids=$id");
-      var result = json.decode(response.toString());
-      await getSongComment(id).then((data) {
-        songDetail.addAll(
-            {'detail': result['songs'][0], 'commentCount': data['total']});
-      });
-      return songDetail;
-    } catch (e) {
-      print(e);
-    }
+    var result = await NeteaseRepository.getSongDetail(id);
+    var comment = await getSongComment(id);
+    songDetail.addAll(
+        {'detail': result['songs'][0], 'commentCount': comment['total']});
+    return songDetail;
   }
 
-// 获取歌曲播放url
+  // 获取歌曲播放url
   _getSongUrl(int id) async {
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
-      var data = json.decode(response.toString())['data'][0];
-      return data['url'];
-    } catch (e) {
-      print(e);
-    }
+    var result = await NeteaseRepository.getSongUrl(id);
+    return result;
   }
 
   void _getSongs() async {
-    try {
-      Response response = await Dio()
-          .get("http://192.168.206.133:3000/search?keywords=${widget.keyword}");
-      var songRes = json.decode(response.toString())['result']['songs'];
-
-      await songRes.asMap().forEach((int index, item) async {
-        var res = await _getSongDetail(item['id']);
+    var songRes = await NeteaseRepository.getSongs(widget.keyword);
+    await songRes.asMap().forEach((int index, item) async {
+      var res = await _getSongDetail(item['id']);
+      if (this.mounted) {
         setState(() {
           songs.add(
             Music(
@@ -87,6 +67,7 @@ class SearchSongTabState extends State<SearchSongTab> {
                 aritstId: item['artists'][0]['id'],
                 albumName: item['album']['name'],
                 albumId: item['album']['id'],
+                albumCoverImg: res['detail']['al']['picUrl'],
                 detail: res['detail'],
                 commentCount: res['commentCount']),
           );
@@ -96,13 +77,8 @@ class SearchSongTabState extends State<SearchSongTab> {
             _isLoading = false;
           });
         }
-      });
-    } catch (e) {
-      print(e);
-      setState(() {
-        _isLoading = false;
-      });
-    }
+      }
+    });
   }
 
   Widget _buildSongList() {
