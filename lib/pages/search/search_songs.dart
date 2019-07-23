@@ -10,6 +10,9 @@ import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import '../../repository/netease.dart';
+import '../../components/musicplayer/playing_album_cover.dart';
+import '../../components/musicplayer/inherited_demo.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
@@ -18,10 +21,13 @@ class SearchSongTab extends StatefulWidget {
   SearchSongTabState createState() => SearchSongTabState();
 }
 
-class SearchSongTabState extends State<SearchSongTab> {
+class SearchSongTabState extends State<SearchSongTab>
+    with AutomaticKeepAliveClientMixin {
   bool _isLoading = true;
   bool _selection = false;
   List<Music> songs = []; // 单曲
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -81,7 +87,7 @@ class SearchSongTabState extends State<SearchSongTab> {
     });
   }
 
-  Widget _buildSongList() {
+  Widget _buildSongList(StateContainerState store) {
     List<Widget> widgetItems = [];
     List<Widget> clearItems = [
       Theme(
@@ -147,7 +153,15 @@ class SearchSongTabState extends State<SearchSongTab> {
                           {
                             'leadingIcon': AntDesign.getIconData('playcircleo'),
                             'title': '下一首播放',
-                            'callback': null
+                            'callback': res == null
+                                ? null
+                                : () async {
+                                    await store.playInsertNext(item);
+                                    Fluttertoast.showToast(
+                                      msg: '已添加到播放列表',
+                                      gravity: ToastGravity.CENTER,
+                                    );
+                                  }
                           },
                           {
                             'leadingIcon': AntDesign.getIconData('plussquareo'),
@@ -266,7 +280,7 @@ class SearchSongTabState extends State<SearchSongTab> {
     );
   }
 
-  Widget buildSongsWidget() {
+  Widget buildSongsWidget(StateContainerState store) {
     return _isLoading == true
         ? Center(
             child: Padding(
@@ -308,7 +322,30 @@ class SearchSongTabState extends State<SearchSongTab> {
                               Expanded(
                                 flex: 10,
                                 child: GestureDetector(
-                                  onTap: () {},
+                                  onTap: () async {
+                                    await store.playMultis(this.songs);
+                                    if (store.player.isPlaying == true) {
+                                      var res =
+                                          await store.player.audioPlayer.stop();
+                                      if (res == 1) {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(builder:
+                                                (BuildContext context) {
+                                          return AlbumCover(
+                                            isNew: true,
+                                          );
+                                        }));
+                                      }
+                                    } else {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return AlbumCover(
+                                          isNew: true,
+                                        );
+                                      }));
+                                    }
+                                  },
                                   child: Container(
                                     child: Row(
                                       children: <Widget>[
@@ -362,7 +399,7 @@ class SearchSongTabState extends State<SearchSongTab> {
                       ),
                       content: Column(
                         children: <Widget>[
-                          _buildSongList(),
+                          _buildSongList(store),
                         ],
                       ));
                 },
@@ -382,8 +419,9 @@ class SearchSongTabState extends State<SearchSongTab> {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return !_selection
-        ? buildSongsWidget()
+        ? buildSongsWidget(store)
         : SelectAll(
             songs: songs,
             handleSongsDel: (val) => _onSongsDelete(val),

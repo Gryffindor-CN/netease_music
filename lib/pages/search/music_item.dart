@@ -15,8 +15,21 @@ class MusicItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
-
-    if (item.name.contains(keyword)) {
+    if (store.player.current.id == item.id) {
+      _nameWidget = DefaultTextStyle(
+        style: TextStyle(color: Theme.of(context).primaryColor),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.volume_up,
+              size: 18.0,
+              color: Theme.of(context).primaryColor,
+            ),
+            Text(item.name)
+          ],
+        ),
+      );
+    } else if (item.name.contains(keyword)) {
       var _startIndex = item.name.indexOf(keyword);
       var _itemNameLen = item.name.length;
       var _keywordLen = keyword.length;

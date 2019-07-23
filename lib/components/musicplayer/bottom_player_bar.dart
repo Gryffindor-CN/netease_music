@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:netease_music/model/music.dart';
 import './inherited_demo.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
+import './playing_list_sheet.dart';
 
 class BottomPlayerBar extends StatefulWidget {
   final Duration position;
@@ -12,10 +14,13 @@ class BottomPlayerBar extends StatefulWidget {
   final VoidCallback pause;
   final VoidCallback complete;
   final VoidCallback setMode;
+  final ValueChanged<BuildContext> clear;
   final ValueChanged<String> toggle;
   final ValueChanged<String> finish;
   final ValueChanged<double> handleSlider;
   final ValueChanged<double> seek;
+  final ValueChanged<Music> playCertain;
+  final ValueChanged<Music> deleteCertain;
   final AudioPlayer audioPlayer;
   BottomPlayerBar(
       {this.play,
@@ -29,36 +34,33 @@ class BottomPlayerBar extends StatefulWidget {
       this.handleSlider,
       this.setMode,
       this.seek,
+      this.playCertain,
+      this.deleteCertain,
+      this.clear,
       @required this.audioPlayer});
 
   @override
   _BottomPlayerBarState createState() => _BottomPlayerBarState();
 }
 
-class _BottomPlayerBarState extends State<BottomPlayerBar> {
-  bool _isMusicLoading = false;
+class _BottomPlayerBarState extends State<BottomPlayerBar>
+    with TickerProviderStateMixin {
   AudioPlayer audioPlayer;
   bool _playingState = false; // 播放器播放icon切换
   bool loaded = false; // 记录是否已经加载过音乐
   int mode;
-
-  // StreamSubscription _audioPlayerStateSubscription;
-
+  AnimationController _animationController;
   AudioPlayerState playerState = AudioPlayerState.STOPPED;
   get _durationText => widget.duration?.toString()?.split('.')?.first ?? '';
-  // get _positionText => widget.position?.toString()?.split('.')?.first ?? '';
 
   @override
   void initState() {
+    _animationController = AnimationController(vsync: this);
     super.initState();
-    initAudioPlayer();
   }
 
   @override
   void dispose() {
-    // _audioPlayerStateSubscription.cancel();
-    // _playerCompleteSubscription.cancel();
-
     super.dispose();
   }
 
@@ -70,89 +72,6 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
     } catch (e) {
       print(e);
     }
-  }
-
-  void initAudioPlayer() async {
-    // final store = StateContainer.of(context);
-    // audioPlayer = widget.audioPlayer;
-    // var preference = await SharedPreferences.getInstance();
-    // var _mode = preference.getInt('player_play_mode');
-    // mode = _mode;
-    // if (mode == 0) {
-    //   audioPlayer.setReleaseMode(ReleaseMode.LOOP);
-    // } else {
-    //   audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
-    // }
-
-    // 播放完成
-    // _playerCompleteSubscription =
-    //     audioPlayer.onPlayerCompletion.listen((event) async {
-    //   final store = StateContainer.of(context);
-    //   // _audioPlayerState = AudioPlayerState.COMPLETED;
-
-    //   if (store.player.playMode.toString() == 'PlayMode.single') {
-    //     // 循环播放
-    //     audioPlayer.setReleaseMode(ReleaseMode.LOOP);
-    //     audioPlayer.resume();
-    //     return;
-    //   }
-    //   audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
-
-    //   var res = await audioPlayer.stop();
-    //   if (res == 1) {
-    //     widget.complete();
-    //     setState(() {
-    //       _playingState = false;
-    //     });
-    //     loaded = false;
-    //     if (store.player.playMode.toString() == 'PlayMode.sequence') {
-    //       // 顺序播放
-    //       widget.finish('sequence');
-    //     } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
-    //       // 随机播放
-    //       widget.finish('shuffle');
-    //     }
-    //     setState(() {
-    //       _isMusicLoading = true;
-    //     });
-    //     var res = await _play(store.player.current.songUrl);
-    //     if (res == 1) {
-    //       setState(() {
-    //         _isMusicLoading = false;
-    //       });
-    //       widget.play();
-    //       loaded = true;
-    //       setState(() {
-    //         _playingState = true;
-    //       });
-    //     }
-    //   }
-    // });
-
-    // 播放状态
-    // _audioPlayerStateSubscription =
-    //     audioPlayer.onPlayerStateChanged.listen((state) {
-    //   setState(() {
-    //     // _audioPlayerState = state;
-    //   });
-    // });
-
-    // if (store.player.isPlaying == true) {
-    //   widget.play();
-    //   loaded = true;
-    //   setState(() {
-    //     _playingState = true;
-    //   });
-    //   return;
-    // }
-    // var res = await _play(store.player.current.songUrl);
-    // if (res == 1) {
-    //   widget.play();
-    //   loaded = true;
-    //   setState(() {
-    //     _playingState = true;
-    //   });
-    // }
   }
 
   IconButton _buildPlayButton(
@@ -268,7 +187,20 @@ class _BottomPlayerBarState extends State<BottomPlayerBar> {
                       ),
                       IconButton(
                         icon: Icon(Icons.menu),
-                        onPressed: () {},
+                        onPressed: () {
+                          // 弹出播放列表
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return PlayingListSheet(play: (Music music) {
+                                  widget.playCertain(music);
+                                }, delete: (Music music) {
+                                  widget.deleteCertain(music);
+                                }, clear: (BuildContext ctx) {
+                                  widget.clear(ctx);
+                                });
+                              });
+                        },
                       )
                     ],
                   ),

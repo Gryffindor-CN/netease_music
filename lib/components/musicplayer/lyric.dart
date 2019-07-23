@@ -34,8 +34,6 @@ class LyricState extends State<Lyric> {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
     final containerSize = containerRenderBox.size;
-    // print(
-    //     'Size: width = ${containerSize.width} - height = ${containerSize.height}');
   }
 
   /// New
@@ -43,13 +41,10 @@ class LyricState extends State<Lyric> {
     final RenderBox containerRenderBox =
         _containerKey.currentContext.findRenderObject();
     final containerPosition = containerRenderBox.localToGlobal(Offset.zero);
-    // print(
-    //     'Position: x = ${containerPosition.dx} - y = ${containerPosition.dy}');
   }
 
   _onBuildCompleted(_) {
     _getContainerSize();
-
     _getContainerPosition();
   }
 
@@ -72,8 +67,8 @@ class LyricState extends State<Lyric> {
 
   @override
   void dispose() {
-    // widget.position.removeListener(_scrollToCurrentPosition);
-    // _controller.dispose();
+    widget.position.removeListener(_scrollToCurrentPosition);
+    _controller.dispose();
     super.dispose();
   }
 

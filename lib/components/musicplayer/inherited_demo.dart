@@ -74,6 +74,7 @@ class StateContainerState extends State<StateContainer> {
   // Whichever properties you wanna pass around your app as state
   PlayerControllerState player;
 
+  // 播放一首
   Future<void> play(Music music) async {
     int _currentIndex = -1;
     List<Music> _playingList;
@@ -88,7 +89,6 @@ class StateContainerState extends State<StateContainer> {
       _playingList = player.playingList;
       var _url = await _getSongUrl(music.id);
       var _comment = await _getSongComment(music.id);
-
       music.songUrl = _url;
       music.commentCount = _comment;
       _playingList.add(music);
@@ -134,7 +134,64 @@ class StateContainerState extends State<StateContainer> {
     }
   }
 
-  Future<void> playShuffle() {
+  // 全部播放
+  Future<void> playMultis(List<Music> musics) async {
+    var _playingList = player.playingList;
+    if (_playingList.length <= 0) {
+      var _currentSongUrl = await _getSongUrl(musics[0].id);
+      musics[0].songUrl = _currentSongUrl;
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString(
+          _PREF_KEY_PLAYING,
+          json.encode(musics[0], toEncodable: (e) => e.toMap()),
+        );
+        prefs.setString(_PREF_KEY_PLAYLIST,
+            json.encode(musics, toEncodable: (e) => e.toMap()));
+
+        setState(() {
+          player = (PlayerControllerState(
+              audioPlayer: player.audioPlayer,
+              current: musics[0],
+              playMode: player.playMode,
+              playingList: musics,
+              isPlaying: player.isPlaying,
+              position: player.position,
+              duration: player.duration,
+              time: player.time));
+        });
+      });
+    } else {
+      var _musics = musics;
+      _musics.reversed.forEach((Music music) {
+        _playingList.add(music);
+      });
+      var _currentSongUrl = await _getSongUrl(musics[0].id);
+      _playingList = _playingList.reversed.toList();
+      _playingList[0].songUrl = _currentSongUrl;
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString(
+          _PREF_KEY_PLAYING,
+          json.encode(_playingList[0], toEncodable: (e) => e.toMap()),
+        );
+        prefs.setString(_PREF_KEY_PLAYLIST,
+            json.encode(_playingList, toEncodable: (e) => e.toMap()));
+        setState(() {
+          player = (PlayerControllerState(
+              audioPlayer: player.audioPlayer,
+              current: _playingList[0],
+              playMode: player.playMode,
+              playingList: _playingList,
+              isPlaying: player.isPlaying,
+              position: player.position,
+              duration: player.duration,
+              time: player.time));
+        });
+      });
+    }
+  }
+
+  // 随机播放
+  Future<void> playShuffle() async {
     final _random = new Random();
     int next(int min, int max) => min + _random.nextInt(max - min);
     int _currentIndex;
@@ -150,6 +207,9 @@ class StateContainerState extends State<StateContainer> {
         ran = next(0, player.playingList.length);
       }
     });
+
+    player.playingList[_currentIndex].songUrl =
+        await _getSongUrl(player.playingList[ran].id);
     setState(() {
       player = (PlayerControllerState(
           audioPlayer: player.audioPlayer,
@@ -162,7 +222,94 @@ class StateContainerState extends State<StateContainer> {
     });
   }
 
-  Future<void> playNext() {
+  // 播放播放列表中一首歌曲
+  Future<String> playCertain(Music music) async {
+    Music _current = music;
+    _current.songUrl = await _getSongUrl(music.id);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+      _PREF_KEY_PLAYING,
+      json.encode(music, toEncodable: (e) => e.toMap()),
+    );
+    setState(() {
+      player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
+          current: _current,
+          playMode: player.playMode,
+          playingList: player.playingList,
+          isPlaying: player.isPlaying,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
+    });
+    return _current.songUrl;
+  }
+
+  // 删除播放列表中一首歌曲
+  Future<dynamic> deleteCertain(Music music) async {
+    int _flagIndex = -1;
+    int _nextIndex = -1;
+    List<Music> _playingList = [];
+
+    bool isCurrent = false;
+    if (music.id == player.current.id) isCurrent = true;
+    _playingList = player.playingList;
+    player.playingList.asMap().forEach((int index, Music item) {
+      if (item.id == music.id) {
+        _flagIndex = index;
+      }
+    });
+
+    if (_flagIndex + 1 >= player.playingList.length) {
+      _nextIndex = 0;
+    } else {
+      _nextIndex = _flagIndex + 1;
+    }
+
+    _playingList.removeAt(_flagIndex);
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_playingList.length <= 0) {
+      prefs.remove(_PREF_KEY_PLAYING);
+      prefs.remove(_PREF_KEY_PLAYLIST);
+      setState(() {
+        PlayerControllerState(
+            audioPlayer: player.audioPlayer,
+            current: Music(),
+            playMode: player.playMode,
+            playingList: [],
+            isPlaying: false,
+            position: Duration.zero,
+            duration: Duration.zero,
+            time: 0.0);
+      });
+      return 0;
+    } else if (isCurrent == false) {
+      prefs.setString(_PREF_KEY_PLAYLIST,
+          json.encode(_playingList, toEncodable: (e) => e.toMap()));
+
+      setState(() {
+        PlayerControllerState(
+            audioPlayer: player.audioPlayer,
+            current: player.current,
+            playMode: player.playMode,
+            playingList: _playingList,
+            isPlaying: player.isPlaying,
+            position: player.position,
+            duration: player.duration,
+            time: player.time);
+      });
+      return 1;
+    } else {
+      // 删除当前正在播放的歌曲
+      Music _current = _playingList[_nextIndex <= 0 ? 0 : _nextIndex - 1];
+      playCertain(_current);
+      return _current.songUrl;
+    }
+  }
+
+  // 播放下一首
+  Future<String> playNext() async {
     int _currentIndex;
     player.playingList.asMap().forEach((int index, Music music) {
       if (music.id == player.current.id) {
@@ -175,10 +322,20 @@ class StateContainerState extends State<StateContainer> {
     } else {
       _currentIndex = _currentIndex + 1;
     }
+
+    Music _current = player.playingList[_currentIndex];
+
+    _current.songUrl = await _getSongUrl(_current.id);
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+      _PREF_KEY_PLAYING,
+      json.encode(_current, toEncodable: (e) => e.toMap()),
+    );
     setState(() {
       player = (PlayerControllerState(
           audioPlayer: player.audioPlayer,
-          current: player.playingList[_currentIndex ?? 0],
+          current: _current,
           playMode: player.playMode,
           playingList: player.playingList,
           isPlaying: player.isPlaying,
@@ -186,9 +343,12 @@ class StateContainerState extends State<StateContainer> {
           duration: player.duration,
           time: player.time));
     });
+
+    return _current.songUrl;
   }
 
-  Future<void> playPrev() {
+  // 播放上一首
+  Future<String> playPrev() async {
     int _currentIndex;
     player.playingList.asMap().forEach((int index, Music music) {
       if (music.id == player.current.id) {
@@ -200,13 +360,62 @@ class StateContainerState extends State<StateContainer> {
     } else {
       _currentIndex = _currentIndex - 1;
     }
+    Music _current = player.playingList[_currentIndex];
+    _current.songUrl = await _getSongUrl(_current.id);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+      _PREF_KEY_PLAYING,
+      json.encode(_current, toEncodable: (e) => e.toMap()),
+    );
+    setState(() {
+      player = (PlayerControllerState(
+          audioPlayer: player.audioPlayer,
+          current: _current,
+          playMode: player.playMode,
+          playingList: player.playingList,
+          isPlaying: player.isPlaying,
+          position: player.position,
+          duration: player.duration,
+          time: player.time));
+    });
+    return _current.songUrl;
+  }
+
+  // 下一首播放
+  Future<void> playInsertNext(Music music) async {
+    int _idIndex = -1;
+    List<Music> _playingList;
+    player.playingList.asMap().forEach((int index, Music item) {
+      if (item.id == music.id) {
+        _idIndex = index;
+      }
+    });
+    if (_idIndex == -1) {
+      _playingList = [music]..addAll(player.playingList);
+    } else {
+      _playingList = player.playingList;
+      _playingList.removeAt(_idIndex);
+      _playingList = [music]..addAll(player.playingList);
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (player.playingList.length == 0) {
+      prefs.setString(
+        _PREF_KEY_PLAYING,
+        json.encode(_playingList[0], toEncodable: (e) => e.toMap()),
+      );
+    }
+
+    prefs.setString(_PREF_KEY_PLAYLIST,
+        json.encode(_playingList, toEncodable: (e) => e.toMap()));
 
     setState(() {
       player = (PlayerControllerState(
           audioPlayer: player.audioPlayer,
-          current: player.playingList[_currentIndex ?? 0],
+          current:
+              player.playingList.length == 0 ? _playingList[0] : player.current,
           playMode: player.playMode,
-          playingList: player.playingList,
+          playingList: _playingList,
           isPlaying: player.isPlaying,
           position: player.position,
           duration: player.duration,
@@ -216,6 +425,7 @@ class StateContainerState extends State<StateContainer> {
 
   void pause(Music music) {}
 
+  // 切换播放模式
   Future<void> switchPlayMode() {
     switch (player.playMode) {
       case PlayMode.single:
@@ -272,6 +482,7 @@ class StateContainerState extends State<StateContainer> {
     }
   }
 
+  // 是否正在播放
   Future<void> switchPlayingState(bool state) {
     setState(() {
       player = (PlayerControllerState(
@@ -286,6 +497,7 @@ class StateContainerState extends State<StateContainer> {
     });
   }
 
+  // 播放器状态
   Future<void> setPlayingState(Duration pos, Duration dur, double time) {
     setState(() {
       player = (PlayerControllerState(
@@ -298,6 +510,25 @@ class StateContainerState extends State<StateContainer> {
           duration: dur,
           time: time));
     });
+  }
+
+  // 清空播放列表
+  Future<String> clearPlayingList() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove(_PREF_KEY_PLAYING);
+    prefs.remove(_PREF_KEY_PLAYLIST);
+    setState(() {
+      player = PlayerControllerState(
+          audioPlayer: player.audioPlayer,
+          current: player.current,
+          playMode: player.playMode,
+          playingList: [],
+          isPlaying: false,
+          position: Duration.zero,
+          duration: Duration.zero,
+          time: 0.0);
+    });
+    return '';
   }
 
   void setPlayer(AudioPlayer audioPlayer) {
@@ -316,29 +547,12 @@ class StateContainerState extends State<StateContainer> {
 
   // 获取歌曲播放url
   _getSongUrl(int id) async {
-    // try {
-    //   Response response =
-    //       await Dio().get("http://192.168.206.133:3000/song/url?id=$id");
-    //   var data = json.decode(response.toString())['data'][0];
-    //   return data['url'];
-    // } catch (e) {
-    //   print(e);
-    // }
     var result = await NeteaseRepository.getSongUrl(id);
     return result;
   }
 
   // 获取歌曲评论数
   _getSongComment(int id) async {
-    // try {
-    //   Response response =
-    //       await Dio().get("http://192.168.206.133:3000/comment/music?id=$id");
-    //   var result = json.decode(response.toString())['total'];
-
-    //   return result;
-    // } catch (e) {
-    //   print(e);
-    // }
     var result = await NeteaseRepository.getSongComment(id);
     return result['total'];
   }

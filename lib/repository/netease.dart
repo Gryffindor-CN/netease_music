@@ -91,10 +91,12 @@ class NeteaseRepository {
 
   // 获取歌曲播放url
   static getSongUrl(int id) async {
-    var url = '${API_HOST}song/url?id=$id';
+    var url =
+        '${API_HOST}song/url?id=$id&timestamp=${DateTime.now().millisecondsSinceEpoch}';
     try {
       Response response = await Dio().get(url);
       var data = json.decode(response.toString())['data'][0];
+
       return data['url'];
     } catch (e) {
       print(e);

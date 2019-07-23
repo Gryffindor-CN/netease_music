@@ -4,8 +4,6 @@ import 'package:netease_music/components/musicplayer/inherited_demo.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'dart:ui';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert' as convert;
 import '../components/netease_toast.dart';
 import '../router/Routes.dart';
 import '../components/musicplayer/playing_album_cover.dart';

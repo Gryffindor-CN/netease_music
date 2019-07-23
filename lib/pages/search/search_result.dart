@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:math';
 import '../../router/Routes.dart';
-import 'package:dio/dio.dart';
-import 'dart:convert';
+import '../../components/musicplayer/inherited_demo.dart';
 import '../../components/song_detail_dialog.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
@@ -13,6 +12,8 @@ import '../../model/music.dart';
 import './music_item.dart';
 import './search_playlist.dart';
 import '../../repository/netease.dart';
+import '../../components/musicplayer/playing_album_cover.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SearchResult extends StatefulWidget {
   final String keyword;
@@ -106,6 +107,7 @@ class SearchResultState extends State<SearchResult>
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     _viewWidget = [
       SingleChildScrollView(
         physics: BouncingScrollPhysics(),
@@ -123,11 +125,8 @@ class SearchResultState extends State<SearchResult>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    child: Album(
-                      widget.keyword,
-                      songs,
-                      tabController: _tabController,
-                    ),
+                    child: Album(widget.keyword, songs,
+                        tabController: _tabController, store: store),
                   ),
                   SizedBox(
                     height: 25.0,
@@ -242,12 +241,8 @@ class Album extends StatelessWidget {
   final String keyword;
   final List<Music> songList;
   final TabController tabController;
-
-  Album(
-    this.keyword,
-    this.songList, {
-    this.tabController,
-  });
+  final StateContainerState store;
+  Album(this.keyword, this.songList, {this.tabController, this.store});
   static Widget _nameWidget;
   static Widget _albumnameWidget;
 
@@ -255,18 +250,6 @@ class Album extends StatelessWidget {
   _getSongUrl(int id) async {
     var result = await NeteaseRepository.getSongUrl(id);
     return result;
-  }
-
-  // 获取歌曲详情图片
-  _getSongDetail(int id) async {
-    try {
-      Response response =
-          await Dio().get("http://192.168.206.133:3000/song/detail?ids=$id");
-      var data = json.decode(response.toString())['songs'][0];
-      return data['al']['picUrl'];
-    } catch (e) {
-      print(e);
-    }
   }
 
   List<Widget> _buildWidget(BuildContext context) {
@@ -283,7 +266,7 @@ class Album extends StatelessWidget {
               var detail = item.detail;
               var commentCount = item.commentCount;
               var res = await _getSongUrl(detail['id']);
-              detail['songUrl'] = res;
+
               showModalBottomSheet(
                   context: context,
                   builder: (BuildContext context) {
@@ -299,7 +282,15 @@ class Album extends StatelessWidget {
                           {
                             'leadingIcon': AntDesign.getIconData('playcircleo'),
                             'title': '下一首播放',
-                            'callback': null
+                            'callback': res == null
+                                ? null
+                                : () async {
+                                    await store.playInsertNext(item);
+                                    Fluttertoast.showToast(
+                                      msg: '已添加到播放列表',
+                                      gravity: ToastGravity.CENTER,
+                                    );
+                                  }
                           },
                           {
                             'leadingIcon': AntDesign.getIconData('plussquareo'),
@@ -447,8 +438,26 @@ class Album extends StatelessWidget {
                               '播放全部',
                               style: TextStyle(fontSize: 12.0),
                             ),
-                            onPressed: () {
-                              print('play all');
+                            onPressed: () async {
+                              await store.playMultis(this.songList);
+                              if (store.player.isPlaying == true) {
+                                var res = await store.player.audioPlayer.stop();
+                                if (res == 1) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                    return AlbumCover(
+                                      isNew: true,
+                                    );
+                                  }));
+                                }
+                              } else {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                  return AlbumCover(
+                                    isNew: true,
+                                  );
+                                }));
+                              }
                             },
                           ),
                         ),

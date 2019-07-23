@@ -10,9 +10,13 @@ class SearchPlaylistTab extends StatefulWidget {
   SearchPlaylistTabState createState() => SearchPlaylistTabState();
 }
 
-class SearchPlaylistTabState extends State<SearchPlaylistTab> {
+class SearchPlaylistTabState extends State<SearchPlaylistTab>
+    with AutomaticKeepAliveClientMixin {
   bool _isLoading = true;
   List<PlayList> playlist = [];
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
