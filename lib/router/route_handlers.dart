@@ -4,6 +4,7 @@ import 'package:netease_music/pages/another_page.dart';
 import 'package:netease_music/pages/my_music.dart';
 import 'package:netease_music/pages/search/search.dart';
 import 'package:netease_music/pages/search/search_result.dart';
+import 'package:netease_music/pages/album_cover/album_cover.dart';
 
 var anotherPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
@@ -18,12 +19,24 @@ var mycollectionHandler = new Handler(
 var searchPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
   if (params['keyword'] != null) {
-    return SearchPage(keyword: params['keyword'][0]);
+    return SearchPage(
+      keyword: params['keyword'][0],
+    );
   }
   return SearchPage();
 });
 
 var searchResultHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-  return new SearchResult(params['keyword'][0]);
+  return new SearchResult(keyword: params['keyword'][0]);
+});
+
+var playingPageHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  if (params['isNew'] != null) {
+    return new AlbumCoverPage(
+      isNew: true,
+    );
+  }
+  return new AlbumCoverPage();
 });

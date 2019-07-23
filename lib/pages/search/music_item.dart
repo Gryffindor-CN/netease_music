@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
 import '../../components/musicplayer/inherited_demo.dart';
-import '../../components/musicplayer/playing_album_cover.dart';
+import '../../router/Routes.dart';
 
 class MusicItem extends StatelessWidget {
   final Music item;
   final String keyword;
   final List<Map<String, dynamic>> tailsList;
-  MusicItem(this.item, this.keyword, {this.tailsList});
+  final BuildContext pageContext;
+  MusicItem(this.item, this.keyword, {this.tailsList, this.pageContext});
 
   static Widget _nameWidget;
   static Widget _albumnameWidget;
@@ -102,22 +103,8 @@ class MusicItem extends StatelessWidget {
             albumId: item.albumId,
             albumCoverImg: item.albumCoverImg,
           ));
-
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (BuildContext context) {
-            return AlbumCover(
-              music: Music(
-                name: item.name,
-                id: item.id,
-                aritstId: item.aritstId,
-                aritstName: item.aritstName,
-                albumName: item.albumName,
-                albumId: item.albumId,
-                albumCoverImg: item.albumCoverImg,
-              ),
-              isNew: true,
-            );
-          }));
+          Routes.router
+              .navigateTo(this.pageContext, '/albumcoverpage?isNew=true');
         },
         child: Row(
           children: <Widget>[

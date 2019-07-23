@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/rendering.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../router/Routes.dart';
 import '../../model/music.dart';
 import '../../repository/netease.dart';
+import './search_result.dart';
 
 class SearchPage extends StatefulWidget {
   final String keyword;
-  SearchPage({this.keyword});
+  final BuildContext pageContext;
+  SearchPage({this.keyword, this.pageContext});
 
   @override
   SearchPageState createState() => SearchPageState();
@@ -21,6 +24,7 @@ class SearchPageState extends State<SearchPage> {
   List<Music> searchhistorylists = [];
   List<Music> hotlists = [];
   List<dynamic> suggestlists = [];
+  String _keyword;
 
   @override
   void initState() {
@@ -88,10 +92,12 @@ class SearchPageState extends State<SearchPage> {
           child: TextField(
             onChanged: (value) {
               if (value == '') {
+                _keyword = value;
                 setState(() {
                   hasSearchInsert = false;
                 });
               } else {
+                _keyword = value;
                 setState(() {
                   hasSearchInsert = true;
                   _getSearchSuggest(value);
@@ -165,10 +171,17 @@ class SearchPageState extends State<SearchPage> {
                             preference.setStringList(
                                 'search_history', searchHisLists);
 
-                            String url =
-                                '/home/searchresultpage?keyword=${_textEditingController.text}';
-                            url = Uri.encodeFull(url);
-                            Routes.router.navigateTo(context, url);
+                            // String url =
+                            //     '/home/searchresultpage?keyword=${_textEditingController.text}';
+                            // url = Uri.encodeFull(url);
+                            // Routes.router.navigateTo(context, url);
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (BuildContext context) {
+                              return SearchResult(
+                                  keyword: _keyword,
+                                  pageContext: widget.pageContext);
+                            }));
+
                             setState(() {
                               hasSearchInsert = false;
                               searchhistorylists.clear();
@@ -217,26 +230,25 @@ class SearchPageState extends State<SearchPage> {
                               itemCount: suggestlists.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return SearchSuggestMusic(
-                                  suggestlists[index]['keyword'],
-                                  searchCb: () {
-                                    setState(() {
-                                      searchhistorylists.clear();
-                                      SharedPreferences.getInstance()
-                                          .then((prefs) {
-                                        prefs
-                                            .getStringList('search_history')
-                                            .asMap()
-                                            .forEach((int index, String item) {
-                                          searchhistorylists
-                                              .add(Music(name: item));
-                                        });
+                                    suggestlists[index]['keyword'],
+                                    searchCb: () {
+                                  setState(() {
+                                    searchhistorylists.clear();
+                                    SharedPreferences.getInstance()
+                                        .then((prefs) {
+                                      prefs
+                                          .getStringList('search_history')
+                                          .asMap()
+                                          .forEach((int index, String item) {
+                                        searchhistorylists
+                                            .add(Music(name: item));
                                       });
-
-                                      hasSearchInsert = false;
-                                      _textEditingController.clear();
                                     });
-                                  },
-                                );
+
+                                    hasSearchInsert = false;
+                                    _textEditingController.clear();
+                                  });
+                                }, pageContext: widget.pageContext);
                               },
                             ),
                           ),
@@ -260,13 +272,17 @@ class SearchPageState extends State<SearchPage> {
                               '热搜榜',
                             ),
                           ),
-                          SearchHotList(hotlists, callback: (lists) {
-                            setState(() {
-                              lists.asMap().forEach((int index, String item) {
-                                searchhistorylists.add(Music(name: item));
+                          SearchHotList(
+                            hotlists,
+                            callback: (lists) {
+                              setState(() {
+                                lists.asMap().forEach((int index, String item) {
+                                  searchhistorylists.add(Music(name: item));
+                                });
                               });
-                            });
-                          }),
+                            },
+                            pageContext: widget.pageContext,
+                          ),
                         ]
                       : [
                           SliverToBoxAdapter(
@@ -275,7 +291,7 @@ class SearchPageState extends State<SearchPage> {
                               icon: {
                                 'iconData': Icons.delete_forever,
                                 'iconPressd': () {
-                                  // 清空搜索历史
+                                  //清空搜索历史
                                   SharedPreferences.getInstance().then((prefs) {
                                     prefs.remove('search_history');
                                     setState(() {
@@ -289,6 +305,7 @@ class SearchPageState extends State<SearchPage> {
                           SearchHistoryList(
                             searchhistorylists,
                             ctx: context,
+                            pageContext: widget.pageContext,
                           ),
                           SliverToBoxAdapter(
                             child: SizedBox(
@@ -309,6 +326,7 @@ class SearchPageState extends State<SearchPage> {
                                 });
                               });
                             },
+                            pageContext: widget.pageContext,
                           ),
                         ]),
             ),
@@ -319,7 +337,8 @@ class SearchPageState extends State<SearchPage> {
 class SearchSuggestMusic extends StatelessWidget {
   final String keyword;
   final VoidCallback searchCb;
-  SearchSuggestMusic(this.keyword, {this.searchCb});
+  final BuildContext pageContext;
+  SearchSuggestMusic(this.keyword, {this.searchCb, this.pageContext});
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +358,12 @@ class SearchSuggestMusic extends StatelessWidget {
           // 跳转搜索页面
           String url = '/home/searchresultpage?keyword=$keyword';
           url = Uri.encodeFull(url);
-          Routes.router.navigateTo(context, url);
+          // Routes.router.navigateTo(context, url);
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (BuildContext context) {
+            return SearchResult(
+                keyword: keyword, pageContext: this.pageContext);
+          }));
           searchCb();
         });
       },
@@ -372,7 +396,8 @@ class SearchSuggestMusic extends StatelessWidget {
 class SearchHotList extends StatelessWidget {
   final List<Music> songlist;
   final ValueChanged callback;
-  SearchHotList(this.songlist, {this.callback});
+  final BuildContext pageContext;
+  SearchHotList(this.songlist, {this.callback, this.pageContext});
 
   @override
   Widget build(BuildContext context) {
@@ -403,7 +428,13 @@ class SearchHotList extends StatelessWidget {
                       String url =
                           '/home/searchresultpage?keyword=${songlist[index].name}';
                       url = Uri.encodeFull(url);
-                      Routes.router.navigateTo(context, url);
+                      // Routes.router.navigateTo(context, url);
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return SearchResult(
+                            keyword: '${songlist[index].name}',
+                            pageContext: this.pageContext);
+                      }));
                       if (callback != null) callback(searchHisLists);
                     });
                   },
@@ -491,7 +522,8 @@ class SearchListTitle extends StatelessWidget {
 class SearchHistoryList extends StatelessWidget {
   final List<Music> songlist;
   final BuildContext ctx;
-  SearchHistoryList(this.songlist, {this.ctx});
+  final BuildContext pageContext;
+  SearchHistoryList(this.songlist, {this.ctx, this.pageContext});
 
   @override
   Widget build(BuildContext context) {
@@ -506,10 +538,17 @@ class SearchHistoryList extends StatelessWidget {
             return SizedBox(
                 child: InkResponse(
               onTap: () {
-                Routes.router.navigateTo(
-                    ctx,
-                    Uri.encodeFull(
-                        '/home/searchresultpage?keyword=${songlist[index].name}'));
+                // Routes.router.navigateTo(
+                //     ctx,
+                //     Uri.encodeFull(
+                //         '/home/searchresultpage?keyword=${songlist[index].name}'));
+
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                  return SearchResult(
+                      keyword: '${songlist[index].name}',
+                      pageContext: this.pageContext);
+                }));
               },
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 12.0),

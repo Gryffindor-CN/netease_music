@@ -13,10 +13,12 @@ import '../../repository/netease.dart';
 import '../../components/musicplayer/playing_album_cover.dart';
 import '../../components/musicplayer/inherited_demo.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../../router/Routes.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
-  SearchSongTab({@required this.keyword});
+  final BuildContext pageContext;
+  SearchSongTab({@required this.keyword, this.pageContext});
   @override
   SearchSongTabState createState() => SearchSongTabState();
 }
@@ -128,150 +130,161 @@ class SearchSongTabState extends State<SearchSongTab>
 
     if (songs.length > 0) {
       songs.map((item) {
-        widgetItems.add(MusicItem(item, widget.keyword, tailsList: [
-          {'iconData': Icons.play_circle_outline, 'iconPress': () {}},
-          {
-            'iconData': Icons.more_vert,
-            'iconPress': () async {
-              var detail = item.detail;
-              var commentCount = item.commentCount;
-              var res = await _getSongUrl(detail['id']);
+        widgetItems.add(MusicItem(
+          item,
+          widget.keyword,
+          tailsList: [
+            {'iconData': Icons.play_circle_outline, 'iconPress': () {}},
+            {
+              'iconData': Icons.more_vert,
+              'iconPress': () async {
+                var detail = item.detail;
+                var commentCount = item.commentCount;
+                var res = await _getSongUrl(detail['id']);
 
-              detail['songUrl'] = res;
-              showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return SongDetailDialog(
-                        detail['name'],
-                        detail['al']['name'],
-                        detail['ar'][0]['name'],
-                        detail['al']['picUrl'],
-                        detail['alia'].length == 0
-                            ? ''
-                            : '（${detail['alia'][0]}）',
-                        [
-                          {
-                            'leadingIcon': AntDesign.getIconData('playcircleo'),
-                            'title': '下一首播放',
-                            'callback': res == null
-                                ? null
-                                : () async {
-                                    await store.playInsertNext(item);
-                                    Fluttertoast.showToast(
-                                      msg: '已添加到播放列表',
-                                      gravity: ToastGravity.CENTER,
-                                    );
-                                  }
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('plussquareo'),
-                            'title': '收藏到歌单',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('download'),
-                            'title': '下载',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('message1'),
-                            'title': '评论($commentCount)',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('sharealt'),
-                            'title': '分享',
-                            'callback': () {
-                              Navigator.of(context).pop();
-                              BottomShare.showBottomShare(context, [
-                                {
-                                  'shareLogo':
-                                      'assets/icons/friend_circle_32.png',
-                                  'shareText': '微信朋友圈',
-                                  'shareEvent': () {
-                                    var model = fluwx.WeChatShareMusicModel(
-                                      scene: fluwx.WeChatScene.TIMELINE,
-                                      thumbnail: detail['al']['picUrl'],
-                                      title:
-                                          '${detail['name']}（${detail['al']['name']}）',
-                                      description: '${detail['ar'][0]['name']}',
-                                      transaction: "music",
-                                      musicUrl: detail['songUrl'],
-                                    );
+                detail['songUrl'] = res;
+                showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SongDetailDialog(
+                          detail['name'],
+                          detail['al']['name'],
+                          detail['ar'][0]['name'],
+                          detail['al']['picUrl'],
+                          detail['alia'].length == 0
+                              ? ''
+                              : '（${detail['alia'][0]}）',
+                          [
+                            {
+                              'leadingIcon':
+                                  AntDesign.getIconData('playcircleo'),
+                              'title': '下一首播放',
+                              'callback': res == null
+                                  ? null
+                                  : () async {
+                                      await store.playInsertNext(item);
+                                      Fluttertoast.showToast(
+                                        msg: '已添加到播放列表',
+                                        gravity: ToastGravity.CENTER,
+                                      );
+                                    }
+                            },
+                            {
+                              'leadingIcon':
+                                  AntDesign.getIconData('plussquareo'),
+                              'title': '收藏到歌单',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('download'),
+                              'title': '下载',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('message1'),
+                              'title': '评论($commentCount)',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('sharealt'),
+                              'title': '分享',
+                              'callback': () {
+                                Navigator.of(context).pop();
+                                BottomShare.showBottomShare(context, [
+                                  {
+                                    'shareLogo':
+                                        'assets/icons/friend_circle_32.png',
+                                    'shareText': '微信朋友圈',
+                                    'shareEvent': () {
+                                      var model = fluwx.WeChatShareMusicModel(
+                                        scene: fluwx.WeChatScene.TIMELINE,
+                                        thumbnail: detail['al']['picUrl'],
+                                        title:
+                                            '${detail['name']}（${detail['al']['name']}）',
+                                        description:
+                                            '${detail['ar'][0]['name']}',
+                                        transaction: "music",
+                                        musicUrl: detail['songUrl'],
+                                      );
 
-                                    fluwx.share(model);
-                                  }
-                                },
-                                {
-                                  'shareLogo': 'assets/icons/wechat_32.png',
-                                  'shareText': '微信好友',
-                                  'shareEvent': () {
-                                    var model = fluwx.WeChatShareMusicModel(
-                                      thumbnail: detail['picUrl'],
-                                      scene: fluwx.WeChatScene.SESSION,
-                                      title:
-                                          '${detail['name']}（${detail['al']['name']}）',
-                                      description: '${detail['ar'][0]['name']}',
-                                      transaction: "music",
-                                      musicUrl: detail['songUrl'],
-                                    );
+                                      fluwx.share(model);
+                                    }
+                                  },
+                                  {
+                                    'shareLogo': 'assets/icons/wechat_32.png',
+                                    'shareText': '微信好友',
+                                    'shareEvent': () {
+                                      var model = fluwx.WeChatShareMusicModel(
+                                        thumbnail: detail['picUrl'],
+                                        scene: fluwx.WeChatScene.SESSION,
+                                        title:
+                                            '${detail['name']}（${detail['al']['name']}）',
+                                        description:
+                                            '${detail['ar'][0]['name']}',
+                                        transaction: "music",
+                                        musicUrl: detail['songUrl'],
+                                      );
 
-                                    fluwx.share(model);
+                                      fluwx.share(model);
+                                    }
+                                  },
+                                  {
+                                    'shareLogo': 'assets/icons/qq_zone_32.png',
+                                    'shareText': 'QQ空间',
+                                    'shareEvent': () {}
+                                  },
+                                  {
+                                    'shareLogo':
+                                        'assets/icons/qq_friend_32.png',
+                                    'shareText': 'QQ好友',
+                                    'shareEvent': () {}
+                                  },
+                                  {
+                                    'shareLogo': 'assets/icons/weibo_32.png',
+                                    'shareText': '微薄',
+                                    'shareEvent': () {}
+                                  },
+                                  {
+                                    'shareLogo':
+                                        'assets/icons/qq_friend_32.png',
+                                    'shareText': '大神圈子',
+                                    'shareEvent': () {}
                                   }
-                                },
-                                {
-                                  'shareLogo': 'assets/icons/qq_zone_32.png',
-                                  'shareText': 'QQ空间',
-                                  'shareEvent': () {}
-                                },
-                                {
-                                  'shareLogo': 'assets/icons/qq_friend_32.png',
-                                  'shareText': 'QQ好友',
-                                  'shareEvent': () {}
-                                },
-                                {
-                                  'shareLogo': 'assets/icons/weibo_32.png',
-                                  'shareText': '微薄',
-                                  'shareEvent': () {}
-                                },
-                                {
-                                  'shareLogo': 'assets/icons/qq_friend_32.png',
-                                  'shareText': '大神圈子',
-                                  'shareEvent': () {}
-                                }
-                              ]);
+                                ]);
+                              }
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('adduser'),
+                              'title': '歌手：${detail['ar'][0]['name']}',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('adduser'),
+                              'title': '专辑：${detail['al']['name']}',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('youtube'),
+                              'title': '查看视频',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('barchart'),
+                              'title': '人气榜应援',
+                              'callback': () {}
+                            },
+                            {
+                              'leadingIcon': AntDesign.getIconData('delete'),
+                              'title': '删除',
+                              'callback': () {}
                             }
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('adduser'),
-                            'title': '歌手：${detail['ar'][0]['name']}',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('adduser'),
-                            'title': '专辑：${detail['al']['name']}',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('youtube'),
-                            'title': '查看视频',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('barchart'),
-                            'title': '人气榜应援',
-                            'callback': () {}
-                          },
-                          {
-                            'leadingIcon': AntDesign.getIconData('delete'),
-                            'title': '删除',
-                            'callback': () {}
-                          }
-                        ]);
-                  });
+                          ]);
+                    });
+              }
             }
-          }
-        ]));
+          ],
+          pageContext: widget.pageContext,
+        ));
       }).toList();
     }
 
@@ -328,22 +341,28 @@ class SearchSongTabState extends State<SearchSongTab>
                                       var res =
                                           await store.player.audioPlayer.stop();
                                       if (res == 1) {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(builder:
-                                                (BuildContext context) {
-                                          return AlbumCover(
-                                            isNew: true,
-                                          );
-                                        }));
+                                        // Navigator.of(context).push(
+                                        //     MaterialPageRoute(builder:
+                                        //         (BuildContext context) {
+                                        //   return AlbumCover(
+                                        //     isNew: true,
+                                        //   );
+                                        // }));
+                                        Routes.router.navigateTo(
+                                            widget.pageContext,
+                                            '/albumcoverpage?isNew=true');
                                       }
                                     } else {
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (BuildContext context) {
-                                        return AlbumCover(
-                                          isNew: true,
-                                        );
-                                      }));
+                                      // Navigator.of(context).push(
+                                      //     MaterialPageRoute(
+                                      //         builder: (BuildContext context) {
+                                      //   return AlbumCover(
+                                      //     isNew: true,
+                                      //   );
+                                      // }));
+                                      Routes.router.navigateTo(
+                                          widget.pageContext,
+                                          '/albumcoverpage?isNew=true');
                                     }
                                   },
                                   child: Container(

@@ -6,9 +6,8 @@ import 'dart:ui';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import '../components/netease_toast.dart';
 import '../router/Routes.dart';
-import '../components/musicplayer/playing_album_cover.dart';
-
 import '../repository/netease.dart';
+import './search/search.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb});
@@ -355,7 +354,13 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
         centerTitle: true,
         title: InkWell(
           onTap: () {
-            Routes.router.navigateTo(context, '/home/searchpage');
+            // Routes.router.navigateTo(context, '/home/searchpage');
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (BuildContext context) {
+              return SearchPage(
+                pageContext: widget.pageContext,
+              );
+            }));
           },
           splashColor: Colors.transparent,
           child: Container(
@@ -381,12 +386,10 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
             ? <Widget>[
                 IconButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return AlbumCover();
-                    }));
+                    Routes.router
+                        .navigateTo(widget.pageContext, '/albumcoverpage');
                   },
-                  icon: Icon(Icons.sort),
+                  icon: Icon(Icons.equalizer),
                 )
               ]
             : [],

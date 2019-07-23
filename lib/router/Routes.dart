@@ -15,6 +15,8 @@ class Routes {
 
   static String searchResPage = '/home/searchresultpage';
 
+  static String albumconverPage = '/albumcoverpage';
+
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
@@ -32,6 +34,9 @@ class Routes {
         handler: searchPageHandler, transitionType: TransitionType.inFromRight);
     router.define(searchResPage,
         handler: searchResultHandler,
+        transitionType: TransitionType.inFromRight);
+    router.define(albumconverPage,
+        handler: playingPageHandler,
         transitionType: TransitionType.inFromRight);
   }
 }

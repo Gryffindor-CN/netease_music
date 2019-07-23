@@ -163,7 +163,17 @@ class StateContainerState extends State<StateContainer> {
     } else {
       var _musics = musics;
       _musics.reversed.forEach((Music music) {
-        _playingList.add(music);
+        var _flag = false;
+        // _playingList.add(music);
+
+        for (Music musics in _playingList) {
+          if (music.id == musics.id) {
+            _flag = true;
+          }
+        }
+        if (_flag == false) {
+          _playingList.add(music);
+        }
       });
       var _currentSongUrl = await _getSongUrl(musics[0].id);
       _playingList = _playingList.reversed.toList();
@@ -191,7 +201,7 @@ class StateContainerState extends State<StateContainer> {
   }
 
   // 随机播放
-  Future<void> playShuffle() async {
+  Future<String> playShuffle() async {
     final _random = new Random();
     int next(int min, int max) => min + _random.nextInt(max - min);
     int _currentIndex;
@@ -220,6 +230,7 @@ class StateContainerState extends State<StateContainer> {
           duration: player.duration,
           time: player.time));
     });
+    return player.playingList[_currentIndex].songUrl;
   }
 
   // 播放播放列表中一首歌曲

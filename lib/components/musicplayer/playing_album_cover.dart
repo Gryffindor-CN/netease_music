@@ -15,12 +15,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../repository/netease.dart';
 
 class AlbumCover extends StatefulWidget {
-  final Music music;
   final bool isNew;
 
   const AlbumCover({
     Key key,
-    this.music,
     this.isNew,
   }) : super(key: key);
 
@@ -106,17 +104,36 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
         if (store.player.playMode.toString() == 'PlayMode.sequence') {
           // 顺序播放
 
-          await store.playNext();
+          var result = await store.playNext();
+          if (result == null) {
+            Fluttertoast.showToast(msg: '歌曲播放失败', gravity: ToastGravity.CENTER);
+            Future.delayed(Duration(milliseconds: 2000), () {
+              Fluttertoast.cancel();
+            });
+          } else {
+            var res = await audioPlayer.play(result);
+            if (res == 1) {
+              store.switchPlayingState(true);
+              controller_record.forward();
+              controller_needle.forward();
+            }
+          }
         } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
           // 随机播放
-          await store.playShuffle();
-        }
-
-        var res = await audioPlayer.play(store.player.current.songUrl);
-        if (res == 1) {
-          store.switchPlayingState(true);
-          controller_record.forward();
-          controller_needle.forward();
+          var result = await store.playShuffle();
+          if (result == null) {
+            Fluttertoast.showToast(msg: '歌曲播放失败', gravity: ToastGravity.CENTER);
+            Future.delayed(Duration(milliseconds: 2000), () {
+              Fluttertoast.cancel();
+            });
+          } else {
+            var res = await audioPlayer.play(result);
+            if (res == 1) {
+              store.switchPlayingState(true);
+              controller_record.forward();
+              controller_needle.forward();
+            }
+          }
         }
       }
     });
@@ -129,20 +146,45 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
     } else {
       audioPlayer.setReleaseMode(ReleaseMode.RELEASE);
     }
+
     // 播放
-    var _url = await NeteaseRepository.getSongUrl(store.player.current.id);
-    if (_url == null) {
-      Fluttertoast.showToast(msg: '歌曲播放失败', gravity: ToastGravity.CENTER);
-      Future.delayed(Duration(milliseconds: 2000), () {
-        Fluttertoast.cancel();
-      });
-    } else {
-      var res = await audioPlayer.play(_url);
-      if (res == 1) {
-        store.switchPlayingState(true);
-        store.setPlayingState(Duration.zero, Duration.zero, 0.0);
-        controller_record.forward();
-        controller_needle.forward();
+    if (widget.isNew != null && widget.isNew == true) {
+      if (store.player.isPlaying == true) {
+        var result = await store.player.audioPlayer.stop();
+        if (result == 1) {
+          store.switchPlayingState(false);
+          store.setPlayingState(Duration.zero, Duration.zero, 0.0);
+          var _url =
+              await NeteaseRepository.getSongUrl(store.player.current.id);
+          if (_url == null) {
+            Fluttertoast.showToast(msg: '歌曲播放失败', gravity: ToastGravity.CENTER);
+            Future.delayed(Duration(milliseconds: 2000), () {
+              Fluttertoast.cancel();
+            });
+          } else {
+            var res = await audioPlayer.play(_url);
+            if (res == 1) {
+              store.switchPlayingState(true);
+              controller_record.forward();
+              controller_needle.forward();
+            }
+          }
+        }
+      } else {
+        var _url = await NeteaseRepository.getSongUrl(store.player.current.id);
+        if (_url == null) {
+          Fluttertoast.showToast(msg: '歌曲播放失败', gravity: ToastGravity.CENTER);
+          Future.delayed(Duration(milliseconds: 2000), () {
+            Fluttertoast.cancel();
+          });
+        } else {
+          var res = await audioPlayer.play(_url);
+          if (res == 1) {
+            store.switchPlayingState(true);
+            controller_record.forward();
+            controller_needle.forward();
+          }
+        }
       }
     }
   }
@@ -150,6 +192,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
     controller_record = new AnimationController(
         duration: const Duration(milliseconds: 13000), vsync: this);
     animation_record =
@@ -174,7 +217,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   void dispose() {
     controller_record.dispose();
     controller_needle.dispose();
-
     super.dispose();
   }
 
@@ -195,24 +237,18 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
     // 从歌曲搜索页面跳转过来
     if (widget.isNew != null && loaded == false) {
-      if (store.player.isPlaying) {
-        audioPlayer.stop();
-      }
       initAudioPlayer(store, audioPlayer, context);
       loaded = true;
-    }
-
-    if (store.player.isPlaying == true) {
-      controller_record.forward();
-      controller_needle.forward();
-      loaded = true;
-      vd.value = _position;
-    }
-    if (store.player.isPlaying == false &&
+    } else if (store.player.isPlaying == false &&
         loaded == false &&
         _position.inMilliseconds == 0) {
       initAudioPlayer(store, audioPlayer, context);
       loaded = true;
+    } else if (store.player.isPlaying == true && loaded == false) {
+      controller_record.forward();
+      controller_needle.forward();
+      loaded = true;
+      vd.value = _position;
     }
 
     setState(() {
@@ -948,7 +984,7 @@ class _OperationBar extends StatelessWidget {
                       },
                       {
                         'leadingIcon': AntDesign.getIconData('barchart'),
-                        'title': '���气榜应援',
+                        'title': '人气榜应援',
                         'callback': () {}
                       },
                       {

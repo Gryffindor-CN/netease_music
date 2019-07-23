@@ -7,6 +7,7 @@ import './pages/home_page.dart';
 import 'components/netease_navigation_bar.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import 'package:audioplayers/audioplayers.dart';
+import './pages/me/home_page.dart';
 
 void main() => runApp(StateContainer(
       child: MyApp(),
@@ -85,13 +86,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           body: Text(
             '视频',
           )),
-      Scaffold(
-          appBar: AppBar(
-            title: Text('我的'),
-          ),
-          body: Text(
-            '我的',
-          )),
+      // Scaffold(
+      //     appBar: AppBar(
+      //       title: Text('我的'),
+      //     ),
+      //     body: Text(
+      //       '我的',
+      //     )),
+      MeHomePage()
     ];
     return Scaffold(
         key: _globalKey,

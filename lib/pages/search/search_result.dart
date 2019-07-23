@@ -12,12 +12,12 @@ import '../../model/music.dart';
 import './music_item.dart';
 import './search_playlist.dart';
 import '../../repository/netease.dart';
-import '../../components/musicplayer/playing_album_cover.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class SearchResult extends StatefulWidget {
   final String keyword;
-  SearchResult(this.keyword);
+  final BuildContext pageContext;
+  SearchResult({this.keyword, this.pageContext});
 
   @override
   SearchResultState createState() => SearchResultState();
@@ -126,7 +126,9 @@ class SearchResultState extends State<SearchResult>
                 children: <Widget>[
                   Container(
                     child: Album(widget.keyword, songs,
-                        tabController: _tabController, store: store),
+                        tabController: _tabController,
+                        store: store,
+                        pageContext: widget.pageContext),
                   ),
                   SizedBox(
                     height: 25.0,
@@ -141,7 +143,10 @@ class SearchResultState extends State<SearchResult>
                 ],
               ),
       ),
-      SearchSongTab(keyword: widget.keyword),
+      SearchSongTab(
+        keyword: widget.keyword,
+        pageContext: widget.pageContext,
+      ),
       Center(child: Text('视频')),
       Center(child: Text('歌手')),
       Center(child: Text('专辑')),
@@ -242,7 +247,9 @@ class Album extends StatelessWidget {
   final List<Music> songList;
   final TabController tabController;
   final StateContainerState store;
-  Album(this.keyword, this.songList, {this.tabController, this.store});
+  final BuildContext pageContext;
+  Album(this.keyword, this.songList,
+      {this.tabController, this.store, this.pageContext});
   static Widget _nameWidget;
   static Widget _albumnameWidget;
 
@@ -401,6 +408,7 @@ class Album extends StatelessWidget {
             }
           }
         ],
+        pageContext: this.pageContext,
       ));
     });
     widgetList.insert(
@@ -443,20 +451,24 @@ class Album extends StatelessWidget {
                               if (store.player.isPlaying == true) {
                                 var res = await store.player.audioPlayer.stop();
                                 if (res == 1) {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                    return AlbumCover(
-                                      isNew: true,
-                                    );
-                                  }));
+                                  // Navigator.of(context).push(MaterialPageRoute(
+                                  //     builder: (BuildContext context) {
+                                  //   return AlbumCover(
+                                  //     isNew: true,
+                                  //   );
+                                  // }));
+                                  Routes.router.navigateTo(pageContext,
+                                      '/albumcoverpage?isNew=true');
                                 }
                               } else {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                  return AlbumCover(
-                                    isNew: true,
-                                  );
-                                }));
+                                // Navigator.of(context).push(MaterialPageRoute(
+                                //     builder: (BuildContext context) {
+                                //   return AlbumCover(
+                                //     isNew: true,
+                                //   );
+                                // }));
+                                Routes.router.navigateTo(
+                                    pageContext, '/albumcoverpage?isNew=true');
                               }
                             },
                           ),
