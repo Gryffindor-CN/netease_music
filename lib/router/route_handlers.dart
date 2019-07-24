@@ -7,25 +7,21 @@ import 'package:netease_music/pages/playlist/page_playlist.dart';
 import '../components/base/album_box.dart';
 
 var albumHandler = new Handler(
-  handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-    return new AlbumBox();
-  }
-);
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new AlbumBox();
+});
 
 var anotherPageHandler = new Handler(
-  handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-    return new AnotherPage();
-  }
-);
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new AnotherPage();
+});
 
 var mycollectionHandler = new Handler(
-  handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-    return new MyCollection();
-  }
-);
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new MyCollection();
+});
 
-var playlistHandler = new Handler(
-  handlerFunc: (BuildContext, Map<String, dynamic> params) {
-    return PlaylistPage();
-  }
-);
+var playlistHandler =
+    new Handler(handlerFunc: (BuildContext, Map<String, dynamic> params) {
+  return PlaylistPage(9);
+});
