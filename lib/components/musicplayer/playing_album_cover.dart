@@ -86,8 +86,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
     // 播放完成
     _playerCompleteSubscription =
         audioPlayer.onPlayerCompletion.listen((event) async {
-      final store = StateContainer.of(ctx);
-
       if (store.player.playMode.toString() == 'PlayMode.single') {
         // 循环播放
         audioPlayer.setReleaseMode(ReleaseMode.LOOP);
@@ -98,7 +96,13 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
       var res = await audioPlayer.stop();
       if (res == 1) {
+        setState(() {
+          position = Duration.zero;
+          duration = Duration.zero;
+          time = 0.0;
+        });
         store.setPlayingState(Duration.zero, Duration.zero, 0.0);
+
         store.switchPlayingState(false);
 
         if (store.player.playMode.toString() == 'PlayMode.sequence') {
@@ -114,8 +118,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
             var res = await audioPlayer.play(result);
             if (res == 1) {
               store.switchPlayingState(true);
-              controller_record.forward();
-              controller_needle.forward();
             }
           }
         } else if (store.player.playMode.toString() == 'PlayMode.shuffle') {
@@ -130,8 +132,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
             var res = await audioPlayer.play(result);
             if (res == 1) {
               store.switchPlayingState(true);
-              controller_record.forward();
-              controller_needle.forward();
             }
           }
         }
@@ -192,7 +192,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
     controller_record = new AnimationController(
         duration: const Duration(milliseconds: 13000), vsync: this);
     animation_record =
@@ -249,7 +248,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
       controller_needle.forward();
       loaded = true;
       vd.value = _position;
-    }
+    } else if (store.player.isPlaying == true && loaded == true) {}
 
     setState(() {
       position = _position;
@@ -1017,8 +1016,6 @@ class _PlayingTitle extends StatelessWidget {
             color: Theme.of(context).primaryIconTheme.color,
           ),
           onPressed: () {
-            // audioPlayer.dispose();
-
             Navigator.pop(context);
           }),
       titleSpacing: 0,
