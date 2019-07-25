@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       onGenerateRoute: Routes.router.generator,
       theme: ThemeData(
+        primaryColor: Color(0xffC20C0C),
         primarySwatch: Colors.red,
       ),
       home: Netease(),

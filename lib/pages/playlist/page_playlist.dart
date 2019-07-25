@@ -1,305 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:netease_music/material/flexible_detail_bar.dart';
+import 'package:flutter/widgets.dart' as prefix0;
+import 'package:netease_music/pages/playlist/selection_list.dart';
 import 'dart:ui';
 import '../../model/model.dart';
 import '../../model/playlist_detail.dart';
 import '../../pages/playlist/music_list.dart';
+import '../../utils/utils.dart';
+import './flexible_app_bar.dart';
+import './music_list.dart';
+import '../../repository/netease.dart';
+import './selection_checkbox.dart';
+import './selection_bottom.dart';
 
 /// 歌单详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
-
-var _creator = {
-  "defaultAvatar": false,
-  "province": 110000,
-  "authStatus": 1,
-  "followed": false,
-  "avatarUrl":
-      "http://p1.music.126.net/QWMV-Ru_6149AKe0mCBXKg==/1420569024374784.jpg",
-  "accountStatus": 0,
-  "gender": 1,
-  "city": 110101,
-  "birthday": -2209017600000,
-  "userId": 1,
-  "userType": 2,
-  "nickname": '网易云音乐',
-  "signature":
-      "网易云音乐是6亿人都在使用的音乐平台，致力于帮助用户发现音乐惊喜，帮助音乐人实现梦想。\n客服在线时间：9：00 - 24：00，如您在使用过程中遇到任何问题，欢迎私信咨询@云音乐客服 ，我们会尽快回复。\n如果仍然不能解决您的问题，请邮件我们：\n用户：ncm5990@163.com\n音乐人：yyr599@163.com",
-  "description": "网易云音乐官方账号",
-  "detailDescription": "网易云音乐官方账号",
-  "avatarImgId": 1420569024374784,
-  "backgroundImgId": 2002210674180202,
-  "backgroundUrl":
-      "http://p1.music.126.net/pmHS4fcQtcNEGewNb5HRhg==/2002210674180202.jpg",
-  "authority": 3,
-  "mutual": false,
-  "expertTags": null,
-  "experts": null,
-  "djStatus": 10,
-  "vipType": 11,
-  "remarkName": null,
-  "avatarImgIdStr": 1420569024374784,
-  "backgroundImgIdStr": 2002210674180202,
-};
-
-var _musics = [
-  Music(
-      id: 1369998604,
-      title: '我们很好',
-      url: 'http://music.163.com/song/media/outer/url?id=1369998604.mp3',
-      album: Album(
-          id: 79630781,
-          name: '我们很好',
-          coverImageUrl:
-              'http://p1.music.126.net/WD5q9kNrUnO9DyDMouYT_Q==/109951164142211910.jpg'),
-      artists: [Artist(id: 3684, name: '林俊杰', imageUrl: null)],
-      mvId: 10871909),
-  Music(
-      id: 1365393542,
-      title: '孤身',
-      url: 'http://music.163.com/song/media/outer/url?id=1365393542.mp3',
-      album: Album(
-          id: 79130968,
-          name: '孤身',
-          coverImageUrl:
-              'http://p2.music.126.net/yVmtE5RFcJ1fhv-ivuyuRw==/109951164075300143.jpg'),
-      artists: [Artist(id: 1197168, name: '徐秉龙', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1371428499,
-      title: 'Rumble',
-      url: 'http://music.163.com/song/media/outer/url?id=1371428499.mp3',
-      album: Album(
-          id: 79759200,
-          name: 'Diaspora',
-          coverImageUrl:
-              'http://p1.music.126.net/t5AN7zm6wzgTM9ubw2VEeQ==/109951164142609091.jpg'),
-      artists: [
-        Artist(id: 916113, name: 'GoldLink', imageUrl: null),
-        Artist(id: 1083118, name: '王嘉尔', imageUrl: null),
-        Artist(id: 32528718, name: 'Lil Nei', imageUrl: null)
-      ],
-      mvId: 0),
-  Music(
-      id: 1371362795,
-      title: '离开地球',
-      url: 'http://music.163.com/song/media/outer/url?id=1371362795.mp3',
-      album: Album(
-          id: 79754932,
-          name: '天文学家',
-          coverImageUrl:
-              'http://p1.music.126.net/cc_7LdhHvgCfiNOFK5QCiw==/109951164141976716.jpg'),
-      artists: [Artist(id: 12264643, name: '泥鳅', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1370008924,
-      title: '我和我的吉他生锈了',
-      url: 'http://music.163.com/song/media/outer/url?id=1370008924.mp3',
-      album: Album(
-          id: 79631230,
-          name: '我和我的吉他生锈了',
-          coverImageUrl:
-              'http://p2.music.126.net/Y6aLO2nYpAHatE2bNVY8PQ==/109951164127400370.jpg'),
-      artists: [Artist(id: 8281, name: '金南玲', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1366903169,
-      title: 'Falling',
-      url: 'http://music.163.com/song/media/outer/url?id=1366903169.mp3',
-      album: Album(
-          id: 79310982,
-          name: 'Falling',
-          coverImageUrl:
-              'http://p2.music.126.net/LslEJ9pYUITGooTEsVQ2-A==/109951164091521728.jpg'),
-      artists: [
-        Artist(id: 1019466, name: 'Rezz', imageUrl: null),
-        Artist(id: 83289, name: 'Underoath', imageUrl: null)
-      ],
-      mvId: 10871836),
-  Music(
-      id: 1335942780,
-      title: '九万字',
-      url: 'http://music.163.com/song/media/outer/url?id=1335942780.mp3',
-      album: Album(
-          id: 75228515,
-          name: '人间不值得',
-          coverImageUrl:
-              'http://p2.music.126.net/oVCpfPtfAqNcAbRWMU7ffA==/109951163801547166.jpg'),
-      artists: [Artist(id: 12308369, name: '黄诗扶', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1371362792,
-      title: 'Intro_我',
-      url: 'http://music.163.com/song/media/outer/url?id=1371362792.mp3',
-      album: Album(
-          id: 79754932,
-          name: '天文学家',
-          coverImageUrl:
-              'http://p1.music.126.net/cc_7LdhHvgCfiNOFK5QCiw==/109951164141976716.jpg'),
-      artists: [Artist(id: 12264643, name: '泥鳅', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1371366701,
-      title: '天文学家',
-      url: 'http://music.163.com/song/media/outer/url?id=1371366701.mp3',
-      album: Album(
-          id: 79754932,
-          name: '天文学家',
-          coverImageUrl:
-              'http://p1.music.126.net/cc_7LdhHvgCfiNOFK5QCiw==/109951164141976716.jpg'),
-      artists: [Artist(id: 12264643, name: '泥鳅', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1371617260,
-      title: 'Loco Contigo',
-      url: 'http://music.163.com/song/media/outer/url?id=1371617260.mp3',
-      album: Album(
-          id: 79777143,
-          name: 'Loco Contigo',
-          coverImageUrl:
-              'http://p1.music.126.net/8Edd-KbLGCGGyPk5wkFkDA==/109951164144621540.jpg'),
-      artists: [
-        Artist(id: 296416, name: 'DJ Snake', imageUrl: null),
-        Artist(id: 309127, name: 'J Balvin', imageUrl: null),
-        Artist(id: 45033, name: 'Tyga', imageUrl: null)
-      ],
-      mvId: 10871912),
-  Music(
-      id: 1371523631,
-      title: 'King of Underground',
-      url: 'http://music.163.com/song/media/outer/url?id=1371523631.mp3',
-      album: Album(
-          id: 79770257,
-          name: '唯有不甘',
-          coverImageUrl:
-              'http://p1.music.126.net/YyVgJxawEJYXSMNfiaz8sA==/109951164143648095.jpg'),
-      artists: [
-        Artist(id: 31055, name: 'Cee', imageUrl: null),
-        Artist(id: 30003804, name: 'GDLF MUSIC', imageUrl: null)
-      ],
-      mvId: 0),
-  Music(
-      id: 1359995960,
-      title: '那个短发姑娘',
-      url: 'http://music.163.com/song/media/outer/url?id=1359995960.mp3',
-      album: Album(
-          id: 78538412,
-          name: '那个短发姑娘',
-          coverImageUrl:
-              'http://p1.music.126.net/gKoRN3NOeW_9XyFD4dobCQ==/109951164011436582.jpg'),
-      artists: [Artist(id: 12258472, name: '杨力', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1346104327,
-      title: '多想在平庸的生活拥抱你',
-      url: 'http://music.163.com/song/media/outer/url?id=1346104327.mp3',
-      album: Album(
-          id: 75018416,
-          name: '多想在平庸的生活拥抱你',
-          coverImageUrl:
-              'http://p1.music.126.net/z-KH6R1-HP1lpCWSnmKy8Q==/109951163911444882.jpg'),
-      artists: [Artist(id: 12429072, name: '隔壁老樊', imageUrl: null)],
-      mvId: 10869713),
-  Music(
-      id: 1371516088,
-      title: 'Down Bad',
-      url: 'http://music.163.com/song/media/outer/url?id=1371516088.mp3',
-      album: Album(
-          id: 79770797,
-          name: '1-888-88-DREAM',
-          coverImageUrl:
-              'http://p1.music.126.net/NBOf4yeeScw6E89p_KNq4w==/109951164143509378.jpg'),
-      artists: [
-        Artist(id: 14212811, name: 'Dreamville', imageUrl: null),
-        Artist(id: 12232106, name: 'J.I.D', imageUrl: null),
-        Artist(id: 854732, name: 'Bas', imageUrl: null),
-        Artist(id: 36910, name: 'J. Cole', imageUrl: null),
-        Artist(id: 980022, name: 'EarthGang', imageUrl: null),
-        Artist(id: 36910, name: 'J. Cole', imageUrl: null),
-        Artist(id: 12523227, name: 'Young Nudy', imageUrl: null)
-      ],
-      mvId: 0),
-  Music(
-      id: 1357621728,
-      title: 'Insurgence',
-      url: 'http://music.163.com/song/media/outer/url?id=1357621728.mp3',
-      album: Album(
-          id: 78399461,
-          name: 'Insurgence',
-          coverImageUrl:
-              'http://p1.music.126.net/SOkshfVrQVzLDexVID9d_A==/109951163986661411.jpg'),
-      artists: [
-        Artist(id: 1063121, name: 'Jim Yosef', imageUrl: null),
-        Artist(id: 12006394, name: 'Starlyte', imageUrl: null)
-      ],
-      mvId: 0),
-  Music(
-      id: 497572729,
-      title: '人生浪费指南',
-      url: 'http://music.163.com/song/media/outer/url?id=497572729.mp3',
-      album: Album(
-          id: 35927488,
-          name: '人生浪费指南',
-          coverImageUrl:
-              'http://p2.music.126.net/-Sogc4j14F2k72BpXwK13g==/109951162999708371.jpg'),
-      artists: [Artist(id: 12383009, name: '夏日入侵企画', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1371050768,
-      title: 'Lost Lately',
-      url: 'http://music.163.com/song/media/outer/url?id=1371050768.mp3',
-      album: Album(
-          id: 79712581,
-          name: 'Lost Lately',
-          coverImageUrl:
-              'http://p1.music.126.net/6lXhxed9oMxeXLRqfG9wgw==/109951164139283981.jpg'),
-      artists: [Artist(id: 1017035, name: 'San Holo', imageUrl: null)],
-      mvId: 10871839),
-  Music(
-      id: 1368028065,
-      title: '夏夜好长',
-      url: 'http://music.163.com/song/media/outer/url?id=1368028065.mp3',
-      album: Album(
-          id: 79388262,
-          name: 'A long summer nights',
-          coverImageUrl:
-              'http://p1.music.126.net/3oyIB6qmExDEoZfD1TfiQA==/109951164104107088.jpg'),
-      artists: [Artist(id: 1021328, name: '李子阳', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1371331794,
-      title: '不是你的猫',
-      url: 'http://music.163.com/song/media/outer/url?id=1371331794.mp3',
-      album: Album(
-          id: 79750541,
-          name: '不是你的猫',
-          coverImageUrl:
-              'http://p1.music.126.net/F7j4mVqMARzF5GuYmEsFKg==/109951164141594446.jpg'),
-      artists: [Artist(id: 28298725, name: '申雨鹭', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1370886954,
-      title: '枪火Show',
-      url: 'http://music.163.com/song/media/outer/url?id=1370886954.mp3',
-      album: Album(
-          id: 79696996,
-          name: '枪火Show',
-          coverImageUrl:
-              'http://p1.music.126.net/sJhRvpJi6nGBgNVz1hURjw==/109951164141877967.jpg'),
-      artists: [Artist(id: 3066, name: '胡彦斌', imageUrl: null)],
-      mvId: 0),
-  Music(
-      id: 1365915805,
-      title: '莫愁',
-      url: 'http://music.163.com/song/media/outer/url?id=1365915805.mp3',
-      album: Album(
-          id: 79193626,
-          name: '莫愁',
-          coverImageUrl:
-              'http://p2.music.126.net/5oOb5Wk8LzO049pjeP_cOg==/109951164080240940.jpg'),
-      artists: [Artist(id: 1181775, name: '翁大涵', imageUrl: null)],
-      mvId: 10868905),
-];
 
 PlaylistDetail _result = PlaylistDetail(
   name: '云音乐飙升榜',
@@ -313,8 +28,8 @@ PlaylistDetail _result = PlaylistDetail(
   commentCount: 156149,
   shareCount: 6074,
   playCount: 2029583616,
-  creator: _creator,
-  musics: _musics,
+  creator: {},
+  musics: [],
 );
 
 class PlaylistPage extends StatefulWidget {
@@ -327,6 +42,46 @@ class PlaylistPage extends StatefulWidget {
 }
 
 class _PlaylistPageState extends State<PlaylistPage> {
+  PlaylistDetail _result;
+  List<Music> songs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getTopListDetail();
+  }
+
+  _getTopListDetail() async {
+    var playlist = await NeteaseRepository.getTopList(0);
+    playlist['tracks'].asMap().forEach((int index, item) {
+      songs.add(Music(
+        name: item['name'],
+        id: item['id'],
+        aritstName: item['ar'][0]['name'],
+        aritstId: item['ar'][0]['id'],
+        albumName: item['al']['name'],
+        albumId: item['al']['id'],
+      ));
+    });
+
+    setState(() {
+      _result = PlaylistDetail(
+        name: playlist['name'],
+        coverUrl: playlist['coverImgUrl'],
+        id: playlist['id'],
+        trackCount: playlist['trackCount'],
+        description: playlist['description'],
+        subscribed: playlist['subscribed'],
+        subscribedCount: playlist['subscribedCount'],
+        commentCount: playlist['commentCount'],
+        shareCount: playlist['shareCount'],
+        playCount: playlist['playCount'],
+        creator: playlist['creator'],
+        musics: songs,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlayList(playlistDetail: _result);
@@ -347,48 +102,246 @@ class PlayList extends StatefulWidget {
 }
 
 class _PlayListState extends State<PlayList> {
+  bool _selection = false;
+  bool _selectedAll = false;
+  Color bottomIconColor = Color(0xffd4d4d4);
+  final List<Music> _selectedList = [];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: CustomScrollView(
+    return NotificationListener<SelectionNotification>(
+      onNotification: (notification) {
+        setState(() {
+          _selectedAll = notification.selectedAll;
+        });
+      },
+      child: Scaffold(
+        body: Stack(
+          children: <Widget>[
+            CustomScrollView(
               slivers: <Widget>[
                 SliverAppBar(
-                  // title: Text('歌单'),
                   elevation: 0,
                   pinned: true,
                   expandedHeight: HEIGHT_HEADER,
-                  bottom: MusicListHeader(count: widget.musiclist.length),
-                  // flexibleSpace: FlexibleSpaceBar(
-                  //   centerTitle: true,
-                  //   title: Text(
-                  //     '可折叠的组件',
-                  //     style: TextStyle(
-                  //       color: Colors.white,
-                  //       fontSize: 16.0,
-                  //     ),
-                  //   ),
-                  //   background: Image.network(
-                  //     'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1549129578802&di=f866c638ea12ad13c5d603bcc008a6c2&imgtype=0&src=http%3A%2F%2Fpic2.16pic.com%2F00%2F07%2F66%2F16pic_766297_b.jpg',
-                  //     fit: BoxFit.cover,
-                  //   ),
-                  // ),
+                  bottom: _selection == false
+                      ? MusicListHeader(
+                          trackCount: widget.playlistDetail == null
+                              ? 0
+                              : widget.playlistDetail.trackCount,
+                          playCount: widget.playlistDetail == null
+                              ? 0
+                              : widget.playlistDetail.playCount)
+                      : _SelectionHeader(
+                          allSelected: _selectedAll,
+                          onTap: (BuildContext ctx) {
+                            SelectionNotification(!_selectedAll).dispatch(ctx);
+                            if (_selectedAll) {
+                              setState(() {
+                                _selectedList.addAll(widget.musiclist);
+                                bottomIconColor =
+                                    Theme.of(context).iconTheme.color;
+                              });
+                            } else {
+                              setState(() {
+                                _selectedList.clear();
+                                bottomIconColor = Color(0xffd4d4d4);
+                              });
+                            }
+                          },
+                        ),
                   flexibleSpace: _PlaylistDetailHeader(
-                      playlistDetail: widget.playlistDetail),
-                ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        MusicTitle(music: widget.musiclist[index]),
-                    childCount: widget.musiclist.length,
+                    playlistDetail: widget.playlistDetail,
+                    onSelect: () {
+                      setState(() {
+                        _selection = !_selection;
+                      });
+                    },
                   ),
                 ),
+                _selection == false
+                    ? SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return widget.playlistDetail == null
+                                ? Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : MusicTitle(
+                                    widget.musiclist,
+                                  );
+                          },
+                          childCount: widget.playlistDetail == null
+                              ? 1
+                              : widget.musiclist.length,
+                        ),
+                      )
+                    : SliverSelection(
+                        musiclist: widget.musiclist,
+                        selectedALL: _selectedAll,
+                        selectedList: _selectedList,
+                        onTap: (value) {
+                          setState(() {
+                            if (!_selectedList.remove(value['item'])) {
+                              // true 代表是未选择
+                              _selectedList.add(value['item']);
+                              bottomIconColor =
+                                  Theme.of(context).iconTheme.color;
+                            }
+                            if (_selectedList.length ==
+                                widget.musiclist.length) {
+                              SelectionNotification(true)
+                                  .dispatch(value['ctx']);
+                              bottomIconColor =
+                                  Theme.of(context).iconTheme.color;
+                            } else {
+                              SelectionNotification(false)
+                                  .dispatch(value['ctx']);
+                            }
+                            if (_selectedList.length == 0) {
+                              bottomIconColor = Color(0xffd4d4d4);
+                            }
+                          });
+                        }),
               ],
             ),
-          ),
-        ],
+            _selection == false
+                ? Center()
+                : SelectBottom(
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 0.0),
+                      // height: 6.0,
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: _selectedList.length == 0
+                                ? null
+                                : () {
+                                    // _addToNext(context);
+                                  },
+                            child: Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.play_circle_outline,
+                                    color: bottomIconColor,
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      '下一首播放',
+                                      style: TextStyle(
+                                          color: Color(0xff3f3b3c),
+                                          fontSize: 12.0),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _selectedList.length == 0
+                                ? null
+                                : () {
+                                    // _addToCollection(context);
+                                  },
+                            child: Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.add_circle_outline,
+                                    color: bottomIconColor,
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      '收藏到歌单',
+                                      style: TextStyle(
+                                          color: Color(0xff3f3b3c),
+                                          fontSize: 12.0),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _selectedList.length == 0 ? null : () {},
+                            child: Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.delete_outline,
+                                    color: bottomIconColor,
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      '删除',
+                                      style: TextStyle(
+                                          color: Color(0xff3f3b3c),
+                                          fontSize: 12.0),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+          ],
+        ),
+      ),
+    );
+
+    ;
+  }
+}
+
+class SliverSelection extends StatefulWidget {
+  SliverSelection(
+      {Key key,
+      this.musiclist,
+      this.selectedALL,
+      this.selectedList,
+      this.onTap})
+      : super(key: key);
+  final List<Music> musiclist;
+  final List<Music> selectedList;
+
+  final bool selectedALL;
+  final ValueChanged<Map<String, dynamic>> onTap;
+
+  @override
+  _SliverSelectionState createState() => _SliverSelectionState();
+}
+
+class _SliverSelectionState extends State<SliverSelection> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          var _item = widget.musiclist[index];
+          return SongList(
+              handleTap: () {
+                widget.onTap({'ctx': context, 'item': _item});
+              },
+              item: _item,
+              selectStatus: widget.selectedALL == true
+                  ? true
+                  : widget.selectedList.contains(_item));
+        },
+        childCount: widget.musiclist.length,
       ),
     );
   }
@@ -401,91 +354,242 @@ class _BlurBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Container(
-    //   decoration: BoxDecoration(
-    //     image: DecorationImage(
-    //       image: NetworkImage(
-    //         playlistDetail.coverUrl,
-    //       ),
-    //       fit: BoxFit.cover,
-    //     ),
-    //   ),
-    //   child: Container(
-    //     child: BackdropFilter(
-    //       filter: ImageFilter.blur(sigmaY: 24.0, sigmaX: 24.0),
-    //       child: Container(
-    //         decoration: BoxDecoration(
-    //             gradient: LinearGradient(
-    //           begin: Alignment.topCenter,
-    //           end: Alignment.bottomCenter,
-    //           colors: [
-    //             Colors.black54,
-    //             Colors.black26,
-    //             Colors.black45,
-    //             Colors.black87,
-    //           ],
-    //         )),
-    //       ),
-    //     ),
-    //   ),
-    // );
     return Stack(
       fit: StackFit.expand,
-      children: <Widget>[
-        // Image(image: NeteaseImage(imageUrl), fit: BoxFit.cover),
-        Image.network(
-          playlistDetail.coverUrl,
-          fit: BoxFit.cover,
-        ),
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(color: Colors.black.withOpacity(0.1)),
-        )
-      ],
+      children: playlistDetail == null
+          ? <Widget>[
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                child: Container(color: Colors.black.withOpacity(0.1)),
+              )
+            ]
+          : <Widget>[
+              Image.network(
+                playlistDetail.coverUrl,
+                fit: BoxFit.cover,
+              ),
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                child: Container(color: Colors.black.withOpacity(0.1)),
+              )
+            ],
     );
   }
 }
 
 class _PlaylistDetailHeader extends StatelessWidget {
-  _PlaylistDetailHeader({this.playlistDetail});
+  _PlaylistDetailHeader({this.playlistDetail, this.onSelect});
   final PlaylistDetail playlistDetail;
+  final VoidCallback onSelect;
+
   @override
   Widget build(BuildContext context) {
-    final FlexibleSpaceBarSettings settings =
-        context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
-    final double deltaExtent = settings.maxExtent - settings.minExtent;
-    final double t =
-        (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent)
-            .clamp(0.0, 1.0);
-    return ClipRect(
-      child: Stack(
-        fit: StackFit.expand,
+    return FlexibleDetailBar(
+        background: _BlurBackground(
+          playlistDetail: playlistDetail,
+        ),
+        content: _buildContent(context),
+        builder: (context, t) {
+          return AppBar(
+            title: Text(t > 0.5 ? playlistDetail.name : '歌单'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            titleSpacing: 0,
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.search), tooltip: "歌单内搜索", onPressed: () {}),
+              IconButton(
+                  icon: Icon(Icons.more_vert),
+                  tooltip: "更多选项",
+                  onPressed: () {})
+            ],
+          );
+        });
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+  ) {
+    Map<String, Object> creator =
+        playlistDetail == null ? {} : playlistDetail.creator;
+
+    return DetailHeader(
+      commentCount: playlistDetail == null ? 0 : playlistDetail.commentCount,
+      shareCount: playlistDetail == null ? 0 : playlistDetail.shareCount,
+      onCommentTap: () {},
+      onShareTap: () {},
+      onSelectionTap: onSelect,
+      content: Container(
+        height: 146.0,
+        padding: EdgeInsets.only(top: 20.0),
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: 16.0,
+            ),
+            AspectRatio(
+              aspectRatio: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(3)),
+                child: Stack(
+                  children: <Widget>[
+                    Hero(
+                      tag: playlistDetail == null ? '' : playlistDetail.heroTag,
+                      child: playlistDetail == null
+                          ? CircularProgressIndicator()
+                          : Image.network(
+                              playlistDetail.coverUrl,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                            Colors.black54,
+                            Colors.black26,
+                            Colors.transparent,
+                            Colors.transparent,
+                          ])),
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Icon(Icons.headset,
+                                color: Theme.of(context).primaryIconTheme.color,
+                                size: 12),
+                            Text(
+                                getFormattedNumber(playlistDetail == null
+                                    ? 0
+                                    : playlistDetail.playCount),
+                                style: Theme.of(context)
+                                    .primaryTextTheme
+                                    .body1
+                                    .copyWith(fontSize: 11))
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 16.0,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Text(
+                    playlistDetail == null ? '' : playlistDetail.name,
+                    style: Theme.of(context)
+                        .primaryTextTheme
+                        .title
+                        .copyWith(fontSize: 17),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 10),
+                  InkWell(
+                    onTap: () => {},
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4, bottom: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: playlistDetail == null
+                                ? CircularProgressIndicator()
+                                : ClipOval(
+                                    child: Image.network(
+                                      creator["avatarUrl"],
+                                    ),
+                                  ),
+                          ),
+                          Padding(padding: EdgeInsets.only(left: 4)),
+                          Text(
+                            playlistDetail == null ? '' : creator["nickname"],
+                            style: Theme.of(context).primaryTextTheme.body1,
+                          ),
+                          Icon(
+                            Icons.chevron_right,
+                            color: Theme.of(context).primaryIconTheme.color,
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailHeader extends StatelessWidget {
+  final Widget content;
+  final int commentCount;
+  final int shareCount;
+  final GestureTapCallback onCommentTap;
+  final GestureTapCallback onShareTap;
+  final GestureTapCallback onSelectionTap;
+
+  const DetailHeader(
+      {Key key,
+      this.content,
+      this.commentCount,
+      this.shareCount,
+      this.onCommentTap,
+      this.onShareTap,
+      this.onSelectionTap})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + kToolbarHeight),
+      child: Column(
         children: <Widget>[
-          Positioned(
-            child: _BlurBackground(
-              playlistDetail: playlistDetail,
-            ),
-          ),
-          // Positioned(
-          //   child: t > 0.5 ? Text('云音乐飙升榜') : Text('$t'),
-          // ),
-          Positioned(
-            child: AppBar(
-              title: Text(t > 0.5 ? '云音乐飙升榜' : '歌单'),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              titleSpacing: 0,
-              actions: <Widget>[
-                IconButton(
-                    icon: Icon(Icons.search),
-                    tooltip: "歌单内搜索",
-                    onPressed: () {}),
-                IconButton(
-                    icon: Icon(Icons.more_vert),
-                    tooltip: "更多选项",
-                    onPressed: () {})
-              ],
-            ),
+          content,
+          SizedBox(height: 30.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              _HeaderAction(
+                iconData: Icons.comment,
+                headerContent: commentCount.toString(),
+                onTap: onCommentTap,
+              ),
+              _HeaderAction(
+                iconData: Icons.share,
+                headerContent: shareCount.toString(),
+                onTap: onShareTap,
+              ),
+              _HeaderAction(
+                iconData: Icons.file_download,
+                headerContent: '下载',
+                onTap: null,
+              ),
+              _HeaderAction(
+                iconData: Icons.check_box,
+                headerContent: '多选',
+                onTap: onSelectionTap,
+              ),
+            ],
           )
         ],
       ),
@@ -493,10 +597,100 @@ class _PlaylistDetailHeader extends StatelessWidget {
   }
 }
 
-class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
-  const MusicListHeader({Key key, this.count, this.tail}) : super(key: key);
+class _HeaderAction extends StatelessWidget {
+  final IconData iconData;
+  final String headerContent;
+  final GestureTapCallback onTap;
+  _HeaderAction({Key key, this.iconData, this.headerContent, this.onTap})
+      : super(key: key);
 
-  final int count;
+  Widget build(BuildContext context) {
+    var textTheme = Theme.of(context).primaryTextTheme;
+    return InkResponse(
+      onTap: onTap,
+      splashColor: textTheme.body1.color,
+      child: Opacity(
+        opacity: onTap == null ? 0.5 : 1,
+        child: Column(children: [
+          Icon(
+            iconData,
+            color: textTheme.body1.color,
+          ),
+          Text(
+            headerContent,
+            style: textTheme.caption.copyWith(fontSize: 13),
+          )
+        ]),
+      ),
+    );
+  }
+}
+
+class _SelectionHeader extends StatelessWidget implements PreferredSizeWidget {
+  final bool allSelected;
+  final ValueChanged<BuildContext> onTap;
+  _SelectionHeader({Key key, this.allSelected, this.onTap}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      child: Material(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            this.onTap(context);
+          },
+          child: SizedBox.fromSize(
+            size: preferredSize,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                SizedBox(
+                  width: 20.0,
+                ),
+                SongCheckbox(
+                  checked: allSelected,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0),
+                  child: Text(
+                    '全选',
+                    style: TextStyle(fontSize: 15.0),
+                  ),
+                ),
+                Spacer(),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0),
+                  child: Text(
+                    '完成',
+                    style: TextStyle(
+                        fontSize: 15.0, color: Theme.of(context).primaryColor),
+                  ),
+                ),
+                SizedBox(
+                  width: 30.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(50);
+}
+
+class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
+  const MusicListHeader({Key key, this.trackCount, this.playCount, this.tail})
+      : super(key: key);
+
+  final int trackCount;
+  final int playCount;
   final Widget tail;
 
   @override
@@ -512,6 +706,7 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
           child: SizedBox.fromSize(
             size: preferredSize,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Padding(padding: EdgeInsets.only(left: 16)),
                 Icon(
@@ -525,11 +720,15 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 Padding(padding: EdgeInsets.only(left: 2)),
                 Text(
-                  "(共$count首)",
+                  "(共$trackCount首)",
                   style: Theme.of(context).textTheme.caption,
                 ),
                 Spacer(),
-                // tail,
+                Padding(
+                  padding: EdgeInsets.only(right: 20.0),
+                  child: Text(
+                      playCount == null ? 0 : getFormattedNumber(playCount)),
+                )
               ],
             ),
           ),
@@ -540,4 +739,9 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(50);
+}
+
+class SelectionNotification extends Notification {
+  SelectionNotification(this.selectedAll);
+  final bool selectedAll;
 }
