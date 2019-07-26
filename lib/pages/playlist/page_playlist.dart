@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart' as prefix0;
 import 'package:netease_music/pages/playlist/selection_list.dart';
 import 'dart:ui';
 import '../../model/model.dart';
@@ -12,25 +11,11 @@ import './music_list.dart';
 import '../../repository/netease.dart';
 import './selection_checkbox.dart';
 import './selection_bottom.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import './playlist_internal_search.dart';
 
 /// 歌单详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
-
-PlaylistDetail _result = PlaylistDetail(
-  name: '云音乐飙升榜',
-  coverUrl:
-      'http://p1.music.126.net/DrRIg6CrgDfVLEph9SNh7w==/18696095720518497.jpg',
-  id: 19723756,
-  trackCount: 100,
-  description: '云音乐中每天热度上升最快的100首单曲，每日更新。',
-  subscribed: false,
-  subscribedCount: 1988705,
-  commentCount: 156149,
-  shareCount: 6074,
-  playCount: 2029583616,
-  creator: {},
-  musics: [],
-);
 
 class PlaylistPage extends StatefulWidget {
   PlaylistPage(this.playlistId, {this.playlist});
@@ -52,16 +37,26 @@ class _PlaylistPageState extends State<PlaylistPage> {
   }
 
   _getTopListDetail() async {
-    var playlist = await NeteaseRepository.getTopList(0);
+    var playlist = await NeteaseRepository.getTopList(widget.playlistId);
     playlist['tracks'].asMap().forEach((int index, item) {
       songs.add(Music(
-        name: item['name'],
-        id: item['id'],
-        aritstName: item['ar'][0]['name'],
-        aritstId: item['ar'][0]['id'],
-        albumName: item['al']['name'],
-        albumId: item['al']['id'],
-      ));
+          name: item['name'],
+          id: item['id'],
+          aritstName: item['ar'][0]['name'],
+          aritstId: item['ar'][0]['id'],
+          albumName: item['al']['name'],
+          albumId: item['al']['id'],
+          album: Album(
+              id: item['al']['id'],
+              name: item['al']['name'],
+              coverImageUrl: item['al']['picUrl']),
+          artists: [
+            Artist(
+              id: item['ar'][0]['id'],
+              name: item['ar'][0]['name'],
+              imageUrl: '',
+            )
+          ]));
     });
 
     setState(() {
@@ -106,6 +101,38 @@ class _PlayListState extends State<PlayList> {
   bool _selectedAll = false;
   Color bottomIconColor = Color(0xffd4d4d4);
   final List<Music> _selectedList = [];
+  ScrollController _scrollController;
+
+  Future<bool> _doSubscribeChanged(bool subscribe) async {
+    int succeed;
+    succeed = await NeteaseRepository.playlistSubscribe(
+        !subscribe, widget.playlistDetail.id);
+    String action = !subscribe ? "收藏" : "取消收藏";
+    if (succeed == 200) {
+      Fluttertoast.showToast(
+        msg: "$action成功",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 1,
+      );
+      return !subscribe;
+    } else {
+      Fluttertoast.showToast(
+        msg: "$action失败",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 1,
+      );
+      return subscribe;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    // _scrollController.animateTo(100, duration:Duration(milliseconds: ), curve: Curves.ease)
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +146,7 @@ class _PlayListState extends State<PlayList> {
         body: Stack(
           children: <Widget>[
             CustomScrollView(
+              controller: _scrollController,
               slivers: <Widget>[
                 SliverAppBar(
                   elevation: 0,
@@ -129,12 +157,18 @@ class _PlayListState extends State<PlayList> {
                           trackCount: widget.playlistDetail == null
                               ? 0
                               : widget.playlistDetail.trackCount,
-                          playCount: widget.playlistDetail == null
+                          subscribed: widget.playlistDetail == null
+                              ? false
+                              : widget.playlistDetail.subscribed,
+                          subscribedCount: widget.playlistDetail == null
                               ? 0
-                              : widget.playlistDetail.playCount)
+                              : widget.playlistDetail.subscribedCount,
+                          doSubscribeChanged: _doSubscribeChanged,
+                        )
                       : _SelectionHeader(
                           allSelected: _selectedAll,
                           onTap: (BuildContext ctx) {
+                            //全选
                             SelectionNotification(!_selectedAll).dispatch(ctx);
                             if (_selectedAll) {
                               setState(() {
@@ -149,13 +183,24 @@ class _PlayListState extends State<PlayList> {
                               });
                             }
                           },
-                        ),
+                          onFinish: (BuildContext ctx) {
+                            // 完成
+                            SelectionNotification(false).dispatch(ctx);
+                            setState(() {
+                              _selectedList.clear();
+                              _selection = false;
+                              bottomIconColor = Color(0xffd4d4d4);
+                            });
+                          }),
                   flexibleSpace: _PlaylistDetailHeader(
                     playlistDetail: widget.playlistDetail,
                     onSelect: () {
                       setState(() {
                         _selection = !_selection;
                       });
+                      _scrollController.animateTo(231.0,
+                          duration: Duration(milliseconds: 100),
+                          curve: Curves.ease);
                     },
                   ),
                 ),
@@ -219,7 +264,12 @@ class _PlayListState extends State<PlayList> {
                             onTap: _selectedList.length == 0
                                 ? null
                                 : () {
-                                    // _addToNext(context);
+                                    // 下一首播放
+                                    _selectedList
+                                        .asMap()
+                                        .forEach((int index, Music music) {
+                                      print(music.name);
+                                    });
                                   },
                             child: Container(
                               child: Column(
@@ -245,7 +295,7 @@ class _PlayListState extends State<PlayList> {
                             onTap: _selectedList.length == 0
                                 ? null
                                 : () {
-                                    // _addToCollection(context);
+                                    // 收藏到歌单
                                   },
                             child: Container(
                               child: Column(
@@ -268,7 +318,11 @@ class _PlayListState extends State<PlayList> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: _selectedList.length == 0 ? null : () {},
+                            onTap: _selectedList.length == 0
+                                ? null
+                                : () {
+                                    // 删除
+                                  },
                             child: Container(
                               child: Column(
                                 children: <Widget>[
@@ -397,7 +451,14 @@ class _PlaylistDetailHeader extends StatelessWidget {
             titleSpacing: 0,
             actions: <Widget>[
               IconButton(
-                  icon: Icon(Icons.search), tooltip: "歌单内搜索", onPressed: () {}),
+                  icon: Icon(Icons.search),
+                  tooltip: "歌单内搜索",
+                  onPressed: () {
+                    showSearch(
+                        context: context,
+                        delegate: PlaylistInternalSearchDelegate(
+                            playlistDetail, Theme.of(context)));
+                  }),
               IconButton(
                   icon: Icon(Icons.more_vert),
                   tooltip: "更多选项",
@@ -629,7 +690,9 @@ class _HeaderAction extends StatelessWidget {
 class _SelectionHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool allSelected;
   final ValueChanged<BuildContext> onTap;
-  _SelectionHeader({Key key, this.allSelected, this.onTap}) : super(key: key);
+  final ValueChanged<BuildContext> onFinish;
+  _SelectionHeader({Key key, this.allSelected, this.onTap, this.onFinish})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -662,12 +725,18 @@ class _SelectionHeader extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 Spacer(),
-                Padding(
-                  padding: EdgeInsets.only(left: 16.0),
-                  child: Text(
-                    '完成',
-                    style: TextStyle(
-                        fontSize: 15.0, color: Theme.of(context).primaryColor),
+                GestureDetector(
+                  onTap: () {
+                    this.onFinish(context);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Text(
+                      '完成',
+                      style: TextStyle(
+                          fontSize: 15.0,
+                          color: Theme.of(context).primaryColor),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -686,11 +755,19 @@ class _SelectionHeader extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
-  const MusicListHeader({Key key, this.trackCount, this.playCount, this.tail})
+  const MusicListHeader(
+      {Key key,
+      this.trackCount,
+      this.subscribed,
+      this.subscribedCount,
+      this.tail,
+      this.doSubscribeChanged})
       : super(key: key);
 
+  final bool subscribed;
   final int trackCount;
-  final int playCount;
+  final int subscribedCount;
+  final Future<bool> Function(bool currentState) doSubscribeChanged;
   final Widget tail;
 
   @override
@@ -724,10 +801,10 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
                   style: Theme.of(context).textTheme.caption,
                 ),
                 Spacer(),
-                Padding(
-                  padding: EdgeInsets.only(right: 20.0),
-                  child: Text(
-                      playCount == null ? 0 : getFormattedNumber(playCount)),
+                _SubscribeButton(this.subscribed, this.subscribedCount,
+                    this.doSubscribeChanged),
+                SizedBox(
+                  width: 5.0,
                 )
               ],
             ),
@@ -744,4 +821,114 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
 class SelectionNotification extends Notification {
   SelectionNotification(this.selectedAll);
   final bool selectedAll;
+}
+
+class _SubscribeButton extends StatefulWidget {
+  final bool subscribed;
+
+  final int subscribedCount;
+
+  final Future<bool> Function(bool currentState) doSubscribeChanged;
+
+  const _SubscribeButton(
+      this.subscribed, this.subscribedCount, this.doSubscribeChanged,
+      {Key key})
+      : super(key: key);
+
+  @override
+  _SubscribeButtonState createState() => _SubscribeButtonState();
+}
+
+class _SubscribeButtonState extends State<_SubscribeButton> {
+  bool subscribed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    subscribed = widget.subscribed;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!subscribed) {
+      return ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        child: Container(
+          height: 40,
+          decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [
+            Theme.of(context).primaryColor.withOpacity(0.5),
+            Theme.of(context).primaryColor
+          ])),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () async {
+                final result = await widget.doSubscribeChanged(subscribed);
+
+                setState(() {
+                  subscribed = result;
+                });
+              },
+              child: Row(
+                children: <Widget>[
+                  SizedBox(width: 16),
+                  Icon(Icons.add,
+                      color: Theme.of(context).primaryIconTheme.color),
+                  SizedBox(width: 4),
+                  Text(
+                    "收藏(${getFormattedNumber(widget.subscribedCount)})",
+                    style: Theme.of(context).primaryTextTheme.body1,
+                  ),
+                  SizedBox(width: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return InkWell(
+          child: Container(
+            height: 40,
+            child: Row(
+              children: <Widget>[
+                SizedBox(width: 16),
+                Icon(Icons.folder_special,
+                    size: 20, color: Theme.of(context).disabledColor),
+                SizedBox(width: 4),
+                Text(getFormattedNumber(widget.subscribedCount),
+                    style: Theme.of(context)
+                        .textTheme
+                        .caption
+                        .copyWith(fontSize: 14)),
+                SizedBox(width: 16),
+              ],
+            ),
+          ),
+          onTap: () async {
+            final result = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: Text("确定不再收藏此歌单吗?"),
+                    actions: <Widget>[
+                      FlatButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text("取消")),
+                      FlatButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text("不再收藏"))
+                    ],
+                  );
+                });
+            if (result != null && result) {
+              final result = await widget.doSubscribeChanged(subscribed);
+              setState(() {
+                subscribed = result;
+              });
+            }
+          });
+    }
+  }
 }

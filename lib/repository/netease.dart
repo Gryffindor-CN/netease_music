@@ -131,8 +131,19 @@ class NeteaseRepository {
     var url = '${API_HOST}top/list?idx=$idx';
     try {
       Response response = await Dio().get(url);
+
       var playlist = json.decode(response.toString())['playlist'];
       return playlist;
+    } catch (e) {}
+  }
+
+  // 收藏/取消歌单
+  static playlistSubscribe(bool t, int id) async {
+    var url = '${API_HOST}playlist/subscribe?t=${t == true ? 1 : 2}&id=$id';
+    try {
+      Response response = await Dio().get(url);
+      var code = json.decode(response.toString())['code'];
+      return code;
     } catch (e) {}
   }
 }

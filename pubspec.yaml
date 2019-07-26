@@ -29,6 +29,7 @@ dependencies:
 
 dev_dependencies:
   flutter_icons: ^0.1.4
+  fluttertoast: ^3.1.0
   flutter_test:
     sdk: flutter
 

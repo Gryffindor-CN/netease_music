@@ -21,9 +21,11 @@ class _MyMusicState extends State<MyMusic> {
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
         RoutePageBuilder builder;
-        switch(settings.name) {
+        switch (settings.name) {
           case '/':
-            builder = (_, __, ___) => MyMusicHome(pageContext: context,);
+            builder = (_, __, ___) => MyMusicHome(
+                  pageContext: context,
+                );
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
@@ -36,7 +38,7 @@ class _MyMusicState extends State<MyMusic> {
   }
 }
 
-class MyMusicHome extends StatelessWidget{
+class MyMusicHome extends StatelessWidget {
   final BuildContext pageContext;
 
   const MyMusicHome({Key key, this.pageContext}) : super(key: key);
@@ -66,6 +68,30 @@ class MyMusicHome extends StatelessWidget{
                   Routes.router.navigateTo(context, '/mymusic/mycollection');
                 },
               ),
+              RaisedButton(
+                child: Text('飙升榜'),
+                onPressed: () {
+                  Routes.router.navigateTo(context, '/playlist?idx=3');
+                },
+              ),
+              RaisedButton(
+                child: Text('新歌榜'),
+                onPressed: () {
+                  Routes.router.navigateTo(context, '/playlist?idx=0');
+                },
+              ),
+              RaisedButton(
+                child: Text('热歌榜'),
+                onPressed: () {
+                  Routes.router.navigateTo(context, '/playlist?idx=1');
+                },
+              ),
+              RaisedButton(
+                child: Text('原创榜'),
+                onPressed: () {
+                  Routes.router.navigateTo(context, '/playlist?idx=2');
+                },
+              ),
             ],
           ),
         ),
@@ -74,7 +100,7 @@ class MyMusicHome extends StatelessWidget{
   }
 }
 
-class MyCollection extends StatelessWidget{
+class MyCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

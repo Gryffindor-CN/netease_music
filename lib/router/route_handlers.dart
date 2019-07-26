@@ -23,5 +23,5 @@ var mycollectionHandler = new Handler(
 
 var playlistHandler =
     new Handler(handlerFunc: (BuildContext, Map<String, dynamic> params) {
-  return PlaylistPage(9);
+  return PlaylistPage(int.parse(params['idx'][0]));
 });

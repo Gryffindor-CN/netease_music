@@ -6,7 +6,9 @@ class MusicItem extends StatelessWidget {
   final int itemIndex;
   final List<Map<String, dynamic>> tailsList;
   final BuildContext pageContext;
-  MusicItem(this.item, {this.itemIndex, this.tailsList, this.pageContext});
+  final GestureTapCallback onTap;
+  MusicItem(this.item,
+      {this.itemIndex, this.tailsList, this.pageContext, this.onTap});
 
   static Widget _nameWidget;
   static Widget _albumnameWidget;
@@ -28,139 +30,137 @@ class MusicItem extends StatelessWidget {
         Text(item.albumName, maxLines: 1, overflow: TextOverflow.ellipsis);
 
     if (tailsList != null) {
-      return Row(
-        children: <Widget>[
-          SizedBox(
-            width: 15.0,
-          ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom:
-                          BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 2.0),
-                    child: Text(
-                      itemIndex < 10 ? '0$itemIndex' : '$itemIndex',
-                      style: TextStyle(
-                          color: itemIndex < 4 ? themeColor : Colors.grey,
-                          fontSize: 16.0),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 8.0,
-                  ),
-                  Flexible(
-                    flex: 7,
-                    child: Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 2.0),
-                            child: _nameWidget,
-                          ),
-                          DefaultTextStyle(
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 10.0,
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                Text(
-                                  item.aritstName,
-                                ),
-                                SizedBox(
-                                  width: 4.0,
-                                ),
-                                Text('-'),
-                                SizedBox(
-                                  width: 4.0,
-                                ),
-                                Flexible(
-                                  child: _albumnameWidget,
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 2,
-                    child: ListTail(
-                      tails: tailsList,
-                    ),
-                  )
-                ],
-              ),
+      return InkWell(
+        onTap: this.onTap,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: 15.0,
             ),
-          ),
-          SizedBox(
-            width: 15.0,
-          ),
-        ],
-      );
-    } else {
-      return Row(
-        children: <Widget>[
-          SizedBox(
-            width: 15.0,
-          ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom:
-                          BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
+            Expanded(
               child: Container(
-                child: Column(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(bottom: 2.0),
-                      child: _nameWidget,
-                    ),
-                    DefaultTextStyle(
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 10.0,
+                      padding: EdgeInsets.only(top: 2.0),
+                      child: Text(
+                        itemIndex < 10 ? '0$itemIndex' : '$itemIndex',
+                        style: TextStyle(
+                            color: itemIndex < 4 ? themeColor : Colors.grey,
+                            fontSize: 16.0),
                       ),
-                      child: Row(
-                        children: <Widget>[
-                          Text(
-                            item.aritstName,
-                          ),
-                          SizedBox(
-                            width: 4.0,
-                          ),
-                          Text('-'),
-                          SizedBox(
-                            width: 4.0,
-                          ),
-                          Flexible(
-                            child: _albumnameWidget,
-                          )
-                        ],
+                    ),
+                    SizedBox(
+                      width: 8.0,
+                    ),
+                    Flexible(
+                      flex: 7,
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 2.0),
+                              child: _nameWidget,
+                            ),
+                            DefaultTextStyle(
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 10.0,
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Text(
+                                    item.aritstName,
+                                  ),
+                                  SizedBox(
+                                    width: 4.0,
+                                  ),
+                                  Text('-'),
+                                  SizedBox(
+                                    width: 4.0,
+                                  ),
+                                  Flexible(
+                                    child: _albumnameWidget,
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 2,
+                      child: ListTail(
+                        tails: tailsList,
                       ),
                     )
                   ],
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            width: 15.0,
-          ),
-        ],
+            SizedBox(
+              width: 15.0,
+            ),
+          ],
+        ),
+      );
+    } else {
+      return InkWell(
+        onTap: this.onTap,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              width: 15.0,
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 2.0),
+                        child: _nameWidget,
+                      ),
+                      DefaultTextStyle(
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10.0,
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            Text(
+                              item.aritstName,
+                            ),
+                            SizedBox(
+                              width: 4.0,
+                            ),
+                            Text('-'),
+                            SizedBox(
+                              width: 4.0,
+                            ),
+                            Flexible(
+                              child: _albumnameWidget,
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 15.0,
+            ),
+          ],
+        ),
       );
     }
   }

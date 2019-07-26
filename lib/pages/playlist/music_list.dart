@@ -28,6 +28,10 @@ class MusicTitle extends StatelessWidget {
           {'iconData': Icons.more_vert, 'iconPress': () async {}}
         ],
         pageContext: this.pageContext,
+        onTap: () {
+          // 播放音乐
+          print('播放音乐');
+        },
       ));
     });
 
