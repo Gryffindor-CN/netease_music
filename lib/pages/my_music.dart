@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:netease_music/router/Routes.dart';
+import './artist/artist_page.dart';
 
 class MyMusic extends StatefulWidget {
   @override
@@ -21,9 +22,11 @@ class _MyMusicState extends State<MyMusic> {
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
         RoutePageBuilder builder;
-        switch(settings.name) {
+        switch (settings.name) {
           case '/':
-            builder = (_, __, ___) => MyMusicHome(pageContext: context,);
+            builder = (_, __, ___) => MyMusicHome(
+                  pageContext: context,
+                );
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
@@ -36,7 +39,7 @@ class _MyMusicState extends State<MyMusic> {
   }
 }
 
-class MyMusicHome extends StatelessWidget{
+class MyMusicHome extends StatelessWidget {
   final BuildContext pageContext;
 
   const MyMusicHome({Key key, this.pageContext}) : super(key: key);
@@ -66,6 +69,16 @@ class MyMusicHome extends StatelessWidget{
                   Routes.router.navigateTo(context, '/mymusic/mycollection');
                 },
               ),
+              RaisedButton(
+                child: Text('歌手'),
+                onPressed: () {
+                  // Routes.router.navigateTo(context, '/mymusic/mycollection');
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
+                    return ArtistPage(2116);
+                  }));
+                },
+              ),
             ],
           ),
         ),
@@ -74,7 +87,7 @@ class MyMusicHome extends StatelessWidget{
   }
 }
 
-class MyCollection extends StatelessWidget{
+class MyCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
