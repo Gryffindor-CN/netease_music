@@ -17,16 +17,17 @@ import './playlist_internal_search.dart';
 /// 歌单详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
 
-class PlaylistPage extends StatefulWidget {
-  PlaylistPage(this.playlistId, {this.playlist});
+class Playlist extends StatefulWidget {
+  Playlist(this.playlistId, {this.playlist, this.pageContext});
   final int playlistId;
   final PlaylistDetail playlist;
+  final BuildContext pageContext;
 
   @override
   _PlaylistPageState createState() => _PlaylistPageState();
 }
 
-class _PlaylistPageState extends State<PlaylistPage> {
+class _PlaylistPageState extends State<Playlist> {
   PlaylistDetail _result;
   List<Music> songs = [];
 
@@ -79,13 +80,17 @@ class _PlaylistPageState extends State<PlaylistPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PlayList(playlistDetail: _result);
+    return PlayList(
+      playlistDetail: _result,
+      pageContext: widget.pageContext,
+    );
   }
 }
 
 class PlayList extends StatefulWidget {
-  const PlayList({Key key, this.playlistDetail}) : super(key: key);
-
+  const PlayList({Key key, this.playlistDetail, this.pageContext})
+      : super(key: key);
+  final BuildContext pageContext;
   final PlaylistDetail playlistDetail;
 
   List<Music> get musiclist => playlistDetail.musics;
@@ -131,7 +136,6 @@ class _PlayListState extends State<PlayList> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    // _scrollController.animateTo(100, duration:Duration(milliseconds: ), curve: Curves.ease)
   }
 
   @override
@@ -214,6 +218,7 @@ class _PlayListState extends State<PlayList> {
                                   )
                                 : MusicTitle(
                                     widget.musiclist,
+                                    pageContext: widget.pageContext,
                                   );
                           },
                           childCount: widget.playlistDetail == null

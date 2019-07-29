@@ -11,12 +11,6 @@ class MusicTitle extends StatelessWidget {
   final BuildContext pageContext;
   MusicTitle(this.songList, {this.pageContext});
 
-  // 获取歌曲播放url
-  _getSongUrl(int id) async {
-    var result = await NeteaseRepository.getSongUrl(id);
-    return result;
-  }
-
   List<Widget> _buildWidget(BuildContext context) {
     List<Widget> widgetList = [];
     songList.asMap().forEach((int index, Music item) {
