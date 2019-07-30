@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' as prefix0;
 import '../../model/model.dart';
 import '../../repository/netease.dart';
 import './flexible_app_bar.dart';
@@ -6,6 +8,7 @@ import 'dart:ui';
 import './music_list.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import './album_list.dart';
+import './video_list.dart';
 
 /// 歌手详情信息 header 高度
 const double HEIGHT_HEADER = 260 + 56.0;
@@ -23,47 +26,38 @@ class _ArtistPageState extends State<ArtistPage>
   List<Music> _hotSongs = [];
   Artist _artist;
   TabController _tabController;
+  ScrollController _scrollController;
   int _tabIndex = 0;
+  int albumOffset = 0;
+  int videoOffset = 0;
   List<Widget> _widgetContent = [];
+  bool albumLoading = false;
+  bool videoLoading = false;
+  List<Album> albums = [];
+  List<Map<String, dynamic>> videos = [];
+  double albumPosition = 0.0;
+  double videoPosition = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = new TabController(initialIndex: 0, vsync: this, length: 4);
-    _tabController.addListener(() {
-      setState(() {
-        _tabIndex = _tabController.index;
-      });
-    });
+    _tabController = TabController(initialIndex: 0, vsync: this, length: 4)
+      ..addListener(_tabListener);
+
+    _scrollController = ScrollController()..addListener(_scrollListener);
     getArtistInfos();
   }
 
-  Future<bool> _doSubscribeChanged(bool subscribe) async {
-    int succeed;
-    succeed = await NeteaseRepository.subcribeAritst(!subscribe, _artist.id);
-    String action = !subscribe ? "收藏" : "取消收藏";
-    if (succeed == 200) {
-      Fluttertoast.showToast(
-        msg: "$action成功",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-      );
-      return !subscribe;
-    } else {
-      Fluttertoast.showToast(
-        msg: "$action失败",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-      );
-      return subscribe;
-    }
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController.dispose();
+    _scrollController.dispose();
   }
 
+  // 获取歌手热门单曲与详细信息
   void getArtistInfos() async {
     var result = await NeteaseRepository.getAritst(widget.id);
-
     setState(() {
       result['hotSongs'].asMap().forEach((int index, item) {
         _hotSongs.add(Music(
@@ -97,14 +91,192 @@ class _ArtistPageState extends State<ArtistPage>
     });
     _widgetContent = [
       SongsWrapper(hotSongs: _hotSongs),
-      AlbumWrapper(id: _artist.id, size: _artist.albumSize)
+      AlbumWrapper(
+        id: _artist.id,
+        size: _artist.albumSize,
+      ),
+      VideoWrapper(),
+      BriefDesc(
+        artist: _artist,
+      )
     ];
+  }
+
+  // 获取专辑列表
+  void getAlbumsInfos(int offset) async {
+    setState(() {
+      _tabIndex = _tabController.index;
+      albumLoading = true;
+      _widgetContent = [
+        SongsWrapper(hotSongs: _hotSongs),
+        AlbumWrapper(
+          id: _artist.id,
+          size: _artist.albumSize,
+          hotAlbums: albums,
+          loading: albumLoading,
+        ),
+        VideoWrapper(),
+        BriefDesc(
+          artist: _artist,
+        )
+      ];
+    });
+    var result =
+        await NeteaseRepository.getAritstAlbums(widget.id, offset: offset);
+    setState(() {
+      albumLoading = false;
+
+      result.asMap().forEach((int index, item) {
+        albums.add(Album(
+            name: item['name'],
+            id: item['id'],
+            coverImageUrl: item['picUrl'],
+            publishTime: item['publishTime'],
+            size: item['size']));
+      });
+      _widgetContent = [
+        SongsWrapper(hotSongs: _hotSongs),
+        AlbumWrapper(
+          id: _artist.id,
+          size: _artist.albumSize,
+          hotAlbums: albums,
+          loading: albumLoading,
+        ),
+        VideoWrapper(),
+        BriefDesc(
+          artist: _artist,
+        )
+      ];
+    });
+  }
+
+  // 获取视频列表
+  void getVideosInfos(int offset) async {
+    setState(() {
+      _tabIndex = _tabController.index;
+      videoLoading = true;
+      _widgetContent = [
+        SongsWrapper(hotSongs: _hotSongs),
+        AlbumWrapper(
+          id: _artist.id,
+          size: _artist.albumSize,
+          hotAlbums: albums,
+        ),
+        VideoWrapper(
+          loading: videoLoading,
+          videos: videos,
+        ),
+        BriefDesc(
+          artist: _artist,
+        )
+      ];
+    });
+    var result =
+        await NeteaseRepository.getAritstVideo(_artist.name, offset: offset);
+    setState(() {
+      videoLoading = false;
+
+      result['videos'].asMap().forEach((int index, item) {
+        videos.add({
+          'coverUrl': item['coverUrl'],
+          'vid': item['vid'],
+          'title': item['title'],
+          'playTime': item['playTime'],
+          'durationms': item['durationms'],
+          'creator': {
+            'userId': item['creator'][0]['userId'],
+            'userName': item['creator'][0]['userName']
+          }
+        });
+      });
+      _widgetContent = [
+        SongsWrapper(hotSongs: _hotSongs),
+        AlbumWrapper(
+          id: _artist.id,
+          size: _artist.albumSize,
+          hotAlbums: albums,
+        ),
+        VideoWrapper(
+          loading: videoLoading,
+          videos: videos,
+        ),
+        BriefDesc(
+          artist: _artist,
+        )
+      ];
+    });
+  }
+
+  void _scrollListener() {
+    if (_tabIndex == 1) {
+      albumPosition = _scrollController.offset;
+    } else {
+      if (_tabIndex == 2) {
+        videoPosition = _scrollController.offset;
+      }
+    }
+    if (_scrollController.position.extentAfter < 2.0) {
+      if (_tabIndex == 1) {
+        if (albumLoading == true) return;
+        albumOffset = albumOffset + 1;
+
+        getAlbumsInfos(albumOffset);
+      } else if (_tabIndex == 2) {
+        if (videoLoading == true) return;
+        videoOffset = videoOffset + 1;
+        getVideosInfos(videoOffset);
+      }
+    }
+  }
+
+  void _tabListener() {
+    if (_tabController.indexIsChanging) {
+      _tabIndex = _tabController.index;
+      if (_tabController.index == 1) {
+        _scrollController.jumpTo(albumPosition);
+        albumOffset = 0;
+        getAlbumsInfos(albumOffset);
+      } else if (_tabController.index == 2) {
+        _scrollController.jumpTo(videoPosition);
+        videoOffset = 0;
+        getVideosInfos(videoOffset);
+      } else {
+        setState(() {
+          _tabIndex = _tabController.index;
+        });
+      }
+    }
+  }
+
+  // 收藏/取消收藏歌手
+  Future<bool> _doSubscribeChanged(bool subscribe) async {
+    int succeed;
+    succeed = await NeteaseRepository.subcribeAritst(!subscribe, _artist.id);
+    String action = !subscribe ? "收藏" : "取消收藏";
+    if (succeed == 200) {
+      Fluttertoast.showToast(
+        msg: "$action成功",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 1,
+      );
+      return !subscribe;
+    } else {
+      Fluttertoast.showToast(
+        msg: "$action失败",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 1,
+      );
+      return subscribe;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: <Widget>[
           SliverAppBar(
             elevation: 0.0,
@@ -128,7 +300,9 @@ class _ArtistPageState extends State<ArtistPage>
                     return Container(
                       alignment: Alignment.center,
                       padding: EdgeInsets.only(top: 20.0),
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white.withOpacity(0.4))),
                     );
                   }, childCount: 1),
                 )
@@ -220,22 +394,34 @@ class _ArtistDetailHeader extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     return DefaultTextStyle(
       style: TextStyle(color: Colors.white, fontSize: 20.0),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                artist != null
-                    ? Text('${artist.name}（${artist.alias[0]}）')
-                    : Text(''),
-                _SubscribeButton(artist.followed, this.doSubscribeChanged)
-              ],
-            )
-          ],
+      child: GestureDetector(
+        onTap: artist == null
+            ? null
+            : () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) {
+                  return HeroScreen(
+                    src: artist.imageUrl,
+                  );
+                }));
+              },
+        child: Container(
+          decoration: BoxDecoration(color: Colors.transparent),
+          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  artist != null
+                      ? Text('${artist.name}（${artist.alias[0]}）')
+                      : Text(''),
+                  _SubscribeButton(artist.followed, this.doSubscribeChanged)
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -443,16 +629,13 @@ class _ArtistsTabState extends State<_ArtistsTab> {
         controller: widget.controller,
         indicatorSize: TabBarIndicatorSize.label,
         unselectedLabelColor: Theme.of(context).textTheme.body1.color,
-        onTap: (int index) {
-          print(index);
-        },
         tabs: <Widget>[
           Text(
             '热门单曲',
           ),
           RichText(
             text: TextSpan(
-              text: '专辑',
+              text: '专辑 ',
               style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: widget.tabIndex == 1
@@ -472,7 +655,7 @@ class _ArtistsTabState extends State<_ArtistsTab> {
           ),
           RichText(
             text: TextSpan(
-              text: '视频',
+              text: '视频 ',
               style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: widget.tabIndex == 2
@@ -547,68 +730,201 @@ class SongsWrapper extends StatelessWidget {
             )
           ],
         );
-      }, childCount: hotSongs.length),
+      }, childCount: 1),
     );
   }
 }
 
 class AlbumWrapper extends StatefulWidget {
-  AlbumWrapper({Key key, this.id, this.size}) : super(key: key);
+  AlbumWrapper(
+      {Key key, this.id, this.size, this.hotAlbums, this.loading = true})
+      : super(key: key);
   final int id;
   final int size;
-
+  final bool loading;
+  final List<Album> hotAlbums;
   @override
   _AlbumWrapperState createState() => _AlbumWrapperState();
 }
 
 class _AlbumWrapperState extends State<AlbumWrapper>
     with AutomaticKeepAliveClientMixin {
-  List<Album> _hotAlbums = [];
-
-  @override
-  void initState() {
-    super.initState();
-    getAlbumsInfos();
-  }
-
-  void getAlbumsInfos() async {
-    var result = await NeteaseRepository.getAritstAlbums(10, widget.id);
-
-    setState(() {
-      result.asMap().forEach((int index, item) {
-        _hotAlbums.add(Album(
-            name: item['name'],
-            id: item['id'],
-            coverImageUrl: item['picUrl'],
-            publishTime: item['publishTime'],
-            size: item['size']));
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return _hotAlbums.length <= 0
+    return (widget.loading == true && widget.hotAlbums.length == 0)
         ? SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               return Container(
                 alignment: Alignment.center,
                 padding: EdgeInsets.only(top: 20.0),
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  valueColor: new AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor),
+                ),
               );
             }, childCount: 1),
           )
-        : SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              return Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(top: 20.0),
-                child: AlbumTitle(_hotAlbums),
+        : widget.loading == true
+            ? SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 20.0),
+                    child: Column(
+                      children: <Widget>[
+                        AlbumTitle(widget.hotAlbums),
+                        Container(
+                          padding: EdgeInsets.all(10.0),
+                          alignment: Alignment.center,
+                          child: Text('专辑加载中...',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor)),
+                        )
+                      ],
+                    ),
+                  );
+                }, childCount: 1),
+              )
+            : SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 20.0),
+                    child: AlbumTitle(widget.hotAlbums),
+                  );
+                }, childCount: 1),
               );
-            }, childCount: widget.size),
-          );
   }
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class VideoWrapper extends StatefulWidget {
+  VideoWrapper({Key key, this.loading = true, this.videos}) : super(key: key);
+  final bool loading;
+  final List<Map<String, dynamic>> videos;
+
+  @override
+  _VideoWrapperState createState() => _VideoWrapperState();
+}
+
+class _VideoWrapperState extends State<VideoWrapper> {
+  @override
+  Widget build(BuildContext context) {
+    return (widget.loading == true && widget.videos.length <= 0)
+        ? SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(top: 20.0),
+                child: CircularProgressIndicator(
+                  valueColor: new AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor),
+                ),
+              );
+            }, childCount: 1),
+          )
+        : widget.loading == true
+            ? SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 20.0),
+                    child: Column(
+                      children: <Widget>[
+                        VideoTitle(widget.videos),
+                        Container(
+                          padding: EdgeInsets.all(10.0),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '视频加载中...',
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                }, childCount: 1),
+              )
+            : SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 20.0),
+                    child: VideoTitle(widget.videos),
+                  );
+                }, childCount: 1),
+              );
+  }
+}
+
+class BriefDesc extends StatelessWidget {
+  BriefDesc({
+    Key key,
+    @required this.artist,
+  });
+  final Artist artist;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        return Container(
+          padding: EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '${artist.name}简介',
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w600),
+                ),
+              ),
+              SizedBox(
+                height: 6.0,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  artist.briefDesc,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                      fontSize: 14.0,
+                      color: Theme.of(context).textTheme.caption.color),
+                ),
+              )
+            ],
+          ),
+        );
+        ;
+      }, childCount: 1),
+    );
+  }
+}
+
+class HeroScreen extends StatelessWidget {
+  final String src;
+  HeroScreen({Key key, @required this.src}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GestureDetector(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Center(
+          child: Hero(
+            tag: src,
+            child: Image.network(
+              src,
+              // src,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -164,17 +164,29 @@ class NeteaseRepository {
     try {
       Response response = await Dio().get(url);
       var result = json.decode(response.toString())['code'];
-      print(result);
+
       return result;
     } catch (e) {}
   }
 
-  // 收藏/取消歌手
-  static getAritstAlbums(int limit, int id) async {
-    var url = '${API_HOST}artist/album?id=$id&limit=$limit';
+  // 歌手专辑
+  static getAritstAlbums(int id, {int limit = 20, int offset = 0}) async {
+    var url = '${API_HOST}artist/album?id=$id&limit=$limit&offset=$offset';
     try {
       Response response = await Dio().get(url);
       var result = json.decode(response.toString())['hotAlbums'];
+
+      return result;
+    } catch (e) {}
+  }
+
+  // 歌手视频
+  static getAritstVideo(String query, {int limit = 10, int offset = 0}) async {
+    var url =
+        '${API_HOST}search?keywords=$query&limit=$limit&offset=$offset&type=1014';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['result'];
 
       return result;
     } catch (e) {}
