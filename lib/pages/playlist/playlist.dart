@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/widgets.dart';
 import 'package:netease_music/pages/playlist/selection_list.dart';
 import 'dart:ui';
@@ -108,23 +109,24 @@ class _PlaylistPageState extends State<Playlists> {
             )
           ]));
     });
-
-    setState(() {
-      _result = PlaylistDetail(
-        name: playlist['name'],
-        coverUrl: playlist['coverImgUrl'],
-        id: playlist['id'],
-        trackCount: playlist['trackCount'],
-        description: playlist['description'],
-        subscribed: playlist['subscribed'],
-        subscribedCount: playlist['subscribedCount'],
-        commentCount: playlist['commentCount'],
-        shareCount: playlist['shareCount'],
-        playCount: playlist['playCount'],
-        creator: playlist['creator'],
-        musics: songs,
-      );
-    });
+    if (this.mounted) {
+      setState(() {
+        _result = PlaylistDetail(
+          name: playlist['name'],
+          coverUrl: playlist['coverImgUrl'],
+          id: playlist['id'],
+          trackCount: playlist['trackCount'],
+          description: playlist['description'],
+          subscribed: playlist['subscribed'],
+          subscribedCount: playlist['subscribedCount'],
+          commentCount: playlist['commentCount'],
+          shareCount: playlist['shareCount'],
+          playCount: playlist['playCount'],
+          creator: playlist['creator'],
+          musics: songs,
+        );
+      });
+    }
   }
 
   @override
@@ -263,7 +265,10 @@ class _PlayListState extends State<_PlayList> {
                           (context, index) {
                             return widget.playlistDetail == null
                                 ? Center(
-                                    child: CircularProgressIndicator(),
+                                    child: Container(
+                                      padding: EdgeInsets.only(top: 20.0),
+                                      child: CircularProgressIndicator(),
+                                    ),
                                   )
                                 : MusicTitle(
                                     widget.musiclist,
@@ -908,7 +913,7 @@ class _SubscribeButtonState extends State<_SubscribeButton> {
       return ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(16)),
         child: Container(
-          height: 40,
+          height: 36,
           decoration: BoxDecoration(
               gradient: LinearGradient(colors: [
             Theme.of(context).primaryColor.withOpacity(0.5),
@@ -926,15 +931,19 @@ class _SubscribeButtonState extends State<_SubscribeButton> {
               },
               child: Row(
                 children: <Widget>[
-                  SizedBox(width: 16),
+                  SizedBox(width: 10),
                   Icon(Icons.add,
+                      size: 18.0,
                       color: Theme.of(context).primaryIconTheme.color),
-                  SizedBox(width: 4),
+                  SizedBox(width: 2),
                   Text(
                     "收藏(${getFormattedNumber(widget.subscribedCount)})",
-                    style: Theme.of(context).primaryTextTheme.body1,
+                    style: TextStyle(
+                        fontSize: 12.0,
+                        color:
+                            Theme.of(context).primaryTextTheme.subtitle.color),
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: 10),
                 ],
               ),
             ),
