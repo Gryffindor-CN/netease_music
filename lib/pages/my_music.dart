@@ -71,25 +71,29 @@ class MyMusicHome extends StatelessWidget {
               RaisedButton(
                 child: Text('飙升榜'),
                 onPressed: () {
-                  Routes.router.navigateTo(context, '/playlist?idx=3');
+                  Routes.router
+                      .navigateTo(context, '/playlist?idx=3&type=ranking');
                 },
               ),
               RaisedButton(
                 child: Text('新歌榜'),
                 onPressed: () {
-                  Routes.router.navigateTo(context, '/playlist?idx=0');
+                  Routes.router
+                      .navigateTo(context, '/playlist?idx=0&type=ranking');
                 },
               ),
               RaisedButton(
                 child: Text('热歌榜'),
                 onPressed: () {
-                  Routes.router.navigateTo(context, '/playlist?idx=1');
+                  Routes.router
+                      .navigateTo(context, '/playlist?idx=1&type=ranking');
                 },
               ),
               RaisedButton(
                 child: Text('原创榜'),
                 onPressed: () {
-                  Routes.router.navigateTo(context, '/playlist?idx=2');
+                  Routes.router
+                      .navigateTo(context, '/playlist?idx=2&type=ranking');
                 },
               ),
             ],

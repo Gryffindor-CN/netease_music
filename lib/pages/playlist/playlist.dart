@@ -17,24 +17,32 @@ import './playlist_internal_search.dart';
 /// 歌单详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
 
-class Playlist extends StatefulWidget {
-  Playlist(this.playlistId, {this.playlist, this.pageContext});
+class Playlists extends StatefulWidget {
+  Playlists(this.playlistId, this.type, {this.playlist, this.pageContext});
   final int playlistId;
   final PlaylistDetail playlist;
   final BuildContext pageContext;
+  final String type;
 
   @override
   _PlaylistPageState createState() => _PlaylistPageState();
 }
 
-class _PlaylistPageState extends State<Playlist> {
+class _PlaylistPageState extends State<Playlists> {
   PlaylistDetail _result;
   List<Music> songs = [];
 
   @override
   void initState() {
     super.initState();
-    _getTopListDetail();
+    switch (widget.type) {
+      case 'ranking':
+        _getTopListDetail();
+        break;
+      case 'playlist':
+        _getPlaylistDetail();
+        break;
+    }
   }
 
   _getTopListDetail() async {
@@ -78,17 +86,58 @@ class _PlaylistPageState extends State<Playlist> {
     });
   }
 
+  _getPlaylistDetail() async {
+    var playlist = await NeteaseRepository.getPlaylistDetail(widget.playlistId);
+    playlist['tracks'].asMap().forEach((int index, item) {
+      songs.add(Music(
+          name: item['name'],
+          id: item['id'],
+          aritstName: item['ar'][0]['name'],
+          aritstId: item['ar'][0]['id'],
+          albumName: item['al']['name'],
+          albumId: item['al']['id'],
+          album: Album(
+              id: item['al']['id'],
+              name: item['al']['name'],
+              coverImageUrl: item['al']['picUrl']),
+          artists: [
+            Artist(
+              id: item['ar'][0]['id'],
+              name: item['ar'][0]['name'],
+              imageUrl: '',
+            )
+          ]));
+    });
+
+    setState(() {
+      _result = PlaylistDetail(
+        name: playlist['name'],
+        coverUrl: playlist['coverImgUrl'],
+        id: playlist['id'],
+        trackCount: playlist['trackCount'],
+        description: playlist['description'],
+        subscribed: playlist['subscribed'],
+        subscribedCount: playlist['subscribedCount'],
+        commentCount: playlist['commentCount'],
+        shareCount: playlist['shareCount'],
+        playCount: playlist['playCount'],
+        creator: playlist['creator'],
+        musics: songs,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PlayList(
+    return _PlayList(
       playlistDetail: _result,
       pageContext: widget.pageContext,
     );
   }
 }
 
-class PlayList extends StatefulWidget {
-  const PlayList({Key key, this.playlistDetail, this.pageContext})
+class _PlayList extends StatefulWidget {
+  const _PlayList({Key key, this.playlistDetail, this.pageContext})
       : super(key: key);
   final BuildContext pageContext;
   final PlaylistDetail playlistDetail;
@@ -101,7 +150,7 @@ class PlayList extends StatefulWidget {
   }
 }
 
-class _PlayListState extends State<PlayList> {
+class _PlayListState extends State<_PlayList> {
   bool _selection = false;
   bool _selectedAll = false;
   Color bottomIconColor = Color(0xffd4d4d4);
