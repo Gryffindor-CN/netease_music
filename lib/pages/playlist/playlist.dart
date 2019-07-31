@@ -274,9 +274,7 @@ class _PlayListState extends State<_PlayList> {
                                     pageContext: widget.pageContext,
                                   );
                           },
-                          childCount: widget.playlistDetail == null
-                              ? 1
-                              : widget.musiclist.length,
+                          childCount: 1,
                         ),
                       )
                     : SliverSelection(
