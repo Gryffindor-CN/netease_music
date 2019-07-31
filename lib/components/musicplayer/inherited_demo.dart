@@ -3,8 +3,7 @@ import '../../model/music.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:math';
-import 'package:dio/dio.dart';
-import 'package:audioplayers/audioplayers.dart';
+
 import '../../repository/netease.dart';
 
 const String _PREF_KEY_PLAYING = "player_playing";
@@ -17,15 +16,13 @@ const String _PREF_KEY_PLAY_MODE = "player_play_mode";
 
 class PlayerControllerState {
   PlayerControllerState(
-      {this.audioPlayer,
-      this.current,
+      {this.current,
       this.playMode,
       this.playingList,
       this.isPlaying = false,
       this.position = Duration.zero,
       this.duration,
       this.time = 0.0});
-  final AudioPlayer audioPlayer;
   final Music current;
   final List<Music> playingList;
   final PlayMode playMode;
@@ -103,7 +100,6 @@ class StateContainerState extends State<StateContainer> {
 
         setState(() {
           player = (PlayerControllerState(
-              audioPlayer: player.audioPlayer,
               current: music,
               playMode: player.playMode,
               playingList: _playingList,
@@ -150,7 +146,6 @@ class StateContainerState extends State<StateContainer> {
 
         setState(() {
           player = (PlayerControllerState(
-              audioPlayer: player.audioPlayer,
               current: musics[0],
               playMode: player.playMode,
               playingList: musics,
@@ -187,7 +182,6 @@ class StateContainerState extends State<StateContainer> {
             json.encode(_playingList, toEncodable: (e) => e.toMap()));
         setState(() {
           player = (PlayerControllerState(
-              audioPlayer: player.audioPlayer,
               current: _playingList[0],
               playMode: player.playMode,
               playingList: _playingList,
@@ -222,7 +216,6 @@ class StateContainerState extends State<StateContainer> {
         await _getSongUrl(player.playingList[ran].id);
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: player.playingList[ran ?? 0],
           playMode: player.playMode,
           playingList: player.playingList,
@@ -244,7 +237,6 @@ class StateContainerState extends State<StateContainer> {
     );
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: _current,
           playMode: player.playMode,
           playingList: player.playingList,
@@ -285,7 +277,6 @@ class StateContainerState extends State<StateContainer> {
       prefs.remove(_PREF_KEY_PLAYLIST);
       setState(() {
         PlayerControllerState(
-            audioPlayer: player.audioPlayer,
             current: Music(),
             playMode: player.playMode,
             playingList: [],
@@ -301,7 +292,6 @@ class StateContainerState extends State<StateContainer> {
 
       setState(() {
         PlayerControllerState(
-            audioPlayer: player.audioPlayer,
             current: player.current,
             playMode: player.playMode,
             playingList: _playingList,
@@ -313,9 +303,11 @@ class StateContainerState extends State<StateContainer> {
       return 1;
     } else {
       // 删除当前正在播放的歌曲
+
       Music _current = _playingList[_nextIndex <= 0 ? 0 : _nextIndex - 1];
       playCertain(_current);
-      return _current.songUrl;
+      var _url = await _getSongUrl(_current.id);
+      return _url;
     }
   }
 
@@ -345,7 +337,6 @@ class StateContainerState extends State<StateContainer> {
     );
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: _current,
           playMode: player.playMode,
           playingList: player.playingList,
@@ -380,7 +371,6 @@ class StateContainerState extends State<StateContainer> {
     );
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: _current,
           playMode: player.playMode,
           playingList: player.playingList,
@@ -422,7 +412,6 @@ class StateContainerState extends State<StateContainer> {
 
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current:
               player.playingList.length == 0 ? _playingList[0] : player.current,
           playMode: player.playMode,
@@ -444,7 +433,6 @@ class StateContainerState extends State<StateContainer> {
           prefs.setInt(_PREF_KEY_PLAY_MODE, 1);
           setState(() {
             player = (PlayerControllerState(
-                audioPlayer: player.audioPlayer,
                 current: player.current,
                 playMode: PlayMode.sequence,
                 playingList: player.playingList,
@@ -461,7 +449,6 @@ class StateContainerState extends State<StateContainer> {
           prefs.setInt(_PREF_KEY_PLAY_MODE, 2);
           setState(() {
             player = (PlayerControllerState(
-                audioPlayer: player.audioPlayer,
                 current: player.current,
                 playMode: PlayMode.shuffle,
                 playingList: player.playingList,
@@ -478,7 +465,6 @@ class StateContainerState extends State<StateContainer> {
           prefs.setInt(_PREF_KEY_PLAY_MODE, 0);
           setState(() {
             player = (PlayerControllerState(
-                audioPlayer: player.audioPlayer,
                 current: player.current,
                 playMode: PlayMode.single,
                 playingList: player.playingList,
@@ -497,7 +483,6 @@ class StateContainerState extends State<StateContainer> {
   Future<void> switchPlayingState(bool state) {
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: player.current,
           playMode: player.playMode,
           playingList: player.playingList,
@@ -512,7 +497,6 @@ class StateContainerState extends State<StateContainer> {
   Future<void> setPlayingState(Duration pos, Duration dur, double time) {
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: player.current,
           playMode: player.playMode,
           playingList: player.playingList,
@@ -530,7 +514,6 @@ class StateContainerState extends State<StateContainer> {
     prefs.remove(_PREF_KEY_PLAYLIST);
     setState(() {
       player = PlayerControllerState(
-          audioPlayer: player.audioPlayer,
           current: player.current,
           playMode: player.playMode,
           playingList: [],
@@ -540,20 +523,6 @@ class StateContainerState extends State<StateContainer> {
           time: 0.0);
     });
     return '';
-  }
-
-  void setPlayer(AudioPlayer audioPlayer) {
-    setState(() {
-      player = (PlayerControllerState(
-          audioPlayer: audioPlayer,
-          current: player.current,
-          playMode: player.playMode,
-          playingList: player.playingList,
-          isPlaying: player.isPlaying,
-          position: player.position,
-          duration: player.duration,
-          time: player.time));
-    });
   }
 
   // 获取歌曲播放url
@@ -612,10 +581,7 @@ class StateContainerState extends State<StateContainer> {
 
     setState(() {
       player = (PlayerControllerState(
-          audioPlayer: AudioPlayer(),
-          current: current,
-          playMode: playMode,
-          playingList: playingList));
+          current: current, playMode: playMode, playingList: playingList));
     });
   }
 

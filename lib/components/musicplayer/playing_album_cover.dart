@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../repository/netease.dart';
+import './player.dart';
 
 class AlbumCover extends StatefulWidget {
   final bool isNew;
@@ -150,7 +151,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
     // 播放
     if (widget.isNew != null && widget.isNew == true) {
       if (store.player.isPlaying == true) {
-        var result = await store.player.audioPlayer.stop();
+        var result = await MyPlayer.player.stop();
         if (result == 1) {
           store.switchPlayingState(false);
           store.setPlayingState(Duration.zero, Duration.zero, 0.0);
@@ -227,12 +228,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
     final _position = store.player.position;
     final _time = store.player.time;
 
-    if (store.player.audioPlayer == null && loaded == false) {
-      store.setPlayer(AudioPlayer());
-      audioPlayer = AudioPlayer();
-    } else {
-      audioPlayer = store.player.audioPlayer;
-    }
+    audioPlayer = MyPlayer.player;
 
     // 从歌曲搜索页面跳转过来
     if (widget.isNew != null && loaded == false) {
@@ -426,7 +422,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
                         if (result == 1) return;
                         if (result == 0) {
                           // 删除了所有歌曲,跳转到首页
-                          var _stop = await store.player.audioPlayer.stop();
+                          var _stop = await MyPlayer.player.stop();
                           if (_stop == 1) {
                             controller_record.stop(canceled: false);
                             controller_needle.reverse();
@@ -441,6 +437,8 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
                         await store.switchPlayingState(false);
                         controller_record.stop(canceled: false);
                         controller_needle.reverse();
+                        await audioPlayer.stop();
+
                         if (result == null) {
                           // 无法获取歌曲播放url
                           Fluttertoast.showToast(
@@ -531,7 +529,7 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
                         }
                       },
                       clear: (BuildContext alertCtx) async {
-                        var res = await store.player.audioPlayer.stop();
+                        var res = await MyPlayer.player.stop();
                         if (res == 1) {
                           var result = await store.clearPlayingList();
                           if (result == '') {
