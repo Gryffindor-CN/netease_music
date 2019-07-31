@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/widgets.dart';
 import 'package:netease_music/pages/playlist/selection_list.dart';
 import 'dart:ui';
@@ -468,25 +467,24 @@ class _BlurBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      fit: StackFit.expand,
-      children: playlistDetail == null
-          ? <Widget>[
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(color: Colors.black.withOpacity(0.1)),
-              )
-            ]
-          : <Widget>[
-              Image.network(
-                playlistDetail.coverUrl,
-                fit: BoxFit.cover,
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(color: Colors.black.withOpacity(0.1)),
-              )
-            ],
-    );
+        fit: StackFit.expand,
+        children: playlistDetail == null
+            ? <Widget>[
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: Container(color: Colors.black.withOpacity(0.4)),
+                )
+              ]
+            : <Widget>[
+                Image.network(
+                  playlistDetail.coverUrl,
+                  fit: BoxFit.cover,
+                ),
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: Container(color: Colors.black.withOpacity(0.4)),
+                ),
+              ]);
   }
 }
 
@@ -556,7 +554,7 @@ class _PlaylistDetailHeader extends StatelessWidget {
                     Hero(
                       tag: playlistDetail == null ? '' : playlistDetail.heroTag,
                       child: playlistDetail == null
-                          ? CircularProgressIndicator()
+                          ? Container()
                           : Image.network(
                               playlistDetail.coverUrl,
                               fit: BoxFit.cover,
@@ -629,7 +627,7 @@ class _PlaylistDetailHeader extends StatelessWidget {
                             height: 24,
                             width: 24,
                             child: playlistDetail == null
-                                ? CircularProgressIndicator()
+                                ? Container()
                                 : ClipOval(
                                     child: Image.network(
                                       creator["avatarUrl"],
