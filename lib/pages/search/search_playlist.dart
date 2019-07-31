@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:netease_music/repository/netease.dart';
 import '../../model/music.dart';
-import 'dart:math';
+import './playlist_item.dart';
 
 class SearchPlaylistTab extends StatefulWidget {
   final String keyword;
@@ -113,7 +113,7 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
                   height: 45.0,
                   margin: EdgeInsets.only(right: 10.0),
                   child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
                       child: Image.network(
                         item.coverImgUrl,
                       )),
@@ -125,6 +125,9 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         _nameWidget,
+                        SizedBox(
+                          height: 4.0,
+                        ),
                         DefaultTextStyle(
                           style: TextStyle(
                               fontSize: 10.0, color: Color(0xFFBDBDBD)),
@@ -182,11 +185,16 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
                         color: Theme.of(context).textTheme.subtitle.color),
                   ),
                 ))
-            : ListView.builder(
-                itemCount: playlist.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _buildWidget(playlist[index]);
-                },
+            // : ListView.builder(
+            //     itemCount: playlist.length,
+            //     itemBuilder: (BuildContext context, int index) {
+            //       return _buildWidget(playlist[index]);
+            //     },
+            //   );
+            : SingleChildScrollView(
+                child: Container(
+                  child: PlaylistSection(widget.keyword, playlist),
+                ),
               );
   }
 }
