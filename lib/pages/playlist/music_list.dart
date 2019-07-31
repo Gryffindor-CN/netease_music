@@ -15,10 +15,14 @@ class MusicTitle extends StatelessWidget {
       widgetList.add(MusicItem(
         item,
         sortIndex: index + 1,
-        tailsList: [
-          {'iconData': Icons.play_circle_outline, 'iconPress': () {}},
-          {'iconData': Icons.more_vert, 'iconPress': () async {}}
-        ],
+        tailsList: item.mvId == 0
+            ? [
+                {'iconData': Icons.more_vert, 'iconPress': () async {}}
+              ]
+            : [
+                {'iconData': Icons.play_circle_outline, 'iconPress': () {}},
+                {'iconData': Icons.more_vert, 'iconPress': () async {}}
+              ],
         pageContext: this.pageContext,
         onTap: () {
           // 播放音乐

@@ -257,7 +257,7 @@ class MusicItem extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 15.0,
+              width: 10.0,
             ),
           ],
         ),
@@ -350,7 +350,7 @@ class ListTail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: _buildTail(),
     );
   }

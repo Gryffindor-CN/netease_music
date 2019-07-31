@@ -10,8 +10,8 @@ import '../repository/netease.dart';
 import './search/search.dart';
 
 class RefreshIndicators extends StatefulWidget {
-  RefreshIndicators({this.showToastCb});
-
+  RefreshIndicators({this.showToastCb, this.pageContext});
+  final BuildContext pageContext;
   final VoidCallback showToastCb;
 
   @override
@@ -236,23 +236,26 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                       Text('abc')
                                     ],
                                   ),
-                                  Column(
-                                    children: <Widget>[
-                                      Container(
-                                        width: 44.0,
-                                        height: 44.0,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                        child: Icon(
-                                          Icons.ac_unit,
-                                          color: Colors.white,
+                                  GestureDetector(
+                                    onTap: () {},
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          width: 44.0,
+                                          height: 44.0,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                          child: Icon(
+                                            Icons.ac_unit,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                      ),
-                                      Text('abc')
-                                    ],
+                                        Text('排行榜')
+                                      ],
+                                    ),
                                   ),
                                   Column(
                                     children: <Widget>[
@@ -397,11 +400,14 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
       body: NeteaseToast(
         toastText: '已为你推荐新的个性化内容!!!',
         showToast: isShow,
-        child: RefreshIndicators(showToastCb: () {
-          setState(() {
-            isShow = true;
-          });
-        }),
+        child: RefreshIndicators(
+          showToastCb: () {
+            setState(() {
+              isShow = true;
+            });
+          },
+          pageContext: widget.pageContext,
+        ),
       ),
     );
   }

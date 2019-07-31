@@ -66,7 +66,8 @@ class _PlaylistPageState extends State<Playlists> {
               name: item['ar'][0]['name'],
               imageUrl: '',
             )
-          ]));
+          ],
+          mvId: item['mv']));
     });
 
     setState(() {
@@ -108,7 +109,8 @@ class _PlaylistPageState extends State<Playlists> {
               name: item['ar'][0]['name'],
               imageUrl: '',
             )
-          ]));
+          ],
+          mvId: item['mv']));
     });
     if (this.mounted) {
       setState(() {

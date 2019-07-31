@@ -21,6 +21,7 @@ class SearchPageState extends State<SearchPage> {
   TextEditingController _textEditingController = TextEditingController();
   bool hasSearchInsert;
   bool isSuggestLoading = true;
+  bool hotSearchLoading = false;
   List<Music> searchhistorylists = [];
   List<Music> hotlists = [];
   List<dynamic> suggestlists = [];
@@ -34,6 +35,7 @@ class SearchPageState extends State<SearchPage> {
       isSuggestLoading = true;
       _textEditingController = TextEditingController(text: widget.keyword);
       _getSearchSuggest(widget.keyword);
+      _keyword = widget.keyword;
     } else {
       _getSearchHot();
       SharedPreferences.getInstance().then((prefs) {
@@ -58,8 +60,12 @@ class SearchPageState extends State<SearchPage> {
 
   // 获取热搜榜
   void _getSearchHot() async {
+    setState(() {
+      hotSearchLoading = true;
+    });
     var hots = await NeteaseRepository.getSearchHot();
     setState(() {
+      hotSearchLoading = false;
       hots.forEach((item) {
         hotlists.add(Music(name: item['first']));
       });
@@ -181,7 +187,6 @@ class SearchPageState extends State<SearchPage> {
                                   keyword: _keyword,
                                   pageContext: widget.pageContext);
                             }));
-
                             setState(() {
                               hasSearchInsert = false;
                               searchhistorylists.clear();
@@ -277,6 +282,7 @@ class SearchPageState extends State<SearchPage> {
                           ),
                           SearchHotList(
                             hotlists,
+                            isLoading: hotSearchLoading,
                             callback: (lists) {
                               setState(() {
                                 lists.asMap().forEach((int index, String item) {
@@ -322,6 +328,7 @@ class SearchPageState extends State<SearchPage> {
                           ),
                           SearchHotList(
                             hotlists,
+                            isLoading: hotSearchLoading,
                             callback: (list) {
                               setState(() {
                                 list.asMap().forEach((int index, String item) {
@@ -400,11 +407,13 @@ class SearchHotList extends StatelessWidget {
   final List<Music> songlist;
   final ValueChanged callback;
   final BuildContext pageContext;
-  SearchHotList(this.songlist, {this.callback, this.pageContext});
+  final bool isLoading;
+  SearchHotList(this.songlist,
+      {this.callback, this.pageContext, this.isLoading});
 
   @override
   Widget build(BuildContext context) {
-    return songlist.length <= 0
+    return isLoading == true
         ? SliverToBoxAdapter(
             child: Center(
               child: CircularProgressIndicator(

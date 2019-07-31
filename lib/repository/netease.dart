@@ -119,7 +119,6 @@ class NeteaseRepository {
     try {
       Response response = await Dio().get(url);
       var plays = json.decode(response.toString())['result']['playlists'];
-
       return plays;
     } catch (e) {
       print(e);
