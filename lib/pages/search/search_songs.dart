@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import '../../components/selection/select_all.dart';
 import '../../model/music.dart';
-import './music_item.dart';
+import '../../components/music_item.dart';
 import '../../components/song_detail_dialog.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
@@ -129,10 +129,12 @@ class SearchSongTabState extends State<SearchSongTab>
     ];
 
     if (songs.length > 0) {
-      songs.map((item) {
+      songs.asMap().forEach((int index, item) {
         widgetItems.add(MusicItem(
           item,
-          widget.keyword,
+          keyword: widget.keyword,
+          sortIndex: index + 1,
+          sort: true,
           tailsList: [
             {'iconData': Icons.play_circle_outline, 'iconPress': () {}},
             {
@@ -285,7 +287,7 @@ class SearchSongTabState extends State<SearchSongTab>
           ],
           pageContext: widget.pageContext,
         ));
-      }).toList();
+      });
     }
 
     return Column(

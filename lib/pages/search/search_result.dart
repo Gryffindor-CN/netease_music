@@ -7,8 +7,9 @@ import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import './search_songs.dart';
+import './search_album.dart';
 import '../../model/music.dart';
-import './music_item.dart';
+import '../../components/music_item.dart';
 import './search_playlist.dart';
 import '../../repository/netease.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -150,7 +151,9 @@ class SearchResultState extends State<SearchResult>
       ),
       Center(child: Text('视频')),
       Center(child: Text('歌手')),
-      Center(child: Text('专辑')),
+      SearchAlbumTab(
+        keyword: widget.keyword,
+      ),
       SearchPlaylistTab(
         keyword: widget.keyword,
       ),
@@ -220,14 +223,62 @@ class SearchResultState extends State<SearchResult>
           isScrollable: true,
           controller: _tabController,
           tabs: <Widget>[
-            Text('综合'),
-            Text('单曲'),
-            Text('视频'),
-            Text('歌手'),
-            Text('专辑'),
-            Text('歌单'),
-            Text('主播电台'),
-            Text('用户')
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '综合',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '单曲',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '视频',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '歌手',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '专辑',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '歌单',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '主播电台',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                '用户',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ),
           ],
         ),
       ),
@@ -265,7 +316,8 @@ class AlbumSection extends StatelessWidget {
     songList.asMap().forEach((int index, Music item) {
       widgetList.add(MusicItem(
         item,
-        keyword,
+        keyword: keyword,
+        sortIndex: index + 1,
         tailsList: [
           {'iconData': Icons.play_circle_outline, 'iconPress': () {}},
           {

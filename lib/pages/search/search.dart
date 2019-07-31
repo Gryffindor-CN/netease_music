@@ -223,7 +223,10 @@ class SearchPageState extends State<SearchPage> {
                   ),
                   SliverToBoxAdapter(
                     child: isSuggestLoading == true
-                        ? Center(child: CircularProgressIndicator())
+                        ? Center(
+                            child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Theme.of(context).primaryColor)))
                         : Container(
                             child: ListView.builder(
                               shrinkWrap: true,
@@ -404,7 +407,9 @@ class SearchHotList extends StatelessWidget {
     return songlist.length <= 0
         ? SliverToBoxAdapter(
             child: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor)),
             ),
           )
         : SliverList(

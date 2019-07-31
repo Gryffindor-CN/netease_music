@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
 import 'dart:math';
+import '../../pages/playlist/playlist.dart';
 
 class PlaylistSection extends StatelessWidget {
   final String keyword;
@@ -9,7 +10,7 @@ class PlaylistSection extends StatelessWidget {
   PlaylistSection(this.keyword, this.playList, {this.tabController});
   static Widget _nameWidget;
 
-  List<Widget> _buildWidget() {
+  List<Widget> _buildWidget(BuildContext ctx) {
     List<Widget> widgetList = [];
     playList.asMap().forEach((int index, PlayList item) {
       if (item.name.contains(keyword)) {
@@ -50,7 +51,12 @@ class PlaylistSection extends StatelessWidget {
       }
 
       widgetList.add(InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.of(ctx)
+              .push(MaterialPageRoute(builder: (BuildContext context) {
+            return Playlists(item.id, 'playlist');
+          }));
+        },
         child: Row(
           children: <Widget>[
             SizedBox(
@@ -167,7 +173,7 @@ class PlaylistSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: _buildWidget(),
+      children: _buildWidget(context),
     );
   }
 }

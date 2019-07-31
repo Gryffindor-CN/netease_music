@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:netease_music/repository/netease.dart';
-import '../../model/music.dart';
-import './playlist_item.dart';
+import 'package:netease_music/model/music.dart';
+import '../../repository/netease.dart';
+import '../../components/album_item.dart';
 
-class SearchPlaylistTab extends StatefulWidget {
+class SearchAlbumTab extends StatefulWidget {
   final String keyword;
-  SearchPlaylistTab({@required this.keyword});
+  SearchAlbumTab({@required this.keyword});
   @override
-  SearchPlaylistTabState createState() => SearchPlaylistTabState();
+  SearchAlbumTabState createState() => SearchAlbumTabState();
 }
 
-class SearchPlaylistTabState extends State<SearchPlaylistTab>
+class SearchAlbumTabState extends State<SearchAlbumTab>
     with AutomaticKeepAliveClientMixin {
   bool _isLoading = true;
-  List<PlayList> playlist = [];
+  List<Album> albumlist = [];
   @override
   bool get wantKeepAlive => true;
 
@@ -21,39 +21,38 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
   void initState() {
     super.initState();
     if (this.mounted) {
-      _getPlaylist(widget.keyword);
+      _getAlbums(widget.keyword);
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (this.mounted) {
-      // _getPlaylist(widget.keyword);
-    }
-  }
-
-  void _getPlaylist(String keyword) async {
-    var plays = await NeteaseRepository.getSearchPlaylist(keyword);
+  void _getAlbums(String keyword) async {
+    var albums = await NeteaseRepository.getSearchAlbum(keyword);
     if (this.mounted) {
       setState(() {
-        plays.asMap().forEach((int index, item) {
-          playlist.add(PlayList(
+        albums.asMap().forEach((int index, item) {
+          albumlist.add(Album(
             name: item['name'],
             id: item['id'],
-            coverImgUrl: item['coverImgUrl'],
-            playCount: item['playCount'],
-            trackCount: item['trackCount'],
-            creatorName: item['creator']['nickname'],
+            coverImageUrl: item['picUrl'],
+            publishTime: item['publishTime'],
+            size: item['size'],
           ));
         });
       });
-      if (playlist.length == plays.asMap().length) {
+      if (albumlist.length == albums.asMap().length) {
         setState(() {
           _isLoading = false;
         });
       }
     }
+  }
+
+  List<Widget> _buildContent(List<Album> albums) {
+    List<Widget> _widgetList = [];
+    albums.asMap().forEach((int index, album) {
+      _widgetList.add(AlbumItem(album, context, onTap: () {}));
+    });
+    return _widgetList;
   }
 
   @override
@@ -67,7 +66,7 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
                   AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
             ),
           ))
-        : playlist.length == 0
+        : albumlist.length == 0
             ? Container(
                 alignment: Alignment.topCenter,
                 child: Padding(
@@ -80,7 +79,9 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
                 ))
             : SingleChildScrollView(
                 child: Container(
-                  child: PlaylistSection(widget.keyword, playlist),
+                  child: Column(
+                    children: _buildContent(albumlist),
+                  ),
                 ),
               );
   }

@@ -114,7 +114,7 @@ class NeteaseRepository {
   }
 
   // 获取所有歌单
-  static getPlaylist(String keyword) async {
+  static getSearchPlaylist(String keyword) async {
     var url = '${API_HOST}search?keywords=$keyword&type=1000';
     try {
       Response response = await Dio().get(url);
@@ -124,5 +124,51 @@ class NeteaseRepository {
     } catch (e) {
       print(e);
     }
+  }
+
+  // 获取所有专辑
+  static getSearchAlbum(String keyword) async {
+    var url = '${API_HOST}search?keywords=$keyword&type=10';
+    try {
+      Response response = await Dio().get(url);
+      var plays = json.decode(response.toString())['result']['albums'];
+
+      return plays;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 获取排行榜详情
+  static getTopList(int idx) async {
+    var url = '${API_HOST}top/list?idx=$idx';
+    try {
+      Response response = await Dio().get(url);
+
+      var playlist = json.decode(response.toString())['playlist'];
+      return playlist;
+    } catch (e) {}
+  }
+
+  // 获取歌单详情
+  static getPlaylistDetail(int id) async {
+    var url = '${API_HOST}playlist/detail?id=$id';
+    try {
+      Response response = await Dio().get(url);
+
+      var playlist = json.decode(response.toString())['playlist'];
+
+      return playlist;
+    } catch (e) {}
+  }
+
+  // 收藏/取消歌单
+  static playlistSubscribe(bool t, int id) async {
+    var url = '${API_HOST}playlist/subscribe?t=${t == true ? 1 : 2}&id=$id';
+    try {
+      Response response = await Dio().get(url);
+      var code = json.decode(response.toString())['code'];
+      return code;
+    } catch (e) {}
   }
 }

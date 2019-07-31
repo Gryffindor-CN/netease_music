@@ -16,6 +16,12 @@ class Music {
   int mvId;
   String url;
 
+  String get subTitle {
+    var ar = artists.map((a) => a.name).join('/');
+    var al = album.name;
+    return '$al - $ar';
+  }
+
   Music(
       {this.name,
       this.id,
