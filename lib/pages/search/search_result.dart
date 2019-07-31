@@ -13,6 +13,7 @@ import './music_item.dart';
 import './search_playlist.dart';
 import '../../repository/netease.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../../components/musicplayer/player.dart';
 
 class SearchResult extends StatefulWidget {
   final String keyword;
@@ -449,7 +450,7 @@ class Album extends StatelessWidget {
                             onPressed: () async {
                               await store.playMultis(this.songList);
                               if (store.player.isPlaying == true) {
-                                var res = await store.player.audioPlayer.stop();
+                                var res = await MyPlayer.player.stop();
                                 if (res == 1) {
                                   // Navigator.of(context).push(MaterialPageRoute(
                                   //     builder: (BuildContext context) {

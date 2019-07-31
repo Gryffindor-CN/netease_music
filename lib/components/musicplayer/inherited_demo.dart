@@ -275,9 +275,11 @@ class StateContainerState extends State<StateContainer> {
     if (_playingList.length <= 0) {
       prefs.remove(_PREF_KEY_PLAYING);
       prefs.remove(_PREF_KEY_PLAYLIST);
+      var __curent = player.current;
+      __curent.id = -1;
       setState(() {
-        PlayerControllerState(
-            current: Music(),
+        player = PlayerControllerState(
+            current: __curent,
             playMode: player.playMode,
             playingList: [],
             isPlaying: false,
@@ -291,7 +293,7 @@ class StateContainerState extends State<StateContainer> {
           json.encode(_playingList, toEncodable: (e) => e.toMap()));
 
       setState(() {
-        PlayerControllerState(
+        player = PlayerControllerState(
             current: player.current,
             playMode: player.playMode,
             playingList: _playingList,
@@ -512,9 +514,11 @@ class StateContainerState extends State<StateContainer> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove(_PREF_KEY_PLAYING);
     prefs.remove(_PREF_KEY_PLAYLIST);
+    var __curent = player.current;
+    __curent.id = -1;
     setState(() {
       player = PlayerControllerState(
-          current: player.current,
+          current: __curent,
           playMode: player.playMode,
           playingList: [],
           isPlaying: false,
@@ -544,9 +548,6 @@ class StateContainerState extends State<StateContainer> {
   }
 
   void _getSavedInfo() async {
-    // var pref = await SharedPreferences.getInstance();
-    // pref.remove(_PREF_KEY_PLAYLIST);
-    // pref.remove(_PREF_KEY_PLAY_MODE);
     var preference = await SharedPreferences.getInstance();
     Music current = Music(name: '');
     List<Music> playingList = [];

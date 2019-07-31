@@ -94,6 +94,10 @@ class MusicItem extends StatelessWidget {
     if (tailsList != null) {
       return InkWell(
         onTap: () async {
+          if (store.player.current.id == item.id) {
+            Routes.router.navigateTo(this.pageContext, '/albumcoverpage');
+            return;
+          }
           await store.play(Music(
             name: item.name,
             id: item.id,

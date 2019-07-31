@@ -10,10 +10,10 @@ import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import '../../repository/netease.dart';
-import '../../components/musicplayer/playing_album_cover.dart';
 import '../../components/musicplayer/inherited_demo.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../router/Routes.dart';
+import '../../components/musicplayer/player.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
@@ -338,8 +338,7 @@ class SearchSongTabState extends State<SearchSongTab>
                                   onTap: () async {
                                     await store.playMultis(this.songs);
                                     if (store.player.isPlaying == true) {
-                                      var res =
-                                          await store.player.audioPlayer.stop();
+                                      var res = await MyPlayer.player.stop();
                                       if (res == 1) {
                                         // Navigator.of(context).push(
                                         //     MaterialPageRoute(builder:

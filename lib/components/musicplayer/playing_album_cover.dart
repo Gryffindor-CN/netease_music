@@ -429,7 +429,6 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
                             Navigator.of(context).pop();
                             Navigator.of(context).pop();
                           }
-
                           return;
                         }
                         await store.setPlayingState(
