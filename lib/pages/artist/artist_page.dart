@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/widgets.dart' as prefix0;
 import '../../model/model.dart';
 import '../../repository/netease.dart';
 import './flexible_app_bar.dart';
@@ -356,7 +355,10 @@ class _ArtistListHeader extends StatelessWidget {
                     '管理',
                     style:
                         TextStyle(fontSize: 12.0, fontWeight: FontWeight.w600),
-                  )
+                  ),
+                  SizedBox(
+                    width: 16.0,
+                  ),
                 ],
               ),
             )
