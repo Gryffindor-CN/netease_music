@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import './selection_checkbox.dart';
 import '../../model/music.dart';
-import '../../components/music_item.dart';
+import '../../components/music/music_item.dart';
 
 class SongList extends StatefulWidget {
   final bool selectStatus;

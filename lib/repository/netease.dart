@@ -104,8 +104,9 @@ class NeteaseRepository {
   }
 
   // 获取所有歌曲
-  static getSongs(String keyword) async {
-    var url = '${API_HOST}search?keywords=$keyword';
+  static getSongs(String keyword, {int offset = 0}) async {
+    print(offset);
+    var url = '${API_HOST}search?keywords=$keyword&offset=$offset';
     try {
       Response response = await Dio().get(url);
       var songRes = json.decode(response.toString())['result']['songs'];

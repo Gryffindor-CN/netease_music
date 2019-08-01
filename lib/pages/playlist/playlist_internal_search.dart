@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../model/playlist_detail.dart';
 import '../../model/music.dart';
 import './music_list.dart';
-import '../../components/music_item.dart';
+import '../../components/music/music_item.dart';
 
 class PlaylistInternalSearchDelegate extends SearchDelegate {
   PlaylistInternalSearchDelegate(this.playlist, this.theme);

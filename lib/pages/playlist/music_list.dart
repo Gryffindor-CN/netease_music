@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
-import '../../components/music_item.dart';
+import '../../components/music/music_item.dart';
 
 class MusicTitle extends StatelessWidget {
   final List<Music> songList;

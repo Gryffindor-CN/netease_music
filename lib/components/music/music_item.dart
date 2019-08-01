@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../model/music.dart';
-import './musicplayer/inherited_demo.dart';
-import '../router/Routes.dart';
+import '../../model/music.dart';
+import '../musicplayer/inherited_demo.dart';
+import '../../router/Routes.dart';
 
 class MusicItem extends StatelessWidget {
   final Music item;

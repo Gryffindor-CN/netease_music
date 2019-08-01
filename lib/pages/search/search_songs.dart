@@ -4,7 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import '../../components/selection/select_all.dart';
 import '../../model/music.dart';
-import '../../components/music_item.dart';
+import '../../components/music/music_item.dart';
+import '../../components/music/music_item_list.dart';
 import '../../components/song_detail_dialog.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import '../../components/bottom_share.dart';
@@ -28,14 +29,31 @@ class SearchSongTabState extends State<SearchSongTab>
   bool _isLoading = true;
   bool _selection = false;
   List<Music> songs = []; // 单曲
+  ScrollController _scrollController;
+  int offset = 0;
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()..addListener(_scrollListener);
     if (this.mounted) {
-      _getSongs();
+      _getSongs(offset);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.extentAfter < 2.0) {
+      if (_isLoading == true) return;
+      offset = offset + 1;
+      _getSongs(offset);
     }
   }
 
@@ -61,77 +79,48 @@ class SearchSongTabState extends State<SearchSongTab>
     return result;
   }
 
-  void _getSongs() async {
-    var songRes = await NeteaseRepository.getSongs(widget.keyword);
+  // 获取单曲
+  void _getSongs(int offset) async {
+    setState(() {
+      _isLoading = true;
+    });
+    var _len = songs.length;
+    var songRes =
+        await NeteaseRepository.getSongs(widget.keyword, offset: offset);
     await songRes.asMap().forEach((int index, item) async {
       var res = await _getSongDetail(item['id']);
       if (this.mounted) {
-        setState(() {
-          songs.add(
-            Music(
-                name: item['name'],
-                id: item['id'],
-                aritstName: item['artists'][0]['name'],
-                aritstId: item['artists'][0]['id'],
-                albumName: item['album']['name'],
-                albumId: item['album']['id'],
-                albumCoverImg: res['detail']['al']['picUrl'],
-                detail: res['detail'],
-                commentCount: res['commentCount'],
-                mvId: item['mvid']),
-          );
-        });
-        if (songs.length == songRes.asMap().length) {
+        Future.delayed(Duration(milliseconds: 20), () {
           setState(() {
-            _isLoading = false;
+            songs.add(
+              Music(
+                  name: item['name'],
+                  id: item['id'],
+                  aritstName: item['artists'][0]['name'],
+                  aritstId: item['artists'][0]['id'],
+                  albumName: item['album']['name'],
+                  albumId: item['album']['id'],
+                  albumCoverImg: res['detail']['al']['picUrl'],
+                  detail: res['detail'],
+                  commentCount: res['commentCount'],
+                  mvId: item['mvid']),
+            );
           });
-        }
+          if (songs.length == _len + songRes.length) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        });
       }
     });
   }
 
-  Widget _buildSongList(StateContainerState store) {
-    List<Widget> widgetItems = [];
-    List<Widget> clearItems = [
-      Theme(
-        data: ThemeData(
-          iconTheme: IconThemeData(color: Color(0xffd4d4d4)),
-        ),
-        child: GestureDetector(
-          onTap: () {
-            // todo 清除播放记录
-            _clearPlayRecords(context, () {
-              setState(() {
-                songs.clear();
-              });
-            });
-          },
-          child: Container(
-            margin: EdgeInsets.only(bottom: 50.0),
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.transparent))),
-            height: 50.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(Icons.delete_outline),
-                Text(
-                  '清除播放记录',
-                  style: TextStyle(
-                      color: Theme.of(context).textTheme.subtitle.color,
-                      fontSize: 14.0),
-                )
-              ],
-            ),
-          ),
-        ),
-      )
-    ];
-
+  List<MusicItem> _buildList(BuildContext context, StateContainerState store) {
+    List<MusicItem> _widgetlist = [];
     if (songs.length > 0) {
       songs.asMap().forEach((int index, item) {
-        widgetItems.add(MusicItem(
+        _widgetlist.add(MusicItem(
           item,
           keyword: widget.keyword,
           sortIndex: index + 1,
@@ -465,14 +454,48 @@ class SearchSongTabState extends State<SearchSongTab>
         ));
       });
     }
+    return _widgetlist;
+  }
 
-    return Column(
-      children: widgetItems..addAll(clearItems),
+  Widget _buildTail() {
+    return Theme(
+      data: ThemeData(
+        iconTheme: IconThemeData(color: Color(0xffd4d4d4)),
+      ),
+      child: GestureDetector(
+        onTap: () {
+          // todo 清除播放记录
+          _clearPlayRecords(context, () {
+            setState(() {
+              songs.clear();
+            });
+          });
+        },
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 20.0),
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.transparent))),
+          height: 50.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.delete_outline),
+              Text(
+                '清除播放记录',
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.subtitle.color,
+                    fontSize: 14.0),
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget buildSongsWidget(StateContainerState store) {
-    return _isLoading == true
+    return (_isLoading == true && offset == 0)
         ? Center(
             child: Padding(
             padding: EdgeInsets.only(top: 50.0),
@@ -492,35 +515,49 @@ class SearchSongTabState extends State<SearchSongTab>
                         color: Theme.of(context).textTheme.subtitle.color),
                   ),
                 ))
-            : ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemBuilder: (BuildContext context, int index) {
-                  return StickyHeader(
-                      header: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 10.0),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border(
-                                  bottom: BorderSide(
-                                      color: Color(0xFFE0E0E0), width: 0.5))),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Expanded(
-                                flex: 10,
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    await store.playMultis(this.songs);
-                                    if (store.player.isPlaying == true) {
-                                      var res = await MyPlayer.player.stop();
-                                      if (res == 1) {
+            : (_isLoading == true && offset > 0)
+                ? ListView.builder(
+                    controller: _scrollController,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return StickyHeader(
+                        header: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 15.0,
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 10.0),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color(0xFFE0E0E0), width: 0.5))),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 10,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      await store.playMultis(this.songs);
+                                      if (store.player.isPlaying == true) {
+                                        var res = await MyPlayer.player.stop();
+                                        if (res == 1) {
+                                          // Navigator.of(context).push(
+                                          //     MaterialPageRoute(builder:
+                                          //         (BuildContext context) {
+                                          //   return AlbumCover(
+                                          //     isNew: true,
+                                          //   );
+                                          // }));
+                                          Routes.router.navigateTo(
+                                              widget.pageContext,
+                                              '/albumcoverpage?isNew=true');
+                                        }
+                                      } else {
                                         // Navigator.of(context).push(
-                                        //     MaterialPageRoute(builder:
-                                        //         (BuildContext context) {
+                                        //     MaterialPageRoute(
+                                        //         builder: (BuildContext context) {
                                         //   return AlbumCover(
                                         //     isNew: true,
                                         //   );
@@ -529,78 +566,190 @@ class SearchSongTabState extends State<SearchSongTab>
                                             widget.pageContext,
                                             '/albumcoverpage?isNew=true');
                                       }
-                                    } else {
-                                      // Navigator.of(context).push(
-                                      //     MaterialPageRoute(
-                                      //         builder: (BuildContext context) {
-                                      //   return AlbumCover(
-                                      //     isNew: true,
-                                      //   );
-                                      // }));
-                                      Routes.router.navigateTo(
-                                          widget.pageContext,
-                                          '/albumcoverpage?isNew=true');
-                                    }
-                                  },
-                                  child: Container(
-                                    child: Row(
-                                      children: <Widget>[
-                                        Icon(Icons.play_circle_outline),
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 12.0),
-                                          child: Text(
-                                            '播放全部',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: Theme.of(context)
-                                                  .textTheme
-                                                  .title
-                                                  .fontSize,
+                                    },
+                                    child: Container(
+                                      child: Row(
+                                        children: <Widget>[
+                                          Icon(Icons.play_circle_outline),
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.only(left: 12.0),
+                                            child: Text(
+                                              '播放全部',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: Theme.of(context)
+                                                    .textTheme
+                                                    .title
+                                                    .fontSize,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Text('（共${songs.length}首）',
-                                            style: TextStyle(
-                                                fontSize: 12.0,
-                                                color: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle
-                                                    .color))
-                                      ],
+                                          Text('（共${songs.length}首）',
+                                              style: TextStyle(
+                                                  fontSize: 12.0,
+                                                  color: Theme.of(context)
+                                                      .textTheme
+                                                      .subtitle
+                                                      .color))
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selection = !_selection;
-                                    });
-                                  },
-                                  child: Row(
-                                    children: <Widget>[
-                                      Icon(Icons.list),
-                                      Text(
-                                        '多选',
-                                      )
-                                    ],
+                                Expanded(
+                                  flex: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selection = !_selection;
+                                      });
+                                    },
+                                    child: Row(
+                                      children: <Widget>[
+                                        Icon(Icons.list),
+                                        Text(
+                                          '多选',
+                                        )
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              )
-                            ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      content: Column(
-                        children: <Widget>[
-                          _buildSongList(store),
-                        ],
-                      ));
-                },
-                itemCount: 1,
-              );
+                        content: Column(
+                          children: <Widget>[
+                            MusicItemList(
+                              keyword: widget.keyword,
+                              list: _buildList(context, store),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(10.0),
+                              alignment: Alignment.center,
+                              child: Text('单曲加载中...',
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor)),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                    itemCount: 1,
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (BuildContext context, int index) {
+                      return StickyHeader(
+                        header: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 15.0,
+                          ),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 10.0),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color(0xFFE0E0E0), width: 0.5))),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 10,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      await store.playMultis(this.songs);
+                                      if (store.player.isPlaying == true) {
+                                        var res = await MyPlayer.player.stop();
+                                        if (res == 1) {
+                                          // Navigator.of(context).push(
+                                          //     MaterialPageRoute(builder:
+                                          //         (BuildContext context) {
+                                          //   return AlbumCover(
+                                          //     isNew: true,
+                                          //   );
+                                          // }));
+                                          Routes.router.navigateTo(
+                                              widget.pageContext,
+                                              '/albumcoverpage?isNew=true');
+                                        }
+                                      } else {
+                                        // Navigator.of(context).push(
+                                        //     MaterialPageRoute(
+                                        //         builder: (BuildContext context) {
+                                        //   return AlbumCover(
+                                        //     isNew: true,
+                                        //   );
+                                        // }));
+                                        Routes.router.navigateTo(
+                                            widget.pageContext,
+                                            '/albumcoverpage?isNew=true');
+                                      }
+                                    },
+                                    child: Container(
+                                      child: Row(
+                                        children: <Widget>[
+                                          Icon(Icons.play_circle_outline),
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.only(left: 12.0),
+                                            child: Text(
+                                              '播放全部',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: Theme.of(context)
+                                                    .textTheme
+                                                    .title
+                                                    .fontSize,
+                                              ),
+                                            ),
+                                          ),
+                                          Text('（共${songs.length}首）',
+                                              style: TextStyle(
+                                                  fontSize: 12.0,
+                                                  color: Theme.of(context)
+                                                      .textTheme
+                                                      .subtitle
+                                                      .color))
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _selection = !_selection;
+                                      });
+                                    },
+                                    child: Row(
+                                      children: <Widget>[
+                                        Icon(Icons.list),
+                                        Text(
+                                          '多选',
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        content: MusicItemList(
+                          keyword: widget.keyword,
+                          list: _buildList(context, store),
+                          tailWidget: _buildTail(),
+                        ),
+                      );
+                    },
+                    itemCount: 1,
+                  );
   }
 
   void _onSongsDelete(val) {
