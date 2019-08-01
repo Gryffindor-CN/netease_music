@@ -7,7 +7,9 @@ class PlaylistSection extends StatelessWidget {
   final String keyword;
   final List<PlayList> playList;
   final TabController tabController;
-  PlaylistSection(this.keyword, this.playList, {this.tabController});
+  final bool showTitle;
+  PlaylistSection(this.keyword, this.playList,
+      {this.tabController, this.showTitle = false});
   static Widget _nameWidget;
 
   List<Widget> _buildWidget(BuildContext ctx) {
@@ -127,46 +129,50 @@ class PlaylistSection extends StatelessWidget {
         ),
       ));
     });
-    widgetList.insert(
-        0,
-        Row(
-          children: <Widget>[
-            SizedBox(
-              width: 15.0,
-            ),
-            Expanded(
-              child: Container(
-                child: InkResponse(
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    onTap: tabController != null
-                        ? () {
-                            tabController.animateTo(5);
-                          }
-                        : null,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              '歌单',
-                              style: TextStyle(
-                                  fontSize: 16.0, fontWeight: FontWeight.w600),
-                            ),
-                            Icon(Icons.keyboard_arrow_right)
-                          ],
-                        )
-                      ],
-                    )),
+    if (showTitle == true) {
+      widgetList.insert(
+          0,
+          Row(
+            children: <Widget>[
+              SizedBox(
+                width: 15.0,
               ),
-            ),
-            SizedBox(
-              width: 15.0,
-            )
-          ],
-        ));
+              Expanded(
+                child: Container(
+                  child: InkResponse(
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onTap: tabController != null
+                          ? () {
+                              tabController.animateTo(5);
+                            }
+                          : null,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                '歌单',
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              Icon(Icons.keyboard_arrow_right)
+                            ],
+                          )
+                        ],
+                      )),
+                ),
+              ),
+              SizedBox(
+                width: 15.0,
+              )
+            ],
+          ));
+    }
+
     return widgetList;
   }
 

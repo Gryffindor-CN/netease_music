@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
 import './album_item.dart';
+import '../../pages/album/album_cover.dart';
 
 class AlbumTitle extends StatelessWidget {
   final List<Album> albumList;
@@ -17,7 +18,12 @@ class AlbumTitle extends StatelessWidget {
       widgetList.add(AlbumItem(
         item,
         this.pageContext,
-        onTap: () async {},
+        onTap: () async {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (BuildContext context) {
+            return AlbumCover(item.id);
+          }));
+        },
       ));
     });
 

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../model/music.dart';
-import 'package:intl/intl.dart';
+import '../../utils/time.dart';
 
-class AlbumItem extends StatelessWidget {
-  final Album item;
+class VideoItem extends StatelessWidget {
+  final Map<String, dynamic> item;
   final BuildContext pageContext;
   final GestureTapCallback onTap;
-  AlbumItem(this.item, this.pageContext, {this.onTap});
+  VideoItem(this.item, this.pageContext, {this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: this.onTap == null ? null : this.onTap,
+      onTap: () {},
       child: Row(
         children: <Widget>[
           SizedBox(
@@ -24,13 +23,13 @@ class AlbumItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  width: 45.0,
-                  height: 45.0,
+                  width: 72 * 1.6,
+                  height: 72.0,
                   margin: EdgeInsets.only(right: 10.0),
                   child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(3.0)),
                       child: Image.network(
-                        item.coverImageUrl,
+                        item['coverUrl'],
                       )),
                 ),
                 Expanded(
@@ -39,7 +38,7 @@ class AlbumItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(item.name),
+                        Text(item['title']),
                         SizedBox(
                           height: 4.0,
                         ),
@@ -48,14 +47,12 @@ class AlbumItem extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              Text(DateFormat("y.M.d").format(
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                      item.publishTime))),
+                              Text('${getTimeStamp(item["durationms"])}'),
                               SizedBox(
                                 width: 6.0,
                               ),
                               Text(
-                                '${item.size}首',
+                                'by ${item['creator']['userName']}',
                               ),
                             ],
                           ),

@@ -124,6 +124,18 @@ class NeteaseRepository {
     } catch (e) {}
   }
 
+  // 获取所有视频
+  static getVideos(String keyword, {int offset = 0}) async {
+    var url =
+        '${API_HOST}search?keywords=$keyword&limit=10&type=1014&offset=$offset';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['result'];
+
+      return result;
+    } catch (e) {}
+  }
+
   // 获取所有歌单
   static getSearchPlaylist(String keyword) async {
     var url = '${API_HOST}search?keywords=$keyword&type=1000';
@@ -169,6 +181,18 @@ class NeteaseRepository {
       var playlist = json.decode(response.toString())['playlist'];
 
       return playlist;
+    } catch (e) {}
+  }
+
+  // 获取专辑详情
+  static getAlbumDetail(int id) async {
+    var url = '${API_HOST}album/detail/dynamic?id=$id';
+    try {
+      Response response = await Dio().get(url);
+
+      var result = json.decode(response.toString());
+
+      return result;
     } catch (e) {}
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:netease_music/model/music.dart';
 import '../../repository/netease.dart';
 import '../../components/album/album_item.dart';
+import '../album/album_cover.dart';
 
 class SearchAlbumTab extends StatefulWidget {
   final String keyword;
@@ -50,7 +51,13 @@ class SearchAlbumTabState extends State<SearchAlbumTab>
   List<Widget> _buildContent(List<Album> albums) {
     List<Widget> _widgetList = [];
     albums.asMap().forEach((int index, album) {
-      _widgetList.add(AlbumItem(album, context, onTap: () {}));
+      _widgetList.add(AlbumItem(album, context, onTap: () {
+        print(0);
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext context) {
+          return AlbumCover(album.id);
+        }));
+      }));
     });
     return _widgetList;
   }

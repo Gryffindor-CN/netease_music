@@ -9,7 +9,8 @@ import './search_playlist.dart';
 import '../../repository/netease.dart';
 import './playlist_section.dart';
 import './song_section.dart';
-import './artist_seaction.dart';
+import './search_artist.dart';
+import './search_video.dart';
 
 class SearchResult extends StatefulWidget {
   final String keyword;
@@ -136,6 +137,7 @@ class SearchResultState extends State<SearchResult>
                       widget.keyword,
                       playlist,
                       tabController: _tabController,
+                      showTitle: true,
                     ),
                   )
                 ],
@@ -145,9 +147,10 @@ class SearchResultState extends State<SearchResult>
         keyword: widget.keyword,
         pageContext: widget.pageContext,
       ),
-      Center(child: Text('视频')),
-      // Center(child: Text('歌手')),
-      ArtistSection(
+      SearchVideoTab(
+        keyword: widget.keyword,
+      ),
+      SearchArtistTab(
         widget.keyword,
       ),
       SearchAlbumTab(

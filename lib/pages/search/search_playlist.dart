@@ -80,6 +80,7 @@ class SearchPlaylistTabState extends State<SearchPlaylistTab>
                 ))
             : SingleChildScrollView(
                 child: Container(
+                  padding: EdgeInsets.only(top: 5.0),
                   child: PlaylistSection(widget.keyword, playlist),
                 ),
               );

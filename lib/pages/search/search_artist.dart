@@ -3,16 +3,16 @@ import '../../repository/netease.dart';
 import '../../model/music.dart';
 import '../artist/artist_page.dart';
 
-class ArtistSection extends StatefulWidget {
-  ArtistSection(this.keyword, {this.id});
+class SearchArtistTab extends StatefulWidget {
+  SearchArtistTab(this.keyword, {this.id});
   final String keyword;
   final int id;
 
   @override
-  _ArtistSectionState createState() => _ArtistSectionState();
+  SearchArtistTabState createState() => SearchArtistTabState();
 }
 
-class _ArtistSectionState extends State<ArtistSection>
+class SearchArtistTabState extends State<SearchArtistTab>
     with AutomaticKeepAliveClientMixin {
   int artistCount = 1;
   List<Artist> artists = [];

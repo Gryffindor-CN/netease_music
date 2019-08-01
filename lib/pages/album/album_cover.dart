@@ -3,8 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:netease_music/pages/playlist/selection_list.dart';
 import 'dart:ui';
 import '../../model/music.dart';
-import '../../model/playlist_detail.dart';
-import '../../pages/playlist/music_list.dart';
+import '../../model/album_detail.dart';
 import '../../utils/utils.dart';
 import './flexible_app_bar.dart';
 import './music_list.dart';
@@ -12,42 +11,34 @@ import '../../repository/netease.dart';
 import './selection_checkbox.dart';
 import './selection_bottom.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import './playlist_internal_search.dart';
+import '../artist/artist_page.dart';
+import '../album_cover/album_cover.dart';
 
-/// 歌单详情信息 header 高度
+/// 专辑详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
 
-class Playlists extends StatefulWidget {
-  Playlists(this.playlistId, this.type, {this.playlist, this.pageContext});
-  final int playlistId;
-  final PlaylistDetail playlist;
+class AlbumCover extends StatefulWidget {
+  AlbumCover(this.albumId, {this.pageContext});
+  final int albumId;
   final BuildContext pageContext;
-  final String type;
 
   @override
-  _PlaylistPageState createState() => _PlaylistPageState();
+  _AlbumCoverState createState() => _AlbumCoverState();
 }
 
-class _PlaylistPageState extends State<Playlists> {
-  PlaylistDetail _result;
+class _AlbumCoverState extends State<AlbumCover> {
+  AlbumDetail _result;
   List<Music> songs = [];
 
   @override
   void initState() {
     super.initState();
-    switch (widget.type) {
-      case 'ranking':
-        _getTopListDetail();
-        break;
-      case 'playlist':
-        _getPlaylistDetail();
-        break;
-    }
+    _getAlbumDetail();
   }
 
-  _getTopListDetail() async {
-    var playlist = await NeteaseRepository.getTopList(widget.playlistId);
-    playlist['tracks'].asMap().forEach((int index, item) async {
+  _getAlbumDetail() async {
+    var result = await NeteaseRepository.getAlbumDetail(widget.albumId);
+    result['songs'].asMap().forEach((int index, item) async {
       songs.add(Music(
           name: item['name'],
           id: item['id'],
@@ -71,91 +62,52 @@ class _PlaylistPageState extends State<Playlists> {
     });
 
     setState(() {
-      _result = PlaylistDetail(
-        name: playlist['name'],
-        coverUrl: playlist['coverImgUrl'],
-        id: playlist['id'],
-        trackCount: playlist['trackCount'],
-        description: playlist['description'],
-        subscribed: playlist['subscribed'],
-        subscribedCount: playlist['subscribedCount'],
-        commentCount: playlist['commentCount'],
-        shareCount: playlist['shareCount'],
-        playCount: playlist['playCount'],
-        creator: playlist['creator'],
+      _result = AlbumDetail(
+        name: result['album']['name'],
+        coverUrl: result['album']['picUrl'],
+        id: result['album']['id'],
+        description: result['album']['description'],
+        commentCount: result['album']['info']['commentCount'],
+        shareCount: result['album']['info']['shareCount'],
+        publishTime: result['album']['publishTime'],
+        subType: result['album']['subType'],
+        company: result['album']['company'],
+        artist: Artist(
+          id: result['album']['artist']['id'],
+          name: result['album']['artist']['name'],
+        ),
+        trackCount: songs.length,
+        subscribed: false,
+        subscribedCount: 0,
         musics: songs,
       );
     });
   }
 
-  _getPlaylistDetail() async {
-    var playlist = await NeteaseRepository.getPlaylistDetail(widget.playlistId);
-    playlist['tracks'].asMap().forEach((int index, item) async {
-      songs.add(Music(
-          name: item['name'],
-          id: item['id'],
-          aritstName: item['ar'][0]['name'],
-          aritstId: item['ar'][0]['id'],
-          albumName: item['al']['name'],
-          albumId: item['al']['id'],
-          albumCoverImg: item['al']['picUrl'],
-          album: Album(
-              id: item['al']['id'],
-              name: item['al']['name'],
-              coverImageUrl: item['al']['picUrl']),
-          artists: [
-            Artist(
-              id: item['ar'][0]['id'],
-              name: item['ar'][0]['name'],
-              imageUrl: '',
-            )
-          ],
-          mvId: item['mv']));
-    });
-    if (this.mounted) {
-      setState(() {
-        _result = PlaylistDetail(
-          name: playlist['name'],
-          coverUrl: playlist['coverImgUrl'],
-          id: playlist['id'],
-          trackCount: playlist['trackCount'],
-          description: playlist['description'],
-          subscribed: playlist['subscribed'],
-          subscribedCount: playlist['subscribedCount'],
-          commentCount: playlist['commentCount'],
-          shareCount: playlist['shareCount'],
-          playCount: playlist['playCount'],
-          creator: playlist['creator'],
-          musics: songs,
-        );
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return _PlayList(
-      playlistDetail: _result,
+    return _AlbumCover(
+      albumDetail: _result,
       pageContext: widget.pageContext,
     );
   }
 }
 
-class _PlayList extends StatefulWidget {
-  const _PlayList({Key key, this.playlistDetail, this.pageContext})
+class _AlbumCover extends StatefulWidget {
+  const _AlbumCover({Key key, this.albumDetail, this.pageContext})
       : super(key: key);
   final BuildContext pageContext;
-  final PlaylistDetail playlistDetail;
+  final AlbumDetail albumDetail;
 
-  List<Music> get musiclist => playlistDetail.musics;
+  List<Music> get musiclist => albumDetail.musics;
 
   @override
   State<StatefulWidget> createState() {
-    return _PlayListState();
+    return __AlbumCoverState();
   }
 }
 
-class _PlayListState extends State<_PlayList> {
+class __AlbumCoverState extends State<_AlbumCover> {
   bool _selection = false;
   bool _selectedAll = false;
   Color bottomIconColor = Color(0xffd4d4d4);
@@ -165,7 +117,7 @@ class _PlayListState extends State<_PlayList> {
   Future<bool> _doSubscribeChanged(bool subscribe) async {
     int succeed;
     succeed = await NeteaseRepository.playlistSubscribe(
-        !subscribe, widget.playlistDetail.id);
+        !subscribe, widget.albumDetail.id);
     String action = !subscribe ? "收藏" : "取消收藏";
     if (succeed == 200) {
       Fluttertoast.showToast(
@@ -212,15 +164,15 @@ class _PlayListState extends State<_PlayList> {
                   expandedHeight: HEIGHT_HEADER,
                   bottom: _selection == false
                       ? MusicListHeader(
-                          trackCount: widget.playlistDetail == null
+                          trackCount: widget.albumDetail == null
                               ? 0
-                              : widget.playlistDetail.trackCount,
-                          subscribed: widget.playlistDetail == null
+                              : widget.albumDetail.trackCount,
+                          subscribed: widget.albumDetail == null
                               ? false
-                              : widget.playlistDetail.subscribed,
-                          subscribedCount: widget.playlistDetail == null
+                              : widget.albumDetail.subscribed,
+                          subscribedCount: widget.albumDetail == null
                               ? 0
-                              : widget.playlistDetail.subscribedCount,
+                              : widget.albumDetail.subscribedCount,
                           doSubscribeChanged: _doSubscribeChanged,
                         )
                       : _SelectionHeader(
@@ -251,7 +203,7 @@ class _PlayListState extends State<_PlayList> {
                             });
                           }),
                   flexibleSpace: _PlaylistDetailHeader(
-                    playlistDetail: widget.playlistDetail,
+                    albumDetail: widget.albumDetail,
                     onSelect: () {
                       setState(() {
                         _selection = !_selection;
@@ -266,7 +218,7 @@ class _PlayListState extends State<_PlayList> {
                     ? SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            return widget.playlistDetail == null
+                            return widget.albumDetail == null
                                 ? Center(
                                     child: Container(
                                       padding: EdgeInsets.only(top: 20.0),
@@ -462,7 +414,7 @@ class _SliverSelectionState extends State<SliverSelection> {
 }
 
 class _BlurBackground extends StatelessWidget {
-  final PlaylistDetail playlistDetail;
+  final AlbumDetail playlistDetail;
   const _BlurBackground({Key key, @required this.playlistDetail})
       : super(key: key);
 
@@ -491,37 +443,37 @@ class _BlurBackground extends StatelessWidget {
 }
 
 class _PlaylistDetailHeader extends StatelessWidget {
-  _PlaylistDetailHeader({this.playlistDetail, this.onSelect});
-  final PlaylistDetail playlistDetail;
+  _PlaylistDetailHeader({this.albumDetail, this.onSelect});
+  final AlbumDetail albumDetail;
   final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
     return FlexibleDetailBar(
         background: _BlurBackground(
-          playlistDetail: playlistDetail,
+          playlistDetail: albumDetail,
         ),
         content: _buildContent(context),
         builder: (context, t) {
           return AppBar(
-            title: Text(t > 0.5 ? playlistDetail.name : '歌单'),
+            title: Text(t > 0.5 ? albumDetail.name : '专辑'),
             backgroundColor: Colors.transparent,
             elevation: 0,
             titleSpacing: 0,
             actions: <Widget>[
               IconButton(
-                  icon: Icon(Icons.search),
-                  tooltip: "歌单内搜索",
-                  onPressed: () {
-                    showSearch(
-                        context: context,
-                        delegate: PlaylistInternalSearchDelegate(
-                            playlistDetail, Theme.of(context)));
-                  }),
-              IconButton(
                   icon: Icon(Icons.more_vert),
                   tooltip: "更多选项",
-                  onPressed: () {})
+                  onPressed: () {}),
+              IconButton(
+                  icon: Icon(Icons.equalizer),
+                  tooltip: "播放器",
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return AlbumCoverPage();
+                    }));
+                  })
             ],
           );
         });
@@ -530,12 +482,9 @@ class _PlaylistDetailHeader extends StatelessWidget {
   Widget _buildContent(
     BuildContext context,
   ) {
-    Map<String, Object> creator =
-        playlistDetail == null ? {} : playlistDetail.creator;
-
     return DetailHeader(
-      commentCount: playlistDetail == null ? 0 : playlistDetail.commentCount,
-      shareCount: playlistDetail == null ? 0 : playlistDetail.shareCount,
+      commentCount: albumDetail == null ? 0 : albumDetail.commentCount,
+      shareCount: albumDetail == null ? 0 : albumDetail.shareCount,
       onCommentTap: () {},
       onShareTap: () {},
       onSelectionTap: onSelect,
@@ -554,46 +503,14 @@ class _PlaylistDetailHeader extends StatelessWidget {
                 child: Stack(
                   children: <Widget>[
                     Hero(
-                      tag: playlistDetail == null ? '' : playlistDetail.heroTag,
-                      child: playlistDetail == null
+                      tag: albumDetail == null ? '' : albumDetail.heroTag,
+                      child: albumDetail == null
                           ? Container()
                           : Image.network(
-                              playlistDetail.coverUrl,
+                              albumDetail.coverUrl,
                               fit: BoxFit.cover,
                             ),
                     ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                            Colors.black54,
-                            Colors.black26,
-                            Colors.transparent,
-                            Colors.transparent,
-                          ])),
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Icon(Icons.headset,
-                                color: Theme.of(context).primaryIconTheme.color,
-                                size: 12),
-                            Text(
-                                getFormattedNumber(playlistDetail == null
-                                    ? 0
-                                    : playlistDetail.playCount),
-                                style: Theme.of(context)
-                                    .primaryTextTheme
-                                    .body1
-                                    .copyWith(fontSize: 11))
-                          ],
-                        ),
-                      ),
-                    )
                   ],
                 ),
               ),
@@ -609,7 +526,7 @@ class _PlaylistDetailHeader extends StatelessWidget {
                     height: 10.0,
                   ),
                   Text(
-                    playlistDetail == null ? '' : playlistDetail.name,
+                    albumDetail == null ? '' : albumDetail.name,
                     style: Theme.of(context)
                         .primaryTextTheme
                         .title
@@ -619,34 +536,104 @@ class _PlaylistDetailHeader extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   InkWell(
-                    onTap: () => {},
+                    onTap: () => {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) {
+                            return ArtistPage(albumDetail.artist.id);
+                          }))
+                        },
                     child: Padding(
                       padding: const EdgeInsets.only(top: 4, bottom: 4),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           SizedBox(
                             height: 24,
-                            width: 24,
-                            child: playlistDetail == null
+                            width: 40,
+                            child: albumDetail == null
                                 ? Container()
-                                : ClipOval(
-                                    child: Image.network(
-                                      creator["avatarUrl"],
-                                    ),
-                                  ),
+                                : Text('歌手：',
+                                    style: TextStyle(
+                                        fontFamily: Theme.of(context)
+                                            .primaryTextTheme
+                                            .body1
+                                            .fontFamily,
+                                        fontSize: 13.0,
+                                        color: Theme.of(context)
+                                            .primaryTextTheme
+                                            .body1
+                                            .color
+                                            .withOpacity(0.6))),
                           ),
                           Padding(padding: EdgeInsets.only(left: 4)),
-                          Text(
-                            playlistDetail == null ? '' : creator["nickname"],
-                            style: Theme.of(context).primaryTextTheme.body1,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                albumDetail == null
+                                    ? ''
+                                    : albumDetail.artist.name,
+                                style: TextStyle(
+                                    fontFamily: Theme.of(context)
+                                        .primaryTextTheme
+                                        .body1
+                                        .fontFamily,
+                                    fontSize: 13.0,
+                                    color: Theme.of(context)
+                                        .primaryTextTheme
+                                        .body1
+                                        .color),
+                              ),
+                              albumDetail == null
+                                  ? Text('')
+                                  : Icon(
+                                      Icons.chevron_right,
+                                      color: Theme.of(context)
+                                          .primaryIconTheme
+                                          .color
+                                          .withOpacity(0.6),
+                                    )
+                            ],
                           ),
-                          playlistDetail == null
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style: TextStyle(
+                          fontFamily: Theme.of(context)
+                              .primaryTextTheme
+                              .body1
+                              .fontFamily,
+                          fontSize: 12.0,
+                          color: Theme.of(context)
+                              .primaryTextTheme
+                              .body1
+                              .color
+                              .withOpacity(0.6)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          albumDetail == null
                               ? Text('')
-                              : Icon(
-                                  Icons.chevron_right,
-                                  color:
-                                      Theme.of(context).primaryIconTheme.color,
+                              : Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                      '发行时间：${getFormattedTime(albumDetail.publishTime)}'),
+                                ),
+                          SizedBox(height: 4),
+                          albumDetail == null
+                              ? Text('')
+                              : Container(
+                                  padding: EdgeInsets.only(right: 10.0),
+                                  child: Text(
+                                    albumDetail.description,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 )
                         ],
                       ),

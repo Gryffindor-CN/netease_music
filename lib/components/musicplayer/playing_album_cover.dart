@@ -97,11 +97,14 @@ class _AlbumCoverState extends State<AlbumCover> with TickerProviderStateMixin {
 
       var res = await audioPlayer.stop();
       if (res == 1) {
-        setState(() {
-          position = Duration.zero;
-          duration = Duration.zero;
-          time = 0.0;
-        });
+        if (this.mounted) {
+          setState(() {
+            position = Duration.zero;
+            duration = Duration.zero;
+            time = 0.0;
+          });
+        }
+
         store.setPlayingState(Duration.zero, Duration.zero, 0.0);
 
         store.switchPlayingState(false);
