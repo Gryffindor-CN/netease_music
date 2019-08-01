@@ -105,12 +105,22 @@ class NeteaseRepository {
 
   // 获取所有歌曲
   static getSongs(String keyword, {int offset = 0}) async {
-    print(offset);
     var url = '${API_HOST}search?keywords=$keyword&offset=$offset';
     try {
       Response response = await Dio().get(url);
       var songRes = json.decode(response.toString())['result']['songs'];
       return songRes;
+    } catch (e) {}
+  }
+
+  // 获取所有歌手
+  static getArtists(String keyword, {int offset = 0}) async {
+    var url = '${API_HOST}search?keywords=$keyword&type=100&offset=$offset';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['result'];
+
+      return result;
     } catch (e) {}
   }
 
@@ -169,6 +179,51 @@ class NeteaseRepository {
       Response response = await Dio().get(url);
       var code = json.decode(response.toString())['code'];
       return code;
+    } catch (e) {}
+  }
+
+  // 获取歌手信息
+  static getAritst(int id) async {
+    var url = '${API_HOST}artists?id=$id';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString());
+
+      return result;
+    } catch (e) {}
+  }
+
+  // 收藏/取消歌手
+  static subcribeAritst(bool t, int id) async {
+    var url = '${API_HOST}artists/sub?id=$id&t=${t == true ? 1 : 2}';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['code'];
+
+      return result;
+    } catch (e) {}
+  }
+
+  // 歌手专辑
+  static getAritstAlbums(int id, {int limit = 20, int offset = 0}) async {
+    var url = '${API_HOST}artist/album?id=$id&limit=$limit&offset=$offset';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['hotAlbums'];
+
+      return result;
+    } catch (e) {}
+  }
+
+  // 歌手视频
+  static getAritstVideo(String query, {int limit = 10, int offset = 0}) async {
+    var url =
+        '${API_HOST}search?keywords=$query&limit=$limit&offset=$offset&type=1014';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['result'];
+
+      return result;
     } catch (e) {}
   }
 }

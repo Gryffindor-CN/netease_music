@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:netease_music/model/music.dart';
 import '../../repository/netease.dart';
-import '../../components/album_item.dart';
+import '../../components/album/album_item.dart';
 
 class SearchAlbumTab extends StatefulWidget {
   final String keyword;

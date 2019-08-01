@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/music.dart';
+import '../../model/music.dart';
 import 'package:intl/intl.dart';
 
 class AlbumItem extends StatelessWidget {
