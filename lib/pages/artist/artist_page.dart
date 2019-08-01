@@ -123,88 +123,95 @@ class _ArtistPageState extends State<ArtistPage>
     });
     var result =
         await NeteaseRepository.getAritstAlbums(widget.id, offset: offset);
-    setState(() {
-      albumLoading = false;
-
-      result.asMap().forEach((int index, item) {
-        albums.add(Album(
-            name: item['name'],
-            id: item['id'],
-            coverImageUrl: item['picUrl'],
-            publishTime: item['publishTime'],
-            size: item['size']));
+    if (this.mounted) {
+      Future.delayed(Duration(milliseconds: 20), () {
+        setState(() {
+          albumLoading = false;
+          result.asMap().forEach((int index, item) {
+            albums.add(Album(
+                name: item['name'],
+                id: item['id'],
+                coverImageUrl: item['picUrl'],
+                publishTime: item['publishTime'],
+                size: item['size']));
+          });
+          _widgetContent = [
+            SongsWrapper(hotSongs: _hotSongs),
+            AlbumWrapper(
+              id: _artist.id,
+              size: _artist.albumSize,
+              hotAlbums: albums,
+              loading: albumLoading,
+            ),
+            VideoWrapper(),
+            BriefDesc(
+              artist: _artist,
+            )
+          ];
+        });
       });
-      _widgetContent = [
-        SongsWrapper(hotSongs: _hotSongs),
-        AlbumWrapper(
-          id: _artist.id,
-          size: _artist.albumSize,
-          hotAlbums: albums,
-          loading: albumLoading,
-        ),
-        VideoWrapper(),
-        BriefDesc(
-          artist: _artist,
-        )
-      ];
-    });
+    }
   }
 
   // 获取视频列表
   void getVideosInfos(int offset) async {
-    setState(() {
-      _tabIndex = _tabController.index;
-      videoLoading = true;
-      _widgetContent = [
-        SongsWrapper(hotSongs: _hotSongs),
-        AlbumWrapper(
-          id: _artist.id,
-          size: _artist.albumSize,
-          hotAlbums: albums,
-        ),
-        VideoWrapper(
-          loading: videoLoading,
-          videos: videos,
-        ),
-        BriefDesc(
-          artist: _artist,
-        )
-      ];
-    });
-    var result =
-        await NeteaseRepository.getAritstVideo(_artist.name, offset: offset);
-    setState(() {
-      videoLoading = false;
+    if (this.mounted) {
+      Future.delayed(Duration(milliseconds: 20), () async {
+        setState(() {
+          _tabIndex = _tabController.index;
+          videoLoading = true;
+          _widgetContent = [
+            SongsWrapper(hotSongs: _hotSongs),
+            AlbumWrapper(
+              id: _artist.id,
+              size: _artist.albumSize,
+              hotAlbums: albums,
+            ),
+            VideoWrapper(
+              loading: videoLoading,
+              videos: videos,
+            ),
+            BriefDesc(
+              artist: _artist,
+            )
+          ];
+        });
+        var result = await NeteaseRepository.getAritstVideo(_artist.name,
+            offset: offset);
+        setState(() {
+          videoLoading = false;
 
-      result['videos'].asMap().forEach((int index, item) {
-        videos.add({
-          'coverUrl': item['coverUrl'],
-          'vid': item['vid'],
-          'title': item['title'],
-          'playTime': item['playTime'],
-          'durationms': item['durationms'],
-          'creator': {
-            'userId': item['creator'][0]['userId'],
-            'userName': item['creator'][0]['userName']
-          }
+          result['videos'].asMap().forEach((int index, item) {
+            videos.add({
+              'coverUrl': item['coverUrl'],
+              'vid': item['vid'],
+              'title': item['title'],
+              'playTime': item['playTime'],
+              'durationms': item['durationms'],
+              'creator': {
+                'userId': item['creator'][0]['userId'],
+                'userName': item['creator'][0]['userName']
+              }
+            });
+          });
+          _widgetContent = [
+            SongsWrapper(hotSongs: _hotSongs),
+            AlbumWrapper(
+              id: _artist.id,
+              size: _artist.albumSize,
+              hotAlbums: albums,
+            ),
+            VideoWrapper(
+              loading: videoLoading,
+              videos: videos,
+            ),
+            BriefDesc(
+              artist: _artist,
+            )
+          ];
         });
       });
-      _widgetContent = [
-        SongsWrapper(hotSongs: _hotSongs),
-        AlbumWrapper(
-          id: _artist.id,
-          size: _artist.albumSize,
-          hotAlbums: albums,
-        ),
-        VideoWrapper(
-          loading: videoLoading,
-          videos: videos,
-        ),
-        BriefDesc(
-          artist: _artist,
-        )
-      ];
-    });
+    }
   }
 
   void _scrollListener() {
@@ -219,7 +226,6 @@ class _ArtistPageState extends State<ArtistPage>
       if (_tabIndex == 1) {
         if (albumLoading == true) return;
         albumOffset = albumOffset + 1;
-
         getAlbumsInfos(albumOffset);
       } else if (_tabIndex == 2) {
         if (videoLoading == true) return;
