@@ -67,68 +67,124 @@ class _Center extends StatelessWidget {
         itemCount: store.player.playingList.length,
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
-            child: Container(
-              padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 0.0),
-              child: Container(
-                padding: EdgeInsets.only(bottom: 10.0),
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom:
-                            BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    DefaultTextStyle(
-                      style: TextStyle(
-                          color: store.player.playingList[index].id ==
-                                  store.player.current.id
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).textTheme.title.color),
+            child: Flex(
+              direction: Axis.horizontal,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 0.0),
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 10.0),
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: Color(0xFFE0E0E0), width: 0.5))),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          store.player.playingList[index].id ==
-                                  store.player.current.id
-                              ? Padding(
-                                  padding: EdgeInsets.only(right: 2.0),
-                                  child: Icon(
-                                    Icons.volume_up,
-                                    size: 18.0,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                )
-                              : Text(''),
-                          Text(
-                            store.player.playingList[index].name,
-                            style: TextStyle(),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Text('-'),
-                          ),
-                          Text(
-                            store.player.playingList[index].aritstName,
+                          DefaultTextStyle(
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.subtitle.color,
-                              fontSize:
-                                  Theme.of(context).textTheme.subtitle.fontSize,
+                                color: store.player.playingList[index].id ==
+                                        store.player.current.id
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context).textTheme.title.color),
+                            child: Expanded(
+                              child: Row(
+                                children: <Widget>[
+                                  store.player.playingList[index].id ==
+                                          store.player.current.id
+                                      ? Padding(
+                                          padding: EdgeInsets.only(right: 2.0),
+                                          child: Icon(
+                                            Icons.volume_up,
+                                            size: 18.0,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        )
+                                      : Text(''),
+                                  Expanded(
+                                    child: RichText(
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      text: TextSpan(
+                                          text:
+                                              '${store.player.playingList[index].name}',
+                                          style: TextStyle(
+                                              color: store
+                                                          .player
+                                                          .playingList[index]
+                                                          .id ==
+                                                      store.player.current.id
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Theme.of(context)
+                                                      .textTheme
+                                                      .title
+                                                      .color),
+                                          children: [
+                                            TextSpan(
+                                                text: ' - ',
+                                                style: TextStyle(
+                                                    color: store
+                                                                .player
+                                                                .playingList[
+                                                                    index]
+                                                                .id ==
+                                                            store.player.current
+                                                                .id
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .textTheme
+                                                            .subtitle
+                                                            .color)),
+                                            TextSpan(
+                                                text: store
+                                                    .player
+                                                    .playingList[index]
+                                                    .aritstName,
+                                                style: TextStyle(
+                                                  color: store
+                                                              .player
+                                                              .playingList[
+                                                                  index]
+                                                              .id ==
+                                                          store
+                                                              .player.current.id
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Theme.of(context)
+                                                          .textTheme
+                                                          .subtitle
+                                                          .color,
+                                                  fontSize: Theme.of(context)
+                                                      .textTheme
+                                                      .subtitle
+                                                      .fontSize,
+                                                ))
+                                          ]),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
+                          ),
+                          GestureDetector(
+                            child: Icon(
+                              Icons.close,
+                              color: Theme.of(context).textTheme.subtitle.color,
+                            ),
+                            onTap: () {
+                              this.delete(store.player.playingList[index]);
+                            },
                           )
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      child: Icon(
-                        Icons.close,
-                        color: Theme.of(context).textTheme.subtitle.color,
-                      ),
-                      onTap: () {
-                        this.delete(store.player.playingList[index]);
-                      },
-                    )
-                  ],
-                ),
-              ),
+                  ),
+                )
+              ],
             ),
             onTap: store.player.playingList[index].id == store.player.current.id
                 ? null
@@ -203,7 +259,7 @@ class _Header extends StatelessWidget {
                   size: 20.0,
                 ),
                 onPressed: () {
-                  //清空播放列表
+                  //���空播放列表
                   showDialog<void>(
                     context: context,
                     barrierDismissible: false, // user must tap button!

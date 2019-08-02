@@ -13,6 +13,9 @@ import './selection_checkbox.dart';
 import './selection_bottom.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import './playlist_internal_search.dart';
+import '../../components/musicplayer/inherited_demo.dart';
+import '../../components/musicplayer/player.dart';
+import '../../router/Routes.dart';
 
 /// 歌单详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
@@ -186,6 +189,14 @@ class _PlayListState extends State<_PlayList> {
     }
   }
 
+  // 多选下一首播放
+  Future<int> _onSongsPlayNext(
+      List<Music> selectedSongs, StateContainerState store) async {
+    await store.playInsertMultiNext(selectedSongs);
+    Fluttertoast.showToast(msg: '已添加到播放列表');
+    return 1;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -194,6 +205,7 @@ class _PlayListState extends State<_PlayList> {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return NotificationListener<SelectionNotification>(
       onNotification: (notification) {
         setState(() {
@@ -222,7 +234,9 @@ class _PlayListState extends State<_PlayList> {
                               ? 0
                               : widget.playlistDetail.subscribedCount,
                           doSubscribeChanged: _doSubscribeChanged,
-                        )
+                          musiclist: widget.playlistDetail == null
+                              ? []
+                              : widget.playlistDetail.musics)
                       : _SelectionHeader(
                           allSelected: _selectedAll,
                           onTap: (BuildContext ctx) {
@@ -323,13 +337,20 @@ class _PlayListState extends State<_PlayList> {
                           GestureDetector(
                             onTap: _selectedList.length == 0
                                 ? null
-                                : () {
+                                : () async {
                                     // 下一首播放
-                                    _selectedList
-                                        .asMap()
-                                        .forEach((int index, Music music) {
-                                      print(music.name);
+                                    List<Music> lists = [];
+                                    _selectedList.forEach((Music music) {
+                                      lists.add(music);
                                     });
+                                    var res =
+                                        await _onSongsPlayNext(lists, store);
+                                    if (res == 1) {
+                                      setState(() {
+                                        _selectedList.clear();
+                                        _selectedAll = false;
+                                      });
+                                    }
                                   },
                             child: Container(
                               child: Column(
@@ -823,6 +844,7 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
       this.subscribed,
       this.subscribedCount,
       this.tail,
+      this.musiclist,
       this.doSubscribeChanged})
       : super(key: key);
 
@@ -831,9 +853,11 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
   final int subscribedCount;
   final Future<bool> Function(bool currentState) doSubscribeChanged;
   final Widget tail;
+  final List<Music> musiclist;
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       child: Material(
@@ -841,7 +865,18 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         shadowColor: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () async {
+            // 播放全部
+            await store.playMultis(this.musiclist);
+            if (store.player.isPlaying == true) {
+              var res = await MyPlayer.player.stop();
+              if (res == 1) {
+                Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
+              }
+            } else {
+              Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
+            }
+          },
           child: SizedBox.fromSize(
             size: preferredSize,
             child: Row(

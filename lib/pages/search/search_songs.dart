@@ -103,7 +103,17 @@ class SearchSongTabState extends State<SearchSongTab>
                   albumCoverImg: res['detail']['al']['picUrl'],
                   detail: res['detail'],
                   commentCount: res['commentCount'],
-                  mvId: item['mvid']),
+                  mvId: item['mvid'],
+                  album: Album(
+                      id: item['album']['id'],
+                      name: item['album']['name'],
+                      coverImageUrl: res['detail']['al']['picUrl']),
+                  artists: [
+                    Artist(
+                        id: item['artists'][0]['id'],
+                        name: item['artists'][0]['name'],
+                        imageUrl: '')
+                  ]),
             );
           });
           if (songs.length == _len + songRes.length) {
@@ -762,6 +772,14 @@ class SearchSongTabState extends State<SearchSongTab>
     });
   }
 
+  // 下一首播放
+  Future<int> _onSongsPlayNext(
+      List<Music> selectedSongs, StateContainerState store) async {
+    await store.playInsertMultiNext(selectedSongs);
+    Fluttertoast.showToast(msg: '已添加到播放列表');
+    return 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
@@ -770,7 +788,9 @@ class SearchSongTabState extends State<SearchSongTab>
         : SelectAll(
             songs: songs,
             handleSongsDel: (val) => _onSongsDelete(val),
-            handleFinish: () {
+            handleSongsPlayNext: (List<Music> selectedSongs) =>
+                _onSongsPlayNext(selectedSongs, store),
+            handleFinish: (List<Music> selectedSongs) {
               setState(() {
                 _selection = false;
               });

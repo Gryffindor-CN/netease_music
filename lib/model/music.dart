@@ -61,10 +61,11 @@ class Music {
       songUrl: map["songUrl"],
       albumCoverImg: map["albumCoverImg"],
       lyrics: map["lyrics"],
-      artists: map["artists"],
-      album: map["album"],
+      artists:
+          (map["artists"] as List).cast<Map>().map(Artist.fromMap).toList(),
+      album: Album.fromMap(map["album"]),
       title: map["title"],
-      mvId: map["mvId"],
+      mvId: map["mvId"] ?? 0,
       url: map["url"],
     );
   }
@@ -78,12 +79,11 @@ class Music {
       "aritstId": aritstId,
       "albumId": albumId,
       'commentCount': commentCount,
-      "album": detail,
       "songUrl": songUrl,
       "albumCoverImg": albumCoverImg,
       "lyrics": lyrics,
-      "artists": artists,
-      "album": album,
+      "artists": artists.map((e) => e.toMap()).toList(),
+      "album": album.toMap(),
       "title": title,
       "mvId": mvId,
       "url": url,
@@ -117,6 +117,15 @@ class Album {
   final String coverImageUrl;
   final int publishTime;
   final int size;
+
+  static Album fromMap(Map map) {
+    return Album(
+        id: map["id"], name: map["name"], coverImageUrl: map["coverImageUrl"]);
+  }
+
+  Map toMap() {
+    return {"id": id, "name": name, "coverImageUrl": coverImageUrl};
+  }
 }
 
 class Artist {
@@ -150,5 +159,9 @@ class Artist {
         alias: map["alias"],
         briefDesc: map["briefDesc"],
         followed: map["followed"]);
+  }
+
+  Map toMap() {
+    return {"id": id, "name": name, "imageUrl": imageUrl};
   }
 }

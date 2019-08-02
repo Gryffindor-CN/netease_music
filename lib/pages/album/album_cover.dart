@@ -13,6 +13,9 @@ import './selection_bottom.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../artist/artist_page.dart';
 import '../album_cover/album_cover.dart';
+import '../../components/musicplayer/inherited_demo.dart';
+import '../../components/musicplayer/player.dart';
+import '../../router/Routes.dart';
 
 /// 专辑详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
@@ -29,6 +32,7 @@ class AlbumCover extends StatefulWidget {
 class _AlbumCoverState extends State<AlbumCover> {
   AlbumDetail _result;
   List<Music> songs = [];
+  bool loading = false;
 
   @override
   void initState() {
@@ -36,7 +40,11 @@ class _AlbumCoverState extends State<AlbumCover> {
     _getAlbumDetail();
   }
 
+  // 获取专辑详情
   _getAlbumDetail() async {
+    setState(() {
+      loading = true;
+    });
     var result = await NeteaseRepository.getAlbumDetail(widget.albumId);
     result['songs'].asMap().forEach((int index, item) async {
       songs.add(Music(
@@ -82,22 +90,28 @@ class _AlbumCoverState extends State<AlbumCover> {
         musics: songs,
       );
     });
+    if (songs.length == result['songs'].length) {
+      setState(() {
+        loading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return _AlbumCover(
-      albumDetail: _result,
-      pageContext: widget.pageContext,
-    );
+        albumDetail: _result,
+        pageContext: widget.pageContext,
+        loading: loading);
   }
 }
 
 class _AlbumCover extends StatefulWidget {
-  const _AlbumCover({Key key, this.albumDetail, this.pageContext})
+  const _AlbumCover({Key key, this.albumDetail, this.pageContext, this.loading})
       : super(key: key);
   final BuildContext pageContext;
   final AlbumDetail albumDetail;
+  final bool loading;
 
   List<Music> get musiclist => albumDetail.musics;
 
@@ -138,6 +152,14 @@ class __AlbumCoverState extends State<_AlbumCover> {
     }
   }
 
+  // 多选下一首播放
+  Future<int> _onSongsPlayNext(
+      List<Music> selectedSongs, StateContainerState store) async {
+    await store.playInsertMultiNext(selectedSongs);
+    Fluttertoast.showToast(msg: '已添加到播放列表');
+    return 1;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -146,6 +168,7 @@ class __AlbumCoverState extends State<_AlbumCover> {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return NotificationListener<SelectionNotification>(
       onNotification: (notification) {
         setState(() {
@@ -174,7 +197,9 @@ class __AlbumCoverState extends State<_AlbumCover> {
                               ? 0
                               : widget.albumDetail.subscribedCount,
                           doSubscribeChanged: _doSubscribeChanged,
-                        )
+                          musiclist: widget.albumDetail == null
+                              ? []
+                              : widget.albumDetail.musics)
                       : _SelectionHeader(
                           allSelected: _selectedAll,
                           onTap: (BuildContext ctx) {
@@ -218,7 +243,7 @@ class __AlbumCoverState extends State<_AlbumCover> {
                     ? SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            return widget.albumDetail == null
+                            return widget.loading == true
                                 ? Center(
                                     child: Container(
                                       padding: EdgeInsets.only(top: 20.0),
@@ -275,13 +300,21 @@ class __AlbumCoverState extends State<_AlbumCover> {
                           GestureDetector(
                             onTap: _selectedList.length == 0
                                 ? null
-                                : () {
-                                    // 下一首播放
-                                    _selectedList
-                                        .asMap()
-                                        .forEach((int index, Music music) {
-                                      print(music.name);
+                                : () async {
+                                    List<Music> lists = [];
+                                    _selectedList.forEach((Music music) {
+                                      lists.add(music);
                                     });
+                                    // 下一首播放
+                                    var res =
+                                        await _onSongsPlayNext(lists, store);
+
+                                    if (res == 1) {
+                                      setState(() {
+                                        _selectedList.clear();
+                                        _selectedAll = false;
+                                      });
+                                    }
                                   },
                             child: Container(
                               child: Column(
@@ -363,8 +396,6 @@ class __AlbumCoverState extends State<_AlbumCover> {
         ),
       ),
     );
-
-    ;
   }
 }
 
@@ -534,7 +565,7 @@ class _PlaylistDetailHeader extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 2),
                   InkWell(
                     onTap: () => {
                           Navigator.of(context).push(MaterialPageRoute(
@@ -600,7 +631,7 @@ class _PlaylistDetailHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 2),
                   Expanded(
                     child: DefaultTextStyle(
                       style: TextStyle(
@@ -630,7 +661,9 @@ class _PlaylistDetailHeader extends StatelessWidget {
                               : Container(
                                   padding: EdgeInsets.only(right: 10.0),
                                   child: Text(
-                                    albumDetail.description,
+                                    albumDetail.description == null
+                                        ? ''
+                                        : albumDetail.description,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -740,8 +773,12 @@ class _SelectionHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool allSelected;
   final ValueChanged<BuildContext> onTap;
   final ValueChanged<BuildContext> onFinish;
-  _SelectionHeader({Key key, this.allSelected, this.onTap, this.onFinish})
-      : super(key: key);
+  _SelectionHeader({
+    Key key,
+    this.allSelected,
+    this.onTap,
+    this.onFinish,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -810,6 +847,7 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
       this.subscribed,
       this.subscribedCount,
       this.tail,
+      this.musiclist,
       this.doSubscribeChanged})
       : super(key: key);
 
@@ -818,9 +856,11 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
   final int subscribedCount;
   final Future<bool> Function(bool currentState) doSubscribeChanged;
   final Widget tail;
+  final List<Music> musiclist;
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       child: Material(
@@ -828,7 +868,18 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         shadowColor: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () async {
+            // 播放全部
+            await store.playMultis(this.musiclist);
+            if (store.player.isPlaying == true) {
+              var res = await MyPlayer.player.stop();
+              if (res == 1) {
+                Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
+              }
+            } else {
+              Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
+            }
+          },
           child: SizedBox.fromSize(
             size: preferredSize,
             child: Row(
@@ -841,7 +892,7 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 Padding(padding: EdgeInsets.only(left: 4)),
                 Text(
-                  "播放全部",
+                  "��放全部",
                   style: Theme.of(context).textTheme.body1,
                 ),
                 Padding(padding: EdgeInsets.only(left: 2)),

@@ -593,7 +593,7 @@ class RotateRecord extends AnimatedWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       image: DecorationImage(
-                          image: NetworkImage(music.albumCoverImg),
+                          image: NetworkImage(music.album.coverImageUrl),
                           fit: BoxFit.fill),
                     ),
                   )
@@ -643,7 +643,7 @@ class _BlurBackground extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: NetworkImage(
-            music.albumCoverImg,
+            music.album.coverImageUrl,
           ),
           fit: BoxFit.cover,
         ),
@@ -945,7 +945,7 @@ class _OperationBar extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return SongDetailDialog(music.name, music.albumName,
-                        music.aritstName, music.albumCoverImg, '', [
+                        music.aritstName, music.album.coverImageUrl, '', [
                       {
                         'leadingIcon': AntDesign.getIconData('plussquareo'),
                         'title': '收藏到歌单',

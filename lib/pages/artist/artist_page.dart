@@ -383,7 +383,11 @@ class _ArtistDetailHeader extends StatelessWidget {
       content: artist == null ? Center() : _buildContent(context),
       builder: (context, t) => AppBar(
             title: Text(
-              t > 0.9 ? '${artist.name}（${artist.alias[0]}）' : '',
+              t > 0.9
+                  ? artist.alias.length > 0
+                      ? '${artist.name}（${artist.alias[0]}）'
+                      : '${artist.name}'
+                  : '',
               style: TextStyle(fontSize: 18.0),
             ),
             backgroundColor: Colors.transparent,
@@ -423,7 +427,9 @@ class _ArtistDetailHeader extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   artist != null
-                      ? Text('${artist.name}（${artist.alias[0]}）')
+                      ? artist.alias.length > 0
+                          ? Text('${artist.name}（${artist.alias[0]}）')
+                          : Text('${artist.name}')
                       : Text(''),
                   _SubscribeButton(artist.followed, this.doSubscribeChanged)
                 ],
@@ -727,6 +733,7 @@ class SongsWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(hotSongs[0].album.name);
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         return Column(

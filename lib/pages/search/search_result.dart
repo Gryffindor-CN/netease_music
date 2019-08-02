@@ -60,7 +60,17 @@ class SearchResultState extends State<SearchResult>
               albumCoverImg: res['detail']['al']['picUrl'],
               detail: res['detail'],
               commentCount: res['commentCount'],
-              mvId: item['mvid']),
+              mvId: item['mvid'],
+              album: Album(
+                  id: item['album']['id'],
+                  name: item['album']['name'],
+                  coverImageUrl: res['detail']['al']['picUrl']),
+              artists: [
+                Artist(
+                    id: item['artists'][0]['id'],
+                    name: item['artists'][0]['name'],
+                    imageUrl: '')
+              ]),
         );
       });
       if (songs.length == songRes.asMap().length) {

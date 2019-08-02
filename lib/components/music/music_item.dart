@@ -123,15 +123,7 @@ class MusicItem extends StatelessWidget {
             Routes.router.navigateTo(context, '/albumcoverpage');
             return;
           }
-          await store.play(Music(
-            name: item.name,
-            id: item.id,
-            aritstId: item.aritstId,
-            aritstName: item.aritstName,
-            albumName: item.albumName,
-            albumId: item.albumId,
-            albumCoverImg: item.albumCoverImg,
-          ));
+          await store.play(item);
           Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
         },
         child: Row(
@@ -264,7 +256,14 @@ class MusicItem extends StatelessWidget {
       );
     } else {
       return InkWell(
-        onTap: () {},
+        onTap: () async {
+          if (store.player.current.id == item.id) {
+            Routes.router.navigateTo(context, '/albumcoverpage');
+            return;
+          }
+          await store.play(item);
+          Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
+        },
         child: Row(
           children: <Widget>[
             SizedBox(
@@ -327,11 +326,12 @@ class ListTail extends StatelessWidget {
   final List<Map<String, dynamic>> tails;
   ListTail({this.tails});
 
-  List<Padding> _buildTail() {
-    List<Padding> _widgetlist = [];
+  List<Container> _buildTail() {
+    List<Container> _widgetlist = [];
 
     tails.asMap().forEach((int index, dynamic item) {
-      _widgetlist.add(Padding(
+      _widgetlist.add(Container(
+        decoration: BoxDecoration(color: Colors.white),
         padding: EdgeInsets.only(left: 12.0),
         child: InkResponse(
           splashColor: Colors.transparent,

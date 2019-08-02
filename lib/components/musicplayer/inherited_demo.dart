@@ -387,22 +387,35 @@ class StateContainerState extends State<StateContainer> {
   // 下一首播放
   Future<void> playInsertNext(Music music) async {
     int _idIndex = -1;
+    int _currentIndex = -1;
     List<Music> _playingList;
+    var _url = await _getSongUrl(music.id);
+    music.songUrl = _url;
     player.playingList.asMap().forEach((int index, Music item) {
       if (item.id == music.id) {
         _idIndex = index;
       }
     });
+    player.playingList.asMap().forEach((int index, Music item) {
+      if (item.id == player.current.id) {
+        _currentIndex = index;
+      }
+    });
+
     if (_idIndex == -1) {
-      _playingList = [music]..addAll(player.playingList);
+      // 下一首播放的歌曲不存在列表中
+      player.playingList
+          .insert(_currentIndex == -1 ? 0 : _currentIndex + 1, music);
+      _playingList = player.playingList;
     } else {
       _playingList = player.playingList;
       _playingList.removeAt(_idIndex);
-      _playingList = [music]..addAll(player.playingList);
+      player.playingList.insert(_currentIndex + 1, music);
+      _playingList = player.playingList;
     }
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (player.playingList.length == 0) {
+    if (_currentIndex == -1) {
       prefs.setString(
         _PREF_KEY_PLAYING,
         json.encode(_playingList[0], toEncodable: (e) => e.toMap()),
@@ -414,8 +427,7 @@ class StateContainerState extends State<StateContainer> {
 
     setState(() {
       player = (PlayerControllerState(
-          current:
-              player.playingList.length == 0 ? _playingList[0] : player.current,
+          current: _currentIndex == -1 ? _playingList[0] : player.current,
           playMode: player.playMode,
           playingList: _playingList,
           isPlaying: player.isPlaying,
@@ -423,6 +435,69 @@ class StateContainerState extends State<StateContainer> {
           duration: player.duration,
           time: player.time));
     });
+  }
+
+  // 多选播放下一首
+  Future<void> playInsertMultiNext(List<Music> musics) async {
+    int _currentIndex = -1;
+    var _playingList = player.playingList;
+    if (_playingList.length <= 0) {
+      var _currentSongUrl = await _getSongUrl(musics[0].id);
+      musics[0].songUrl = _currentSongUrl;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString(
+        _PREF_KEY_PLAYING,
+        json.encode(musics[0], toEncodable: (e) => e.toMap()),
+      );
+      prefs.setString(_PREF_KEY_PLAYLIST,
+          json.encode(musics, toEncodable: (e) => e.toMap()));
+
+      setState(() {
+        player = (PlayerControllerState(
+            current: musics[0],
+            playMode: player.playMode,
+            playingList: musics,
+            isPlaying: player.isPlaying,
+            position: player.position,
+            duration: player.duration,
+            time: player.time));
+      });
+    } else {
+      var _musics = musics;
+      player.playingList.asMap().forEach((int index, Music item) {
+        if (item.id == player.current.id) {
+          _currentIndex = index;
+        }
+      });
+
+      _musics.forEach((Music music) {
+        var _flag = false;
+        for (Music musics in _playingList) {
+          if (music.id == musics.id) {
+            _flag = true;
+          }
+        }
+        if (_flag == false) {
+          player.playingList.insert(_currentIndex + 1, music);
+          _playingList = player.playingList;
+        }
+      });
+
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString(_PREF_KEY_PLAYLIST,
+            json.encode(_playingList, toEncodable: (e) => e.toMap()));
+        setState(() {
+          player = (PlayerControllerState(
+              current: player.current,
+              playMode: player.playMode,
+              playingList: _playingList,
+              isPlaying: player.isPlaying,
+              position: player.position,
+              duration: player.duration,
+              time: player.time));
+        });
+      });
+    }
   }
 
   void pause(Music music) {}
@@ -549,6 +624,7 @@ class StateContainerState extends State<StateContainer> {
 
   void _getSavedInfo() async {
     var preference = await SharedPreferences.getInstance();
+    // preference.clear();
     Music current = Music(name: '');
     List<Music> playingList = [];
     PlayMode playMode = PlayMode.values[0];
@@ -568,6 +644,9 @@ class StateContainerState extends State<StateContainer> {
           .toList();
 
       playingList.asMap().forEach((int index, Music music) async {
+        if (music.album == null || music.artists == null) {
+          print(music.name);
+        }
         var _url = await _getSongUrl(music.id);
         var _comment = await _getSongComment(music.id);
 

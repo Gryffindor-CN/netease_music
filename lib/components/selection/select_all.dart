@@ -4,15 +4,19 @@ import 'package:sticky_headers/sticky_headers.dart';
 import './music_checkbox.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:overlay_support/overlay_support.dart';
-import './select_bottom.dart';
 import '../../model/music.dart';
 
 class SelectAll extends StatefulWidget {
   final List<Music> songs;
-  final VoidCallback handleFinish;
+  final ValueChanged<List<Music>> handleFinish;
+  final Future<int> Function(List<Music>) handleSongsPlayNext;
   final handleSongsDel;
   SelectAll(
-      {Key key, @required this.songs, this.handleSongsDel, this.handleFinish})
+      {Key key,
+      @required this.songs,
+      this.handleSongsDel,
+      this.handleFinish,
+      this.handleSongsPlayNext})
       : super(key: key);
 
   @override
@@ -23,7 +27,7 @@ class SelectAllState extends State<SelectAll> {
   int selectedCount = 0;
   bool allSelected = false;
   Color bottomIconColor = Color(0xffd4d4d4);
-  final List selectedList = [];
+  final List<Music> selectedList = [];
   // final List<Widget> widgetItems = [];
 
   Widget _buildList() {
@@ -123,7 +127,9 @@ class SelectAllState extends State<SelectAll> {
                     Expanded(
                       flex: 1,
                       child: GestureDetector(
-                        onTap: widget.handleFinish,
+                        onTap: () {
+                          widget.handleFinish(this.selectedList);
+                        },
                         child: Text(
                           '完成',
                           style: TextStyle(
@@ -139,101 +145,6 @@ class SelectAllState extends State<SelectAll> {
           );
         },
       ),
-      // Positioned(
-      //   height: 70.0,
-      //   // right: 0.0,
-      //   left: 0,
-      //   bottom: 20.0,
-      //   child: SelectBottom(
-      //     child: Container(
-      //       padding: EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 0.0),
-      //       // height: 6.0,
-      //       width: MediaQuery.of(context).size.width,
-      //       child: Row(
-      //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //         children: <Widget>[
-      //           GestureDetector(
-      //             onTap: selectedList.length == 0
-      //                 ? null
-      //                 : () {
-      //                     _addToNext(context);
-      //                   },
-      //             child: Container(
-      //               child: Column(
-      //                 children: <Widget>[
-      //                   Icon(
-      //                     Icons.play_circle_outline,
-      //                     color: bottomIconColor,
-      //                   ),
-      //                   Padding(
-      //                     padding: EdgeInsets.only(top: 4.0),
-      //                     child: Text(
-      //                       '下一首播放',
-      //                       style: TextStyle(
-      //                           color: Color(0xff3f3b3c), fontSize: 12.0),
-      //                     ),
-      //                   )
-      //                 ],
-      //               ),
-      //             ),
-      //           ),
-      //           GestureDetector(
-      //             onTap: selectedList.length == 0
-      //                 ? null
-      //                 : () {
-      //                     _addToCollection(context);
-      //                   },
-      //             child: Container(
-      //               child: Column(
-      //                 children: <Widget>[
-      //                   Icon(
-      //                     Icons.add_circle_outline,
-      //                     color: bottomIconColor,
-      //                   ),
-      //                   Padding(
-      //                     padding: EdgeInsets.only(top: 4.0),
-      //                     child: Text(
-      //                       '收藏到歌单',
-      //                       style: TextStyle(
-      //                           color: Color(0xff3f3b3c), fontSize: 12.0),
-      //                     ),
-      //                   )
-      //                 ],
-      //               ),
-      //             ),
-      //           ),
-      //           GestureDetector(
-      //             onTap: selectedList.length == 0
-      //                 ? null
-      //                 : () {
-      //                     _showDeleteModal(context, () {
-      //                       widget.handleSongsDel(selectedList);
-      //                     });
-      //                   },
-      //             child: Container(
-      //               child: Column(
-      //                 children: <Widget>[
-      //                   Icon(
-      //                     Icons.delete_outline,
-      //                     color: bottomIconColor,
-      //                   ),
-      //                   Padding(
-      //                     padding: EdgeInsets.only(top: 4.0),
-      //                     child: Text(
-      //                       '删除',
-      //                       style: TextStyle(
-      //                           color: Color(0xff3f3b3c), fontSize: 12.0),
-      //                     ),
-      //                   )
-      //                 ],
-      //               ),
-      //             ),
-      //           )
-      //         ],
-      //       ),
-      //     ),
-      //   ),
-      // ),
       Positioned(
           width: MediaQuery.of(context).size.width,
           height: 70.0,
@@ -255,8 +166,20 @@ class SelectAllState extends State<SelectAll> {
                   GestureDetector(
                     onTap: selectedList.length == 0
                         ? null
-                        : () {
-                            _addToNext(context);
+                        : () async {
+                            List<Music> lists = [];
+                            this.selectedList.forEach((Music music) {
+                              lists.add(music);
+                            });
+                            var res = await widget.handleSongsPlayNext(lists);
+                            if (res == 1) {
+                              setState(() {
+                                selectedList.clear();
+                                selectedCount = 0;
+                                allSelected = false;
+                                bottomIconColor = Color(0xffd4d4d4);
+                              });
+                            }
                           },
                     child: Container(
                       child: Column(
