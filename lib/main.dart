@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:netease_music/router/Routes.dart';
 import './components/circle_bottom_bar.dart';
 import './components/musicplayer/inherited_demo.dart';
-import './pages/home_page.dart';
+import './pages/home/home_page.dart';
 import 'components/netease_navigation_bar.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import 'package:audioplayers/audioplayers.dart';
