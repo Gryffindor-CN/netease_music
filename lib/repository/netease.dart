@@ -13,7 +13,6 @@ class NeteaseRepository {
       Response response = await Dio().get(url);
       if (response.statusCode == 200) {
         var result = json.decode(response.toString())['account'];
-        print(result);
         return result;
       }
     } catch (e) {
@@ -973,6 +972,16 @@ class NeteaseRepository {
       Response response = await Dio().get(url);
       var result = json.decode(response.toString())['result'];
 
+      return result;
+    } catch (e) {}
+  }
+
+  // 获取用户歌单
+  static getUserPlaylist(int userId) async {
+    var url = '${API_HOST}user/playlist?uid=1788319348';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['playlist'];
       return result;
     } catch (e) {}
   }

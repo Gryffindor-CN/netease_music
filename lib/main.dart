@@ -86,13 +86,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           body: Text(
             '视频',
           )),
-      // Scaffold(
-      //     appBar: AppBar(
-      //       title: Text('我的'),
-      //     ),
-      //     body: Text(
-      //       '我的',
-      //     )),
       MeHomePage()
     ];
     return Scaffold(
