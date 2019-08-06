@@ -18,12 +18,6 @@ class SongList extends StatefulWidget {
 class SongListState extends State<SongList> {
   @override
   Widget build(BuildContext context) {
-    String _name;
-    if (widget.item.name.toString().toString().length > 16) {
-      _name = '${widget.item.name.toString().substring(0, 15)}';
-    } else {
-      _name = widget.item.name;
-    }
     return GestureDetector(
       onTap: widget.handleTap,
       child: Container(
@@ -32,7 +26,10 @@ class SongListState extends State<SongList> {
         child: Row(children: <Widget>[
           SongCheckbox(checked: widget.selectStatus),
           Expanded(
-            child: MusicItem(widget.item),
+            child: MusicItem(
+              widget.item,
+              isSelect: false,
+            ),
           )
         ]),
       ),

@@ -5,16 +5,16 @@ import '../../../components/musicplayer/inherited_demo.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../components/musicplayer/player.dart';
 import '../../../router/Routes.dart';
-import '../../../utils/utils.dart';
 import './flexible_app_bar.dart';
 import 'dart:ui';
 import './selection_bottom.dart';
 import './music_list.dart';
 import './selection_list.dart';
 import './selection_checkbox.dart';
+import '../../album_cover/album_cover.dart';
 
 /// 每日推荐歌曲信息 header 高度
-const double HEIGHT_HEADER = 150 + 56.0;
+const double HEIGHT_HEADER = 160 + 56.0;
 
 class RecommendSongs extends StatefulWidget {
   RecommendSongs({this.pageContext});
@@ -31,12 +31,10 @@ class _RecommendSongsState extends State<RecommendSongs> {
   bool _selection = false;
   bool _selectedAll = false;
   Color bottomIconColor = Color(0xffd4d4d4);
-  ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
     _getRecommandSongs();
   }
 
@@ -119,7 +117,6 @@ class _RecommendSongsState extends State<RecommendSongs> {
         body: Stack(
           children: <Widget>[
             CustomScrollView(
-              controller: _scrollController,
               slivers: <Widget>[
                 SliverAppBar(
                   elevation: 0,
@@ -127,7 +124,12 @@ class _RecommendSongsState extends State<RecommendSongs> {
                   expandedHeight: HEIGHT_HEADER,
                   bottom: _selection == false
                       ? MusicListHeader(
-                          musiclist: songs.length <= 0 ? [] : songs)
+                          musiclist: songs.length <= 0 ? [] : songs,
+                          onSelect: () {
+                            setState(() {
+                              _selection = !_selection;
+                            });
+                          })
                       : _SelectionHeader(
                           allSelected: _selectedAll,
                           onTap: (BuildContext ctx) {
@@ -160,9 +162,6 @@ class _RecommendSongsState extends State<RecommendSongs> {
                       setState(() {
                         _selection = !_selection;
                       });
-                      _scrollController.animateTo(231.0,
-                          duration: Duration(milliseconds: 100),
-                          curve: Curves.ease);
                     },
                   ),
                 ),
@@ -227,6 +226,7 @@ class _RecommendSongsState extends State<RecommendSongs> {
                             onTap: _selectedList.length == 0
                                 ? null
                                 : () async {
+                                    print(_selectedList.length);
                                     // 下一首播放
                                     List<Music> lists = [];
                                     _selectedList.forEach((Music music) {
@@ -391,6 +391,7 @@ class _RecommendDetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return FlexibleDetailBar(
         background: _BlurBackground(),
         content: _buildContent(context),
@@ -400,10 +401,19 @@ class _RecommendDetailHeader extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             titleSpacing: 0,
-            actions: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.equalizer), tooltip: "播放器", onPressed: () {})
-            ],
+            actions: store.player.playingList.length <= 0
+                ? []
+                : <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.equalizer),
+                        tooltip: "播放器",
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) {
+                            return AlbumCoverPage();
+                          }));
+                        })
+                  ],
           );
         });
   }
@@ -414,93 +424,6 @@ class _RecommendDetailHeader extends StatelessWidget {
       child: GestureDetector(
         onTap: () {},
         child: Container(),
-      ),
-    );
-  }
-}
-
-class DetailHeader extends StatelessWidget {
-  final Widget content;
-  final int commentCount;
-  final int shareCount;
-  final GestureTapCallback onCommentTap;
-  final GestureTapCallback onShareTap;
-  final GestureTapCallback onSelectionTap;
-
-  const DetailHeader(
-      {Key key,
-      this.content,
-      this.commentCount,
-      this.shareCount,
-      this.onCommentTap,
-      this.onShareTap,
-      this.onSelectionTap})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top + kToolbarHeight),
-      child: Column(
-        children: <Widget>[
-          content,
-          SizedBox(height: 30.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              _HeaderAction(
-                iconData: Icons.comment,
-                headerContent: commentCount.toString(),
-                onTap: onCommentTap,
-              ),
-              _HeaderAction(
-                iconData: Icons.share,
-                headerContent: shareCount.toString(),
-                onTap: onShareTap,
-              ),
-              _HeaderAction(
-                iconData: Icons.file_download,
-                headerContent: '下载',
-                onTap: null,
-              ),
-              _HeaderAction(
-                iconData: Icons.check_box,
-                headerContent: '多选',
-                onTap: onSelectionTap,
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderAction extends StatelessWidget {
-  final IconData iconData;
-  final String headerContent;
-  final GestureTapCallback onTap;
-  _HeaderAction({Key key, this.iconData, this.headerContent, this.onTap})
-      : super(key: key);
-
-  Widget build(BuildContext context) {
-    var textTheme = Theme.of(context).primaryTextTheme;
-    return InkResponse(
-      onTap: onTap,
-      splashColor: textTheme.body1.color,
-      child: Opacity(
-        opacity: onTap == null ? 0.5 : 1,
-        child: Column(children: [
-          Icon(
-            iconData,
-            color: textTheme.body1.color,
-          ),
-          Text(
-            headerContent,
-            style: textTheme.caption.copyWith(fontSize: 13),
-          )
-        ]),
       ),
     );
   }
@@ -574,13 +497,11 @@ class _SelectionHeader extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
-  const MusicListHeader({
-    Key key,
-    this.tail,
-    this.musiclist,
-  }) : super(key: key);
+  const MusicListHeader({Key key, this.tail, this.musiclist, this.onSelect})
+      : super(key: key);
   final Widget tail;
   final List<Music> musiclist;
+  final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -615,14 +536,27 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
                   color: Theme.of(context).iconTheme.color,
                 ),
                 Padding(padding: EdgeInsets.only(left: 4)),
-                Text(
-                  "播放全部",
-                  style: Theme.of(context).textTheme.body1,
-                ),
+                Text("播放全部",
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.body1.color,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600)),
                 Padding(padding: EdgeInsets.only(left: 2)),
                 Spacer(),
+                InkWell(
+                  onTap: this.onSelect == null ? null : this.onSelect,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.list),
+                      Text(
+                        '多选',
+                        style: TextStyle(fontSize: 13.0),
+                      )
+                    ],
+                  ),
+                ),
                 SizedBox(
-                  width: 5.0,
+                  width: 15.0,
                 )
               ],
             ),
@@ -639,118 +573,4 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
 class SelectionNotification extends Notification {
   SelectionNotification(this.selectedAll);
   final bool selectedAll;
-}
-
-class _SubscribeButton extends StatefulWidget {
-  final bool subscribed;
-
-  final int subscribedCount;
-
-  final Future<bool> Function(bool currentState) doSubscribeChanged;
-
-  const _SubscribeButton(
-      this.subscribed, this.subscribedCount, this.doSubscribeChanged,
-      {Key key})
-      : super(key: key);
-
-  @override
-  _SubscribeButtonState createState() => _SubscribeButtonState();
-}
-
-class _SubscribeButtonState extends State<_SubscribeButton> {
-  bool subscribed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    subscribed = widget.subscribed;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!subscribed) {
-      return ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-        child: Container(
-          height: 36,
-          decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-            Theme.of(context).primaryColor.withOpacity(0.5),
-            Theme.of(context).primaryColor
-          ])),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () async {
-                final result = await widget.doSubscribeChanged(subscribed);
-
-                setState(() {
-                  subscribed = result;
-                });
-              },
-              child: Row(
-                children: <Widget>[
-                  SizedBox(width: 10),
-                  Icon(Icons.add,
-                      size: 18.0,
-                      color: Theme.of(context).primaryIconTheme.color),
-                  SizedBox(width: 2),
-                  Text(
-                    "收藏(${getFormattedNumber(widget.subscribedCount)})",
-                    style: TextStyle(
-                        fontSize: 12.0,
-                        color:
-                            Theme.of(context).primaryTextTheme.subtitle.color),
-                  ),
-                  SizedBox(width: 10),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    } else {
-      return InkWell(
-          child: Container(
-            height: 40,
-            child: Row(
-              children: <Widget>[
-                SizedBox(width: 16),
-                Icon(Icons.folder_special,
-                    size: 20, color: Theme.of(context).disabledColor),
-                SizedBox(width: 4),
-                Text(getFormattedNumber(widget.subscribedCount),
-                    style: Theme.of(context)
-                        .textTheme
-                        .caption
-                        .copyWith(fontSize: 14)),
-                SizedBox(width: 16),
-              ],
-            ),
-          ),
-          onTap: () async {
-            final result = await showDialog<bool>(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    content: Text("确定不再收藏此歌单吗?"),
-                    actions: <Widget>[
-                      FlatButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text("取消")),
-                      FlatButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: Text("不再收藏"))
-                    ],
-                  );
-                });
-            if (result != null && result) {
-              final result = await widget.doSubscribeChanged(subscribed);
-              setState(() {
-                subscribed = result;
-              });
-            }
-          });
-    }
-  }
 }

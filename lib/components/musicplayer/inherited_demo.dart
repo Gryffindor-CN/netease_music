@@ -416,6 +416,7 @@ class StateContainerState extends State<StateContainer> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_currentIndex == -1) {
+      // 列表为空
       prefs.setString(
         _PREF_KEY_PLAYING,
         json.encode(_playingList[0], toEncodable: (e) => e.toMap()),

@@ -43,6 +43,7 @@ class MusicTitle extends StatelessWidget {
     songList.asMap().forEach((int index, Music item) {
       widgetList.add(MusicItem(
         item,
+        isSelect: true,
         tailsList: item.mvId == 0
             ? [
                 {

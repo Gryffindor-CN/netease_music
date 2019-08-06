@@ -28,7 +28,8 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
   List banners = [];
   void _init() async {
     await _doLogin();
-    _getRecommendResource();
+    await NeteaseRepository.refreshLogin();
+    // _getRecommendResource();
     _getBanner();
   }
 

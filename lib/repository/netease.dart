@@ -13,7 +13,23 @@ class NeteaseRepository {
       Response response = await Dio().get(url);
       if (response.statusCode == 200) {
         var result = json.decode(response.toString())['account'];
+        print(result);
         return result;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // 刷新登录
+  static Future<bool> refreshLogin() async {
+    try {
+      var url = '${API_HOST}login/refresh';
+      Response response = await Dio().get(url);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
       print(e);
@@ -478,7 +494,7 @@ class NeteaseRepository {
           "mark": 0,
           "rtype": 0,
           "rurl": null,
-          "mvid": 0,
+          "mvid": 36565,
           "bMusic": {
             "name": null,
             "id": 99210593,
@@ -543,6 +559,183 @@ class NeteaseRepository {
             "preSell": false
           },
           "alg": "itembased"
+        },
+        {
+          "name": "孤身",
+          "id": 1365393542,
+          "position": 0,
+          "alias": [],
+          "status": 0,
+          "fee": 8,
+          "copyrightId": 0,
+          "disc": "01",
+          "no": 0,
+          "artists": [
+            {
+              "name": "徐秉龙",
+              "id": 1197168,
+              "picId": 0,
+              "img1v1Id": 0,
+              "briefDesc": "",
+              "picUrl":
+                  "http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+              "img1v1Url":
+                  "http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+              "albumSize": 0,
+              "alias": [],
+              "trans": "",
+              "musicSize": 0,
+              "topicPerson": 0
+            }
+          ],
+          "album": {
+            "name": "孤身",
+            "id": 79130968,
+            "type": "专辑",
+            "size": 2,
+            "picId": 109951164075300140,
+            "blurPicUrl":
+                "http://p1.music.126.net/yVmtE5RFcJ1fhv-ivuyuRw==/109951164075300143.jpg",
+            "companyId": 0,
+            "pic": 109951164075300140,
+            "picUrl":
+                "http://p1.music.126.net/yVmtE5RFcJ1fhv-ivuyuRw==/109951164075300143.jpg",
+            "publishTime": 1557936000000,
+            "description": "",
+            "tags": "",
+            "company": "",
+            "briefDesc": "",
+            "artist": {
+              "name": "",
+              "id": 0,
+              "picId": 0,
+              "img1v1Id": 0,
+              "briefDesc": "",
+              "picUrl":
+                  "http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+              "img1v1Url":
+                  "http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+              "albumSize": 0,
+              "alias": [],
+              "trans": "",
+              "musicSize": 0,
+              "topicPerson": 0
+            },
+            "songs": [],
+            "alias": [],
+            "status": 0,
+            "copyrightId": -1,
+            "commentThreadId": "R_AL_3_79130968",
+            "artists": [
+              {
+                "name": "徐秉龙",
+                "id": 1197168,
+                "picId": 0,
+                "img1v1Id": 0,
+                "briefDesc": "",
+                "picUrl":
+                    "http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+                "img1v1Url":
+                    "http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+                "albumSize": 0,
+                "alias": [],
+                "trans": "",
+                "musicSize": 0,
+                "topicPerson": 0
+              }
+            ],
+            "subType": "录音室版",
+            "transName": null,
+            "mark": 0,
+            "picId_str": "109951164075300143"
+          },
+          "starred": false,
+          "popularity": 100,
+          "score": 100,
+          "starredNum": 0,
+          "duration": 211541,
+          "playedNum": 0,
+          "dayPlays": 0,
+          "hearTime": 0,
+          "ringtone": "",
+          "crbt": null,
+          "audition": null,
+          "copyFrom": "",
+          "commentThreadId": "R_SO_4_1365393542",
+          "rtUrl": null,
+          "ftype": 0,
+          "rtUrls": [],
+          "copyright": 0,
+          "transName": null,
+          "sign": null,
+          "mark": 0,
+          "bMusic": {
+            "name": null,
+            "id": 3767426185,
+            "size": 3385773,
+            "extension": "mp3",
+            "sr": 48000,
+            "dfsId": 0,
+            "bitrate": 128000,
+            "playTime": 211541,
+            "volumeDelta": -45401
+          },
+          "mp3Url": null,
+          "rtype": 0,
+          "rurl": null,
+          "mvid": 0,
+          "hMusic": {
+            "name": null,
+            "id": 3767426183,
+            "size": 8464365,
+            "extension": "mp3",
+            "sr": 48000,
+            "dfsId": 0,
+            "bitrate": 320000,
+            "playTime": 211541,
+            "volumeDelta": -49744
+          },
+          "mMusic": {
+            "name": null,
+            "id": 3767426184,
+            "size": 5078637,
+            "extension": "mp3",
+            "sr": 48000,
+            "dfsId": 0,
+            "bitrate": 192000,
+            "playTime": 211541,
+            "volumeDelta": -47122
+          },
+          "lMusic": {
+            "name": null,
+            "id": 3767426185,
+            "size": 3385773,
+            "extension": "mp3",
+            "sr": 48000,
+            "dfsId": 0,
+            "bitrate": 128000,
+            "playTime": 211541,
+            "volumeDelta": -45401
+          },
+          "reason": "根据你可能喜欢的单曲 Always Online",
+          "privilege": {
+            "id": 1365393542,
+            "fee": 8,
+            "payed": 0,
+            "st": 0,
+            "pl": 128000,
+            "dl": 0,
+            "sp": 7,
+            "cp": 1,
+            "subp": 1,
+            "cs": false,
+            "maxbr": 999000,
+            "fl": 128000,
+            "toast": false,
+            "flag": 64,
+            "preSell": false
+          },
+          "alg": "endRecentSubRC"
         }
       ];
     } catch (e) {
@@ -761,7 +954,7 @@ class NeteaseRepository {
     } catch (e) {}
   }
 
-  // 歌手专辑
+  // 歌手��辑
   static getAritstAlbums(int id, {int limit = 20, int offset = 0}) async {
     var url = '${API_HOST}artist/album?id=$id&limit=$limit&offset=$offset';
     try {
