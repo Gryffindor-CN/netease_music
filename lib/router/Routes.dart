@@ -20,6 +20,8 @@ class Routes {
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
+  static String latelyplay = '/mymusic/latelyplay';
+
   /// 过渡动画在路由定义[router.define]时给定，没有特殊要求的情况下，统一使用 [TransitionType.native]
   static void configureRoutes(Router router) {
     router.notFoundHandler = new Handler(
@@ -38,5 +40,8 @@ class Routes {
     router.define(albumconverPage,
         handler: playingPageHandler,
         transitionType: TransitionType.inFromRight);
+    router.define(latelyplay,
+        handler: latelyplayHandler,
+        transitionType: TransitionType.native);
   }
 }
