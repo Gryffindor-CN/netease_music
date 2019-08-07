@@ -36,7 +36,7 @@ class SongListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsetsDirectional.fromSTEB(24,5,10,5),
+      padding: EdgeInsetsDirectional.fromSTEB(14,5,10,5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
