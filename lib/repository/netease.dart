@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 
-const API_HOST = 'http://192.168.206.133:3000/';
+const API_HOST = 'http://192.168.206.131:3000/';
 
 class NeteaseRepository {
   static Future<dynamic> doLogin() async {

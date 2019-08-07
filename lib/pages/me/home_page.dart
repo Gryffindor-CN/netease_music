@@ -302,6 +302,9 @@ class CollectionSection extends StatelessWidget {
           CounterSectionItem(
             title: '最近播放',
             iconData: Icons.music_note,
+            onTap: (){
+              Routes.router.navigateTo(context, '/mymusic/latelyplay');
+            },
           ),
           CounterSectionItem(
             title: '我的电台',
