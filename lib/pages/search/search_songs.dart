@@ -15,6 +15,8 @@ import '../../components/musicplayer/inherited_demo.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../router/Routes.dart';
 import '../../components/musicplayer/player.dart';
+import '../artist/artist_page.dart';
+import '../album/album_cover.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
@@ -266,13 +268,25 @@ class SearchSongTabState extends State<SearchSongTab>
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '歌手：${detail['ar'][0]['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return ArtistPage(item.artists[0].id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '专辑：${detail['al']['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return AlbumCover(item.album.id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -429,13 +443,25 @@ class SearchSongTabState extends State<SearchSongTab>
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '歌手：${detail['ar'][0]['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return ArtistPage(item.artists[0].id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '专辑：${detail['al']['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return AlbumCover(item.album.id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':

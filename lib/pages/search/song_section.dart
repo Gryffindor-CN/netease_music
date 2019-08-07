@@ -11,6 +11,8 @@ import '../../model/music.dart';
 import '../../components/musicplayer/inherited_demo.dart';
 import '../../repository/netease.dart';
 import '../../router/Routes.dart';
+import '../artist/artist_page.dart';
+import '../album/album_cover.dart';
 
 class SongSection extends StatelessWidget {
   final String keyword;
@@ -166,13 +168,25 @@ class SongSection extends StatelessWidget {
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '歌手：${detail['ar'][0]['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return ArtistPage(music.artists[0].id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '专辑：${detail['al']['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return AlbumCover(music.album.id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -328,13 +342,25 @@ class SongSection extends StatelessWidget {
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '歌手：${detail['ar'][0]['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return ArtistPage(music.artists[0].id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':
                                         AntDesign.getIconData('adduser'),
                                     'title': '专辑：${detail['al']['name']}',
-                                    'callback': () {}
+                                    'callback': () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) {
+                                        return AlbumCover(music.album.id);
+                                      }));
+                                    }
                                   },
                                   {
                                     'leadingIcon':

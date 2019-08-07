@@ -895,6 +895,16 @@ class NeteaseRepository {
     } catch (e) {}
   }
 
+  // 获取所有榜单
+  static getTopListAll() async {
+    var url = '${API_HOST}toplist';
+    try {
+      Response response = await Dio().get(url);
+      var list = json.decode(response.toString())['list'];
+      return list;
+    } catch (e) {}
+  }
+
   // 获取歌单详情
   static getPlaylistDetail(int id) async {
     var url = '${API_HOST}playlist/detail?id=$id';

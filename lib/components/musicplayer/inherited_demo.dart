@@ -408,9 +408,18 @@ class StateContainerState extends State<StateContainer> {
           .insert(_currentIndex == -1 ? 0 : _currentIndex + 1, music);
       _playingList = player.playingList;
     } else {
+      if (player.current.id != music.id) {
+        // 不是当前正在播放的歌曲
+
+      }
       _playingList = player.playingList;
       _playingList.removeAt(_idIndex);
-      player.playingList.insert(_currentIndex + 1, music);
+      if (_playingList.length == 0) {
+        player.playingList.insert(0, music);
+      } else {
+        player.playingList.insert(_currentIndex + 1, music);
+      }
+
       _playingList = player.playingList;
     }
 

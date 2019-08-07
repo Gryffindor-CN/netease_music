@@ -250,9 +250,13 @@ class __AlbumCoverState extends State<_AlbumCover> {
                                       child: CircularProgressIndicator(),
                                     ),
                                   )
-                                : MusicTitle(
-                                    widget.musiclist,
-                                    pageContext: widget.pageContext,
+                                : Container(
+                                    decoration:
+                                        BoxDecoration(color: Colors.white),
+                                    child: MusicTitle(
+                                      widget.musiclist,
+                                      pageContext: widget.pageContext,
+                                    ),
                                   );
                           },
                           childCount: 1,
@@ -631,7 +635,6 @@ class _PlaylistDetailHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 2),
                   Expanded(
                     child: DefaultTextStyle(
                       style: TextStyle(
@@ -864,7 +867,7 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       child: Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
         child: InkWell(

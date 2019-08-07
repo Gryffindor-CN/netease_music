@@ -733,7 +733,6 @@ class SongsWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(hotSongs[0].album.name);
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         return Column(

@@ -11,6 +11,7 @@ import '../search/search.dart';
 import '../../utils/utils.dart';
 import '../playlist/playlist.dart';
 import '../home/recommandSongs/recommend_songs.dart';
+import './ranking_list.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb, this.pageContext});
@@ -28,7 +29,7 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
   List banners = [];
   void _init() async {
     await _doLogin();
-    // _getRecommendResource();
+    _getRecommendResource();
     _getBanner();
   }
 
@@ -255,7 +256,13 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () {},
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(builder:
+                                                (BuildContext context) {
+                                          return RankingListPage();
+                                        }));
+                                      },
                                       child: Column(
                                         children: <Widget>[
                                           Container(
@@ -528,9 +535,9 @@ class _PlaylistSquare extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 170,
+                maxCrossAxisExtent: 180,
                 childAspectRatio: 0.7,
-                crossAxisSpacing: 8,
+                crossAxisSpacing: 1,
                 mainAxisSpacing: 0,
               ),
               children: List.generate(playlist.length, (index) {
@@ -547,6 +554,8 @@ class _PlaylistSquare extends StatelessWidget {
                         child: Column(
                           children: <Widget>[
                             Container(
+                              width: 110.0,
+                              height: 110.0,
                               child: ClipRRect(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(4.0)),
@@ -557,18 +566,21 @@ class _PlaylistSquare extends StatelessWidget {
                             SizedBox(
                               height: 4.0,
                             ),
-                            Text(
-                              playlist[index].name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 12.0),
+                            Container(
+                              width: 110.0,
+                              child: Text(
+                                playlist[index].name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 12.0),
+                              ),
                             )
                           ],
                         ),
                       ),
                       Positioned(
                         top: 2.0,
-                        right: 6.0,
+                        right: 16.0,
                         child: Align(
                           alignment: Alignment.topRight,
                           child: Row(

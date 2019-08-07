@@ -199,29 +199,33 @@ class SearchPageState extends State<SearchPage> {
                             });
                           });
                         },
-                        child: Row(
-                          children: <Widget>[
-                            SizedBox(
-                              width: 10.0,
-                            ),
-                            Expanded(
-                              child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: BorderSide(
-                                              color: Color(0xFFE0E0E0)))),
-                                  padding: EdgeInsets.symmetric(vertical: 10.0),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Text('搜索'),
-                                      SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      Text('“${_textEditingController.text}”')
-                                    ],
-                                  )),
-                            )
-                          ],
+                        child: DefaultTextStyle(
+                          style: TextStyle(color: Color(0xff0c73c2)),
+                          child: Row(
+                            children: <Widget>[
+                              SizedBox(
+                                width: 10.0,
+                              ),
+                              Expanded(
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                color: Color(0xFFE0E0E0)))),
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 10.0),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Text('搜索'),
+                                        SizedBox(
+                                          width: 10.0,
+                                        ),
+                                        Text('“${_textEditingController.text}”')
+                                      ],
+                                    )),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -384,7 +388,11 @@ class SearchSuggestMusic extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(right: 8.0),
-              child: Icon(Icons.search),
+              child: Icon(
+                Icons.search,
+                size: 20.0,
+                color: Colors.grey.withOpacity(0.4),
+              ),
             ),
             Expanded(
               child: Container(

@@ -301,15 +301,15 @@ class CollectionSection extends StatelessWidget {
           ),
           CounterSectionItem(
             title: '最近播放',
-            iconData: Icons.music_note,
+            iconData: Icons.play_circle_outline,
           ),
           CounterSectionItem(
             title: '我的电台',
-            iconData: Icons.music_note,
+            iconData: Icons.radio,
           ),
           CounterSectionItem(
             title: '我的收藏',
-            iconData: Icons.music_note,
+            iconData: Icons.collections,
           ),
         ],
       ),

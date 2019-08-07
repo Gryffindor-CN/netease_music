@@ -138,6 +138,7 @@ class _PlaylistPageState extends State<Playlists> {
   @override
   Widget build(BuildContext context) {
     return _PlayList(
+      type: widget.type,
       playlistDetail: _result,
       pageContext: widget.pageContext,
     );
@@ -145,8 +146,9 @@ class _PlaylistPageState extends State<Playlists> {
 }
 
 class _PlayList extends StatefulWidget {
-  const _PlayList({Key key, this.playlistDetail, this.pageContext})
+  const _PlayList({Key key, this.type, this.playlistDetail, this.pageContext})
       : super(key: key);
+  final String type;
   final BuildContext pageContext;
   final PlaylistDetail playlistDetail;
 
@@ -265,6 +267,7 @@ class _PlayListState extends State<_PlayList> {
                             });
                           }),
                   flexibleSpace: _PlaylistDetailHeader(
+                    type: widget.type,
                     playlistDetail: widget.playlistDetail,
                     onSelect: () {
                       setState(() {
@@ -287,9 +290,13 @@ class _PlayListState extends State<_PlayList> {
                                       child: CircularProgressIndicator(),
                                     ),
                                   )
-                                : MusicTitle(
-                                    widget.musiclist,
-                                    pageContext: widget.pageContext,
+                                : Container(
+                                    decoration:
+                                        BoxDecoration(color: Colors.white),
+                                    child: MusicTitle(
+                                      widget.musiclist,
+                                      pageContext: widget.pageContext,
+                                    ),
                                   );
                           },
                           childCount: 1,
@@ -512,7 +519,8 @@ class _BlurBackground extends StatelessWidget {
 }
 
 class _PlaylistDetailHeader extends StatelessWidget {
-  _PlaylistDetailHeader({this.playlistDetail, this.onSelect});
+  _PlaylistDetailHeader({this.type, this.playlistDetail, this.onSelect});
+  final String type;
   final PlaylistDetail playlistDetail;
   final VoidCallback onSelect;
 
@@ -525,7 +533,9 @@ class _PlaylistDetailHeader extends StatelessWidget {
         content: _buildContent(context),
         builder: (context, t) {
           return AppBar(
-            title: Text(t > 0.5 ? playlistDetail.name : '歌单'),
+            title: Text(t > 0.5
+                ? playlistDetail.name
+                : type == 'playlist' ? '歌单' : '排行榜'),
             backgroundColor: Colors.transparent,
             elevation: 0,
             titleSpacing: 0,
@@ -861,7 +871,7 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       child: Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
         child: InkWell(
