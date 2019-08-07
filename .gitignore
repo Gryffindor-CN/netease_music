@@ -25,7 +25,7 @@
 .packages
 .pub-cache/
 .pub/
-pubspec.lock
+./pubspec.lock
 /build/
 
 # Android related
