@@ -219,9 +219,24 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                                 shape: BoxShape.circle,
                                                 color: Theme.of(context)
                                                     .primaryColor),
-                                            child: Icon(
-                                              Icons.calendar_today,
-                                              color: Colors.white,
+                                            child: Stack(
+                                              children: <Widget>[
+                                                Icon(
+                                                  Icons.calendar_today,
+                                                  color: Colors.white,
+                                                ),
+                                                Positioned(
+                                                  left: 9.0,
+                                                  top: 8.0,
+                                                  child: Text(
+                                                    '${DateTime.now().day}',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w600),
+                                                  ),
+                                                )
+                                              ],
                                             ),
                                           ),
                                           SizedBox(

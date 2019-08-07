@@ -45,6 +45,8 @@ class MusicTitle extends StatelessWidget {
     songList.asMap().forEach((int index, Music item) {
       widgetList.add(MusicItem(
         item,
+        sort: true,
+        showBottomLine: false,
         sortIndex: index + 1,
         tailsList: item.mvId == 0
             ? [

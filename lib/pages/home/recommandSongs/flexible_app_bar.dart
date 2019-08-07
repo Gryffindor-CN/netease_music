@@ -37,7 +37,7 @@ class FlexibleDetailBar extends StatelessWidget {
         child: background));
 
     _widgetList.add(Positioned(
-      top: settings.currentExtent - settings.maxExtent,
+      top: settings.currentExtent - settings.maxExtent + 30,
       left: 0,
       right: 0,
       height: settings.maxExtent,

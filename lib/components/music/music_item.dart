@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
 import '../musicplayer/inherited_demo.dart';
@@ -8,6 +9,7 @@ class MusicItem extends StatelessWidget {
   final String keyword;
   final bool sort;
   final int sortIndex;
+  final bool showBottomLine;
   final List<Map<String, dynamic>> tailsList;
   final BuildContext pageContext;
   final VoidCallback onTap;
@@ -17,6 +19,7 @@ class MusicItem extends StatelessWidget {
       this.tailsList,
       this.pageContext,
       this.onTap,
+      this.showBottomLine = true,
       @required this.sortIndex});
 
   static Widget _nameWidget;
@@ -49,7 +52,13 @@ class MusicItem extends StatelessWidget {
                 size: 18.0,
                 color: Theme.of(context).primaryColor,
               ),
-              Text(item.name)
+              Expanded(
+                child: Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
             ],
           ),
         );
@@ -135,16 +144,30 @@ class MusicItem extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 decoration: BoxDecoration(
-                    border: Border(
-                        bottom:
-                            BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
+                    border: showBottomLine == true
+                        ? Border(
+                            bottom: BorderSide(
+                                color: Color(0xFFE0E0E0), width: 0.5))
+                        : Border(
+                            top: BorderSide.none,
+                            bottom: BorderSide.none,
+                            left: BorderSide.none,
+                            right: BorderSide.none,
+                          )),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: sort == true
                       ? <Widget>[
                           Flexible(
                             flex: 1,
-                            child: Text('$sortIndex'),
+                            child: Text(
+                              '$sortIndex',
+                              style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .subtitle
+                                      .color),
+                            ),
                           ),
                           Flexible(
                             flex: 7,

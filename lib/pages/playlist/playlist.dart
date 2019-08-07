@@ -277,6 +277,7 @@ class _PlayListState extends State<_PlayList> {
                           duration: Duration(milliseconds: 100),
                           curve: Curves.ease);
                     },
+                    pageContext: widget.pageContext,
                   ),
                 ),
                 _selection == false
@@ -519,13 +520,15 @@ class _BlurBackground extends StatelessWidget {
 }
 
 class _PlaylistDetailHeader extends StatelessWidget {
-  _PlaylistDetailHeader({this.type, this.playlistDetail, this.onSelect});
+  _PlaylistDetailHeader(
+      {this.type, this.playlistDetail, this.onSelect, this.pageContext});
   final String type;
   final PlaylistDetail playlistDetail;
   final VoidCallback onSelect;
-
+  final BuildContext pageContext;
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return FlexibleDetailBar(
         background: _BlurBackground(
           playlistDetail: playlistDetail,
@@ -539,21 +542,44 @@ class _PlaylistDetailHeader extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             titleSpacing: 0,
-            actions: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.search),
-                  tooltip: "歌单内搜索",
-                  onPressed: () {
-                    showSearch(
-                        context: context,
-                        delegate: PlaylistInternalSearchDelegate(
-                            playlistDetail, Theme.of(context)));
-                  }),
-              IconButton(
-                  icon: Icon(Icons.more_vert),
-                  tooltip: "更多选项",
-                  onPressed: () {})
-            ],
+            actions: (store.player != null &&
+                    store.player.playingList.length > 0)
+                ? <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.search),
+                        tooltip: "歌单内搜索",
+                        onPressed: () {
+                          showSearch(
+                              context: context,
+                              delegate: PlaylistInternalSearchDelegate(
+                                  playlistDetail, Theme.of(context)));
+                        }),
+                    IconButton(
+                        icon: Icon(Icons.more_vert),
+                        tooltip: "更多选项",
+                        onPressed: () {}),
+                    IconButton(
+                        icon: Icon(Icons.equalizer),
+                        tooltip: "播放器",
+                        onPressed: () {
+                          Routes.router.navigateTo(context, '/albumcoverpage');
+                        })
+                  ]
+                : [
+                    IconButton(
+                        icon: Icon(Icons.search),
+                        tooltip: "歌单内搜索",
+                        onPressed: () {
+                          showSearch(
+                              context: context,
+                              delegate: PlaylistInternalSearchDelegate(
+                                  playlistDetail, Theme.of(context)));
+                        }),
+                    IconButton(
+                        icon: Icon(Icons.more_vert),
+                        tooltip: "更多选项",
+                        onPressed: () {}),
+                  ],
           );
         });
   }

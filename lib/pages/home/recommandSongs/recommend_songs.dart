@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import '../../../model/music.dart';
 import '../../../repository/netease.dart';
 import '../../../components/musicplayer/inherited_demo.dart';
@@ -173,7 +174,11 @@ class _RecommendSongsState extends State<RecommendSongs> {
                                 ? Center(
                                     child: Container(
                                       padding: EdgeInsets.only(top: 20.0),
-                                      child: CircularProgressIndicator(),
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Theme.of(context).primaryColor),
+                                      ),
                                     ),
                                   )
                                 : MusicTitle(
@@ -419,11 +424,32 @@ class _RecommendDetailHeader extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
+    var _day = DateTime.now().day;
+    var _month = DateTime.now().month;
+
     return DefaultTextStyle(
-      style: TextStyle(color: Colors.white, fontSize: 20.0),
+      style: TextStyle(
+          fontWeight: FontWeight.w600, color: Colors.white, fontSize: 18.0),
       child: GestureDetector(
         onTap: () {},
-        child: Container(),
+        child: Container(
+            margin: EdgeInsets.only(left: 15.0),
+            child: Row(
+              children: <Widget>[
+                Text(
+                  _day < 10 ? '0$_day' : _day,
+                  style: TextStyle(fontSize: 32.0),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text('/'),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 10.0),
+                  child: Text(_month < 10 ? '0$_month' : _month),
+                ),
+              ],
+            )),
       ),
     );
   }
