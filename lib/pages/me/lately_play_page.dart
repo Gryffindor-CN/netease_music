@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:netease_music/components/music/music_item.dart';
+import 'package:netease_music/components/music/music_item_list.dart';
 import 'package:netease_music/components/songlist_list/song_list_list.dart';
+import 'package:netease_music/model/music.dart';
 
 
 
@@ -106,7 +109,10 @@ class MeHomePageState extends State<LatelyPlayPage> {
         ),
         body: TabBarView(
           children: [
-            Icon(Icons.directions_transit),
+            MusicItemList(
+              keyword: "123asd",
+              list: _buildList(),
+            ),
             Icon(Icons.directions_transit),
             Icon(Icons.directions_bike),
             SongListList(),
@@ -114,5 +120,36 @@ class MeHomePageState extends State<LatelyPlayPage> {
         ),
       ),
     );
+  }
+
+  List<MusicItem> _buildList(){
+    List<MusicItem> _widgetlist = [];
+
+    MusicItem item1 = MusicItem(
+        Music(
+          name: "龙的传人",
+          aritstName: "成龙",
+          albumName: "中国红",
+        ),
+      underline: false,
+      onTap: (){
+        print('龙德传人');
+      },
+    );
+    _widgetlist.add(item1);
+
+    MusicItem item2 = MusicItem(
+      Music(
+          name: "龙的传人2",
+          aritstName: "成龙",
+          albumName: "中国红"
+      ),
+      underline: false,
+      onTap: (){
+        print('龙德传人2');
+      },
+    );
+    _widgetlist.add(item2);
+    return _widgetlist;
   }
 }

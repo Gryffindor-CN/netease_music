@@ -11,12 +11,15 @@ class MusicItem extends StatelessWidget {
   final List<Map<String, dynamic>> tailsList;
   final BuildContext pageContext;
   final VoidCallback onTap;
+  final bool underline;
+
   MusicItem(this.item,
       {this.keyword,
       this.sort = false,
       this.tailsList,
       this.pageContext,
       this.onTap,
+      this.underline = true,
       @required this.sortIndex});
 
   static Widget _nameWidget;
@@ -137,7 +140,7 @@ class MusicItem extends StatelessWidget {
                 decoration: BoxDecoration(
                     border: Border(
                         bottom:
-                            BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
+                            BorderSide(color: this.underline == true?Color(0xffE0E0E0):Color(0x00E0E0E0), width: 0.5))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: sort == true
@@ -275,7 +278,7 @@ class MusicItem extends StatelessWidget {
                 decoration: BoxDecoration(
                     border: Border(
                         bottom:
-                            BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
+                            BorderSide(color: this.underline == true?Color(0xffE0E0E0):Color(0x00E0E0E0), width: 0.5))),
                 child: Container(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
