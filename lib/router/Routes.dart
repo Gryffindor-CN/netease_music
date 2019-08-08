@@ -17,6 +17,12 @@ class Routes {
 
   static String albumconverPage = '/albumcoverpage';
 
+  static String playlistSquarePage = '/home/playlistsquare/playlistsquarepage';
+
+  static String rankinglistPage = '/home/rankinglistpage';
+
+  static String recommandSongsPage = '/home/recommandSongs/recommandsongspage';
+
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
@@ -37,6 +43,15 @@ class Routes {
         transitionType: TransitionType.inFromRight);
     router.define(albumconverPage,
         handler: playingPageHandler,
+        transitionType: TransitionType.inFromRight);
+    router.define(playlistSquarePage,
+        handler: playlistSquarePageHandler,
+        transitionType: TransitionType.inFromRight);
+    router.define(rankinglistPage,
+        handler: rankinglistPageHandler,
+        transitionType: TransitionType.inFromRight);
+    router.define(recommandSongsPage,
+        handler: recommandSongsPageHandler,
         transitionType: TransitionType.inFromRight);
   }
 }

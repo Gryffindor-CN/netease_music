@@ -5,6 +5,9 @@ import 'package:netease_music/pages/my_music.dart';
 import 'package:netease_music/pages/search/search.dart';
 import 'package:netease_music/pages/search/search_result.dart';
 import 'package:netease_music/pages/album_cover/album_cover.dart';
+import 'package:netease_music/pages/home/playlistSquare/playlist_square.dart';
+import 'package:netease_music/pages/home/ranking_list.dart';
+import 'package:netease_music/pages/home/recommandSongs/recommend_songs.dart';
 
 var anotherPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
@@ -39,4 +42,19 @@ var playingPageHandler = new Handler(
     );
   }
   return new AlbumCoverPage();
+});
+
+var playlistSquarePageHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new PlaylistSquare();
+});
+
+var rankinglistPageHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new RankingListPage();
+});
+
+var recommandSongsPageHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  return new RecommendSongs();
 });

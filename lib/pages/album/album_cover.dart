@@ -484,6 +484,7 @@ class _PlaylistDetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final store = StateContainer.of(context);
     return FlexibleDetailBar(
         background: _BlurBackground(
           playlistDetail: albumDetail,
@@ -495,21 +496,29 @@ class _PlaylistDetailHeader extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             titleSpacing: 0,
-            actions: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.more_vert),
-                  tooltip: "更多选项",
-                  onPressed: () {}),
-              IconButton(
-                  icon: Icon(Icons.equalizer),
-                  tooltip: "播放器",
-                  onPressed: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return AlbumCoverPage();
-                    }));
-                  })
-            ],
+            actions:
+                (store.player != null && store.player.playingList.length > 0)
+                    ? <Widget>[
+                        IconButton(
+                            icon: Icon(Icons.more_vert),
+                            tooltip: "更多选项",
+                            onPressed: () {}),
+                        IconButton(
+                            icon: Icon(Icons.equalizer),
+                            tooltip: "播放器",
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return AlbumCoverPage();
+                              }));
+                            })
+                      ]
+                    : [
+                        IconButton(
+                            icon: Icon(Icons.more_vert),
+                            tooltip: "更多选项",
+                            onPressed: () {}),
+                      ],
           );
         });
   }

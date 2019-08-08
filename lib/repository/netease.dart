@@ -6383,4 +6383,14 @@ class NeteaseRepository {
       return result;
     } catch (e) {}
   }
+
+  // 歌单 ( 网友精选碟 )
+  static getTopPlaylist({int limit = 50}) async {
+    var url = '${API_HOST}top/playlist?limit=$limit';
+    try {
+      Response response = await Dio().get(url);
+      var result = json.decode(response.toString())['playlists'];
+      return result;
+    } catch (e) {}
+  }
 }

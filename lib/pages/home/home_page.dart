@@ -203,11 +203,13 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                   children: <Widget>[
                                     GestureDetector(
                                       onTap: () {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(builder:
-                                                (BuildContext context) {
-                                          return RecommendSongs();
-                                        }));
+                                        // Navigator.of(context).push(
+                                        //     MaterialPageRoute(builder:
+                                        //         (BuildContext context) {
+                                        //   return RecommendSongs();
+                                        // }));
+                                        Routes.router.navigateTo(context,
+                                            '/home/recommandSongs/recommandsongspage');
                                       },
                                       child: Column(
                                         children: <Widget>[
@@ -272,11 +274,13 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                                     ),
                                     GestureDetector(
                                       onTap: () {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(builder:
-                                                (BuildContext context) {
-                                          return RankingListPage();
-                                        }));
+                                        // Navigator.of(context).push(
+                                        //     MaterialPageRoute(builder:
+                                        //         (BuildContext context) {
+                                        //   return RankingListPage();
+                                        // }));
+                                        Routes.router.navigateTo(
+                                            context, '/home/rankinglistpage');
                                       },
                                       child: Column(
                                         children: <Widget>[
@@ -523,6 +527,8 @@ class _PlaylistSquare extends StatelessWidget {
         InkWell(
           onTap: () {
             // 歌单广场
+            Routes.router
+                .navigateTo(context, '/home/playlistsquare/playlistsquarepage');
           },
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0),
