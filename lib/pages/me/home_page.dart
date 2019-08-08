@@ -88,7 +88,6 @@ class MeHomeContainerState extends State<MeHomeContainer> {
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
     return Scaffold(
-      // backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0.0,
         leading: Icon(Icons.cloud_queue),
@@ -136,6 +135,7 @@ class PlaylistSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.only(left: 15.0),
       decoration: BoxDecoration(color: Colors.white),
       width: MediaQuery.of(context).size.width,
       child: Column(children: <Widget>[

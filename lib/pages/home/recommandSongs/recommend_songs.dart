@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import '../../../model/music.dart';
 import '../../../repository/netease.dart';
 import '../../../components/musicplayer/inherited_demo.dart';
@@ -529,66 +528,159 @@ class MusicListHeader extends StatelessWidget implements PreferredSizeWidget {
   final List<Music> musiclist;
   final VoidCallback onSelect;
 
+  Widget _buildSmallWidget(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      alignment: Alignment.center,
+      height: 20.0,
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 62.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Container(
+                width: 22.0,
+                height: 22.0,
+                child: Stack(
+                  children: <Widget>[
+                    Positioned(
+                      top: 8.0,
+                      right: 8.0,
+                      child: Container(
+                        width: 8.0,
+                        height: 8.0,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 2.0)),
+                      ),
+                    ),
+                    Positioned(
+                      right: 10.0,
+                      child: Container(
+                        width: 4.0,
+                        height: 12.0,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(2.0))),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 22.0,
+                height: 22.0,
+                child: Stack(
+                  children: <Widget>[
+                    Positioned(
+                      top: 8.0,
+                      right: 8.0,
+                      child: Container(
+                        width: 8.0,
+                        height: 8.0,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 2.0)),
+                      ),
+                    ),
+                    Positioned(
+                      right: 10.0,
+                      child: Container(
+                        width: 4.0,
+                        height: 12.0,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(2.0))),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          )),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      child: Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        shadowColor: Colors.transparent,
-        child: InkWell(
-          onTap: () async {
-            // 播放全部
-            await store.playMultis(this.musiclist);
-            if (store.player.isPlaying == true) {
-              var res = await MyPlayer.player.stop();
-              if (res == 1) {
-                Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
-              }
-            } else {
-              Routes.router.navigateTo(context, '/albumcoverpage?isNew=true');
-            }
-          },
-          child: SizedBox.fromSize(
-            size: preferredSize,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Padding(padding: EdgeInsets.only(left: 16)),
-                Icon(
-                  Icons.play_circle_outline,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                Padding(padding: EdgeInsets.only(left: 4)),
-                Text("播放全部",
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.body1.color,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600)),
-                Padding(padding: EdgeInsets.only(left: 2)),
-                Spacer(),
-                InkWell(
-                  onTap: this.onSelect == null ? null : this.onSelect,
+    return Stack(
+      overflow: Overflow.visible,
+      children: <Widget>[
+        ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          child: Material(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            child: InkWell(
+                onTap: () async {
+                  // 播放全部
+                  await store.playMultis(this.musiclist);
+                  if (store.player.isPlaying == true) {
+                    var res = await MyPlayer.player.stop();
+                    if (res == 1) {
+                      Routes.router
+                          .navigateTo(context, '/albumcoverpage?isNew=true');
+                    }
+                  } else {
+                    Routes.router
+                        .navigateTo(context, '/albumcoverpage?isNew=true');
+                  }
+                },
+                child: SizedBox.fromSize(
+                  size: preferredSize,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Icon(Icons.list),
-                      Text(
-                        '多选',
-                        style: TextStyle(fontSize: 13.0),
+                      Padding(padding: EdgeInsets.only(left: 16)),
+                      Icon(
+                        Icons.play_circle_outline,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      Padding(padding: EdgeInsets.only(left: 4)),
+                      Text("播放全部",
+                          style: TextStyle(
+                              color: Theme.of(context).textTheme.body1.color,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600)),
+                      Padding(padding: EdgeInsets.only(left: 2)),
+                      Spacer(),
+                      InkWell(
+                        onTap: this.onSelect == null ? null : this.onSelect,
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.list),
+                            Text(
+                              '多选',
+                              style: TextStyle(fontSize: 13.0),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 15.0,
                       )
                     ],
                   ),
-                ),
-                SizedBox(
-                  width: 15.0,
-                )
-              ],
-            ),
+                )),
           ),
         ),
-      ),
+        Positioned(
+          // left: 120.0,
+          left: 0.0,
+          top: -6.0,
+          child: _buildSmallWidget(context),
+        ),
+      ],
     );
   }
 

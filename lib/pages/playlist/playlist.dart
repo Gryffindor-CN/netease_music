@@ -288,7 +288,11 @@ class _PlayListState extends State<_PlayList> {
                                 ? Center(
                                     child: Container(
                                       padding: EdgeInsets.only(top: 20.0),
-                                      child: CircularProgressIndicator(),
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Theme.of(context).primaryColor),
+                                      ),
                                     ),
                                   )
                                 : Container(
