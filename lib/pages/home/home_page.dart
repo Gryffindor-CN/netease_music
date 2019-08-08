@@ -10,8 +10,6 @@ import '../../repository/netease.dart';
 import '../search/search.dart';
 import '../../utils/utils.dart';
 import '../playlist/playlist.dart';
-import '../home/recommandSongs/recommend_songs.dart';
-import './ranking_list.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb, this.pageContext});

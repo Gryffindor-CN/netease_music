@@ -5,6 +5,8 @@ import '../../router/Routes.dart';
 import '../../components/main/main_playlist.dart';
 import '../../repository/netease.dart';
 import '../../model/music.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
 
 class MeHomePage extends StatefulWidget {
   @override
@@ -50,10 +52,22 @@ class MeHomeContainer extends StatefulWidget {
 class MeHomeContainerState extends State<MeHomeContainer> {
   List<PlayList> _createdLists = [];
   List<PlayList> _likedLists = [];
+  Store<int> redux_store;
+
+  int appReducer(int state, dynamic action) {
+    if (action == Actions.Increase) {
+      return state + 1;
+    }
+    return state;
+  }
 
   @override
   void initState() {
     _getUserPlaylist(1788319348);
+    redux_store = Store<int>(
+      appReducer,
+      initialState: 0,
+    );
     super.initState();
   }
 
@@ -109,7 +123,9 @@ class MeHomeContainerState extends State<MeHomeContainer> {
         child: Column(
           children: <Widget>[
             TabSection(),
-            CollectionSection(),
+            CollectionSection(
+              store: redux_store,
+            ),
             Container(
               width: MediaQuery.of(context).size.width,
               height: 6.0,
@@ -286,32 +302,47 @@ class TabSectionItem extends StatelessWidget {
   }
 }
 
+enum Actions { Increase }
+
 class CollectionSection extends StatelessWidget {
+  CollectionSection({@required this.store});
+  final Store<int> store;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.white),
-      width: MediaQuery.of(context).size.width,
-      height: 220.0,
-      child: Column(
-        children: <Widget>[
-          CounterSectionItem(
-            title: '本地音乐',
-            iconData: Icons.music_note,
-          ),
-          CounterSectionItem(
-            title: '最近播放',
-            iconData: Icons.play_circle_outline,
-          ),
-          CounterSectionItem(
-            title: '我的电台',
-            iconData: Icons.radio,
-          ),
-          CounterSectionItem(
-            title: '我的收藏',
-            iconData: Icons.collections,
-          ),
-        ],
+    return StoreProvider<int>(
+      store: store,
+      child: Container(
+        decoration: BoxDecoration(color: Colors.white),
+        width: MediaQuery.of(context).size.width,
+        height: 220.0,
+        child: StoreConnector(
+          builder: (BuildContext context, int count) {
+            return Column(
+              children: <Widget>[
+                CounterSectionItem(
+                  title: '$count',
+                  iconData: Icons.music_note,
+                ),
+                CounterSectionItem(
+                  title: '最近播放',
+                  iconData: Icons.play_circle_outline,
+                ),
+                CounterSectionItem(
+                  title: '我的电台',
+                  iconData: Icons.radio,
+                ),
+                CounterSectionItem(
+                  title: '我的收藏',
+                  iconData: Icons.collections,
+                ),
+              ],
+            );
+          },
+          converter: (Store<int> store) {
+            return store.state;
+          },
+        ),
       ),
     );
   }

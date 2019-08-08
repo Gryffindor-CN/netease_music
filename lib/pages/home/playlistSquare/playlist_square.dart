@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../model/music.dart';
 import '../../../components/musicplayer/inherited_demo.dart';
 import '../../../utils/utils.dart';
 import '../../../repository/netease.dart';
 import '../../playlist/playlist.dart';
+import './playlist_official.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
 class PlaylistSquare extends StatefulWidget {
@@ -89,42 +89,42 @@ class _PlaylistSquareState extends State<PlaylistSquare>
                     flex: 3,
                     child: Container(
                       width: MediaQuery.of(context).size.width,
-                      height: 240,
+                      height: 230,
                       child: Swiper(
                         itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            decoration: BoxDecoration(boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                offset: Offset(0.0, -30.0),
-                                blurRadius: 20,
-                              )
-                            ]),
-                            child: ClipRRect(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(4.0)),
-                                child: Column(
-                                  children: <Widget>[
-                                    Container(
-                                        child: Image.network(
-                                      playlist[index].coverImgUrl,
-                                      fit: BoxFit.fill,
-                                    )),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 2.0, horizontal: 10.0),
-                                      height: 40.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.vertical(
-                                              bottom: Radius.circular(4.0))),
-                                      child: Text(
-                                        playlist[index].name,
-                                        style: TextStyle(fontSize: 13.0),
-                                      ),
-                                    )
-                                  ],
-                                )),
+                          return InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return Playlists(
+                                    playlist[index].id, 'playlist');
+                              }));
+                            },
+                            child: Card(
+                              child: ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4.0)),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                          child: Image.network(
+                                        playlist[index].coverImgUrl,
+                                        fit: BoxFit.fill,
+                                      )),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 2.0, horizontal: 10.0),
+                                        height: 40.0,
+                                        child: Text(
+                                          playlist[index].name,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 13.0),
+                                        ),
+                                      )
+                                    ],
+                                  )),
+                            ),
                           );
                         },
                         itemCount: playlist.length,
@@ -132,6 +132,9 @@ class _PlaylistSquareState extends State<PlaylistSquare>
                         layout: SwiperLayout.STACK,
                       ),
                     ),
+                  ),
+                  SizedBox(
+                    height: 30.0,
                   ),
                   Flexible(
                     flex: 7,
@@ -186,7 +189,7 @@ class _PlaylistSquareState extends State<PlaylistSquare>
                               ),
                               Positioned(
                                 top: 2.0,
-                                right: 16.0,
+                                right: 20.0,
                                 child: Align(
                                   alignment: Alignment.topRight,
                                   child: Row(
@@ -220,7 +223,7 @@ class _PlaylistSquareState extends State<PlaylistSquare>
                 ],
               ),
             ),
-      Container(),
+      PlaylistOfficial(),
       Container(),
       Container(),
       Container(),
