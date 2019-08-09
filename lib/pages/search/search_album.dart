@@ -52,7 +52,6 @@ class SearchAlbumTabState extends State<SearchAlbumTab>
     List<Widget> _widgetList = [];
     albums.asMap().forEach((int index, album) {
       _widgetList.add(AlbumItem(album, context, onTap: () {
-        print(0);
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return AlbumCover(album.id);

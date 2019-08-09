@@ -57,48 +57,51 @@ class _ArtistPageState extends State<ArtistPage>
   // 获取歌手热门单曲与详细信息
   void getArtistInfos() async {
     var result = await NeteaseRepository.getAritst(widget.id);
-    setState(() {
-      result['hotSongs'].asMap().forEach((int index, item) {
-        _hotSongs.add(Music(
-            name: item['name'],
-            id: item['id'],
-            aritstName: item['ar'][0]['name'],
-            aritstId: item['ar'][0]['id'],
-            albumName: item['al']['name'],
-            albumId: item['al']['id'],
-            album: Album(
-                id: item['al']['id'],
-                name: item['al']['name'],
-                coverImageUrl: item['al']['picUrl']),
-            artists: [
-              Artist(
-                id: item['ar'][0]['id'],
-                name: item['ar'][0]['name'],
-                imageUrl: '',
-              )
-            ]));
+    if (this.mounted) {
+      setState(() {
+        print(result['artist']['followed']);
+        result['hotSongs'].asMap().forEach((int index, item) {
+          _hotSongs.add(Music(
+              name: item['name'],
+              id: item['id'],
+              aritstName: item['ar'][0]['name'],
+              aritstId: item['ar'][0]['id'],
+              albumName: item['al']['name'],
+              albumId: item['al']['id'],
+              album: Album(
+                  id: item['al']['id'],
+                  name: item['al']['name'],
+                  coverImageUrl: item['al']['picUrl']),
+              artists: [
+                Artist(
+                  id: item['ar'][0]['id'],
+                  name: item['ar'][0]['name'],
+                  imageUrl: '',
+                )
+              ]));
+        });
+        _artist = Artist(
+            id: result['artist']['id'],
+            name: result['artist']['name'],
+            imageUrl: result['artist']['picUrl'],
+            alias: result['artist']['alias'],
+            albumSize: result['artist']['albumSize'],
+            mvSize: result['artist']['mvSize'],
+            briefDesc: result['artist']['briefDesc'],
+            followed: result['artist']['followed']);
       });
-      _artist = Artist(
-          id: result['artist']['id'],
-          name: result['artist']['name'],
-          imageUrl: result['artist']['picUrl'],
-          alias: result['artist']['alias'],
-          albumSize: result['artist']['albumSize'],
-          mvSize: result['artist']['mvSize'],
-          briefDesc: result['artist']['briefDesc'],
-          followed: result['artist']['followed']);
-    });
-    _widgetContent = [
-      SongsWrapper(hotSongs: _hotSongs),
-      AlbumWrapper(
-        id: _artist.id,
-        size: _artist.albumSize,
-      ),
-      VideoWrapper(),
-      BriefDesc(
-        artist: _artist,
-      )
-    ];
+      _widgetContent = [
+        SongsWrapper(hotSongs: _hotSongs),
+        AlbumWrapper(
+          id: _artist.id,
+          size: _artist.albumSize,
+        ),
+        VideoWrapper(),
+        BriefDesc(
+          artist: _artist,
+        )
+      ];
+    }
   }
 
   // 获取专辑列表
@@ -588,7 +591,7 @@ class _ArtistsHeader extends StatelessWidget implements PreferredSizeWidget {
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       child: Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Colors.white,
         elevation: 0,
         shadowColor: Colors.transparent,
         child: SizedBox.fromSize(
@@ -737,10 +740,16 @@ class SongsWrapper extends StatelessWidget {
       delegate: SliverChildBuilderDelegate((context, index) {
         return Column(
           children: <Widget>[
-            _ArtistListHeader(len: hotSongs.length),
-            MusicTitle(
-              hotSongs,
-              // pageContext: widget.pageContext,
+            Container(
+              decoration: BoxDecoration(color: Colors.white),
+              child: _ArtistListHeader(len: hotSongs.length),
+            ),
+            Container(
+              decoration: BoxDecoration(color: Colors.white),
+              child: MusicTitle(
+                hotSongs,
+                // pageContext: widget.pageContext,
+              ),
             )
           ],
         );
@@ -782,6 +791,7 @@ class _AlbumWrapperState extends State<AlbumWrapper>
             ? SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   return Container(
+                    decoration: BoxDecoration(color: Colors.white),
                     alignment: Alignment.center,
                     padding: EdgeInsets.only(top: 20.0),
                     child: Column(
@@ -802,6 +812,7 @@ class _AlbumWrapperState extends State<AlbumWrapper>
             : SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   return Container(
+                    decoration: BoxDecoration(color: Colors.white),
                     alignment: Alignment.center,
                     padding: EdgeInsets.only(top: 20.0),
                     child: AlbumTitle(widget.hotAlbums),

@@ -273,9 +273,9 @@ class _PlayListState extends State<_PlayList> {
                       setState(() {
                         _selection = !_selection;
                       });
-                      _scrollController.animateTo(231.0,
-                          duration: Duration(milliseconds: 100),
-                          curve: Curves.ease);
+                      // _scrollController.animateTo(231.0,
+                      //     duration: Duration(milliseconds: 100),
+                      //     curve: Curves.ease);
                     },
                     pageContext: widget.pageContext,
                   ),

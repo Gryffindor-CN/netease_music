@@ -47,6 +47,7 @@ class MusicTitle extends StatelessWidget {
         item,
         sort: true,
         sortIndex: index + 1,
+        showBottomLine: false,
         tailsList: item.mvId == 0
             ? [
                 {

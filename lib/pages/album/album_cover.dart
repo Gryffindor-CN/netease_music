@@ -233,9 +233,9 @@ class __AlbumCoverState extends State<_AlbumCover> {
                       setState(() {
                         _selection = !_selection;
                       });
-                      _scrollController.animateTo(231.0,
-                          duration: Duration(milliseconds: 100),
-                          curve: Curves.ease);
+                      // _scrollController.animateTo(231.0,
+                      //     duration: Duration(milliseconds: 100),
+                      //     curve: Curves.ease);
                     },
                   ),
                 ),
@@ -247,7 +247,11 @@ class __AlbumCoverState extends State<_AlbumCover> {
                                 ? Center(
                                     child: Container(
                                       padding: EdgeInsets.only(top: 20.0),
-                                      child: CircularProgressIndicator(),
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Theme.of(context).primaryColor),
+                                      ),
                                     ),
                                   )
                                 : Container(

@@ -7,6 +7,7 @@ import '../../repository/netease.dart';
 import '../../model/music.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import '../../redux/app.dart';
 
 class MeHomePage extends StatefulWidget {
   @override
@@ -52,22 +53,10 @@ class MeHomeContainer extends StatefulWidget {
 class MeHomeContainerState extends State<MeHomeContainer> {
   List<PlayList> _createdLists = [];
   List<PlayList> _likedLists = [];
-  Store<int> redux_store;
-
-  int appReducer(int state, dynamic action) {
-    if (action == Actions.Increase) {
-      return state + 1;
-    }
-    return state;
-  }
 
   @override
   void initState() {
     _getUserPlaylist(1788319348);
-    redux_store = Store<int>(
-      appReducer,
-      initialState: 0,
-    );
     super.initState();
   }
 
@@ -123,9 +112,7 @@ class MeHomeContainerState extends State<MeHomeContainer> {
         child: Column(
           children: <Widget>[
             TabSection(),
-            CollectionSection(
-              store: redux_store,
-            ),
+            CollectionSection(),
             Container(
               width: MediaQuery.of(context).size.width,
               height: 6.0,
@@ -305,44 +292,42 @@ class TabSectionItem extends StatelessWidget {
 enum Actions { Increase }
 
 class CollectionSection extends StatelessWidget {
-  CollectionSection({@required this.store});
-  final Store<int> store;
-
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<int>(
-      store: store,
-      child: Container(
-        decoration: BoxDecoration(color: Colors.white),
-        width: MediaQuery.of(context).size.width,
-        height: 220.0,
-        child: StoreConnector(
-          builder: (BuildContext context, int count) {
-            return Column(
-              children: <Widget>[
-                CounterSectionItem(
-                  title: '$count',
-                  iconData: Icons.music_note,
-                ),
-                CounterSectionItem(
-                  title: '最近播放',
-                  iconData: Icons.play_circle_outline,
-                ),
-                CounterSectionItem(
-                  title: '我的电台',
-                  iconData: Icons.radio,
-                ),
-                CounterSectionItem(
-                  title: '我的收藏',
-                  iconData: Icons.collections,
-                ),
-              ],
-            );
-          },
-          converter: (Store<int> store) {
-            return store.state;
-          },
-        ),
+    return Container(
+      decoration: BoxDecoration(color: Colors.white),
+      width: MediaQuery.of(context).size.width,
+      height: 220.0,
+      child: StoreConnector(
+        builder: (BuildContext context, NeteaseState state) {
+          return Column(
+            children: <Widget>[
+              CounterSectionItem(
+                title: '本地音乐',
+                count: int.parse('${state.collectionState.myLocal}'),
+                iconData: Icons.music_note,
+              ),
+              CounterSectionItem(
+                title: '最近播放',
+                count: int.parse('${state.collectionState.recentPlay}'),
+                iconData: Icons.play_circle_outline,
+              ),
+              CounterSectionItem(
+                title: '我的电台',
+                count: int.parse('${state.collectionState.myRadio}'),
+                iconData: Icons.radio,
+              ),
+              CounterSectionItem(
+                title: '我的收藏',
+                count: int.parse('${state.collectionState.myCollection}'),
+                iconData: Icons.collections,
+              ),
+            ],
+          );
+        },
+        converter: (Store<NeteaseState> store) {
+          return store.state;
+        },
       ),
     );
   }
@@ -351,11 +336,13 @@ class CollectionSection extends StatelessWidget {
 class CounterSectionItem extends StatelessWidget {
   CounterSectionItem({
     Key key,
+    this.count,
     this.title,
     this.iconData,
     this.onTap,
   }) : super(key: key);
 
+  final int count;
   final String title;
   final IconData iconData;
   final VoidCallback onTap;
@@ -390,7 +377,7 @@ class CounterSectionItem extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         Text(
-                          '0',
+                          '$count',
                           style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.display1.color),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import './selection_checkbox.dart';
 import '../../model/music.dart';
-import './music_item.dart';
+// import './music_item.dart';
+import '../../components/music/music_item.dart';
 
 class SongList extends StatefulWidget {
   final bool selectStatus;
@@ -34,6 +35,8 @@ class SongListState extends State<SongList> {
           Expanded(
             child: MusicItem(
               widget.item,
+              sortIndex: 1,
+              showBottomLine: false,
               onTap: null,
             ),
           )

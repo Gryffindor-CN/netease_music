@@ -17,6 +17,9 @@ import '../../router/Routes.dart';
 import '../../components/musicplayer/player.dart';
 import '../artist/artist_page.dart';
 import '../album/album_cover.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
+import '../../redux/app.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
@@ -128,7 +131,8 @@ class SearchSongTabState extends State<SearchSongTab>
     });
   }
 
-  List<MusicItem> _buildList(BuildContext context, StateContainerState store) {
+  List<MusicItem> _buildList(
+      BuildContext context, StateContainerState store, VoidCallback cb) {
     List<MusicItem> _widgetlist = [];
     if (songs.length > 0) {
       songs.asMap().forEach((int index, item) {
@@ -176,7 +180,9 @@ class SearchSongTabState extends State<SearchSongTab>
                                     'leadingIcon':
                                         AntDesign.getIconData('plussquareo'),
                                     'title': '收藏到歌单',
-                                    'callback': () {}
+                                    'callback': () {
+                                      cb();
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -200,7 +206,7 @@ class SearchSongTabState extends State<SearchSongTab>
                                         {
                                           'shareLogo':
                                               'assets/icons/friend_circle_32.png',
-                                          'shareText': '微信朋友圈',
+                                          'shareText': '微��朋友圈',
                                           'shareEvent': () {
                                             var model =
                                                 fluwx.WeChatShareMusicModel(
@@ -351,7 +357,9 @@ class SearchSongTabState extends State<SearchSongTab>
                                     'leadingIcon':
                                         AntDesign.getIconData('plussquareo'),
                                     'title': '收藏到歌单',
-                                    'callback': () {}
+                                    'callback': () {
+                                      cb();
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -530,7 +538,7 @@ class SearchSongTabState extends State<SearchSongTab>
     );
   }
 
-  Widget buildSongsWidget(StateContainerState store) {
+  Widget buildSongsWidget(StateContainerState store, VoidCallback cb) {
     return (_isLoading == true && offset == 0)
         ? Center(
             child: Padding(
@@ -659,7 +667,7 @@ class SearchSongTabState extends State<SearchSongTab>
                           children: <Widget>[
                             MusicItemList(
                               keyword: widget.keyword,
-                              list: _buildList(context, store),
+                              list: _buildList(context, store, cb),
                             ),
                             Container(
                               padding: EdgeInsets.all(10.0),
@@ -779,7 +787,7 @@ class SearchSongTabState extends State<SearchSongTab>
                         ),
                         content: MusicItemList(
                           keyword: widget.keyword,
-                          list: _buildList(context, store),
+                          list: _buildList(context, store, cb),
                           tailWidget: _buildTail(),
                         ),
                       );
@@ -810,7 +818,16 @@ class SearchSongTabState extends State<SearchSongTab>
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
     return !_selection
-        ? buildSongsWidget(store)
+        ? StoreConnector<NeteaseState, VoidCallback>(
+            builder: (BuildContext context, cb) {
+              return buildSongsWidget(store, cb);
+            },
+            converter: (Store<NeteaseState> appstore) {
+              return () {
+                appstore.dispatch(Actions.AddToCollection);
+              };
+            },
+          )
         : SelectAll(
             songs: songs,
             handleSongsDel: (val) => _onSongsDelete(val),

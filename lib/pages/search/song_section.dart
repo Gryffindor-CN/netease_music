@@ -13,6 +13,9 @@ import '../../repository/netease.dart';
 import '../../router/Routes.dart';
 import '../artist/artist_page.dart';
 import '../album/album_cover.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:redux/redux.dart';
+import '../../redux/app.dart';
 
 class SongSection extends StatelessWidget {
   final String keyword;
@@ -31,7 +34,7 @@ class SongSection extends StatelessWidget {
     return result;
   }
 
-  List<MusicItem> _buildList(BuildContext context) {
+  List<MusicItem> _buildList(BuildContext context, VoidCallback cb) {
     List<MusicItem> _widgetlist = [];
     songList.asMap().forEach((int index, Music music) {
       _widgetlist.add(MusicItem(music,
@@ -76,7 +79,9 @@ class SongSection extends StatelessWidget {
                                     'leadingIcon':
                                         AntDesign.getIconData('plussquareo'),
                                     'title': '收藏到歌单',
-                                    'callback': () {}
+                                    'callback': () {
+                                      cb();
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -250,7 +255,9 @@ class SongSection extends StatelessWidget {
                                     'leadingIcon':
                                         AntDesign.getIconData('plussquareo'),
                                     'title': '收藏到歌单',
-                                    'callback': () {}
+                                    'callback': () {
+                                      cb();
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -479,11 +486,20 @@ class SongSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: MusicItemList(
-          keyword: keyword,
-          list: _buildList(context),
-          titleWidget: _buildTitle()),
+    return StoreConnector<NeteaseState, VoidCallback>(
+      builder: (BuildContext context, cb) {
+        return SingleChildScrollView(
+          child: MusicItemList(
+              keyword: keyword,
+              list: _buildList(context, cb),
+              titleWidget: _buildTitle()),
+        );
+      },
+      converter: (Store<NeteaseState> appstore) {
+        return () {
+          appstore.dispatch(Actions.AddToCollection);
+        };
+      },
     );
   }
 }

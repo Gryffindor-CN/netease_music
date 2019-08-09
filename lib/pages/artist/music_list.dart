@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../model/music.dart';
-import './music_item.dart';
+import '../../components/music/music_item.dart';
 import '../../repository/netease.dart';
 import '../../components/song_detail_dialog.dart';
 import '../../components/bottom_share.dart';
@@ -45,7 +45,9 @@ class MusicTitle extends StatelessWidget {
     songList.asMap().forEach((int index, Music item) {
       widgetList.add(MusicItem(
         item,
-        itemIndex: index + 1,
+        sort: true,
+        sortIndex: index + 1,
+        showBottomLine: false,
         tailsList: item.mvId == 0
             ? [
                 {

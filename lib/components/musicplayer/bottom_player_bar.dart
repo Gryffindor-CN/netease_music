@@ -16,7 +16,6 @@ class BottomPlayerBar extends StatefulWidget {
   final VoidCallback setMode;
   final ValueChanged<BuildContext> clear;
   final ValueChanged<String> toggle;
-  final ValueChanged<String> finish;
   final ValueChanged<double> handleSlider;
   final ValueChanged<double> seek;
   final ValueChanged<Music> playCertain;
@@ -25,7 +24,6 @@ class BottomPlayerBar extends StatefulWidget {
   BottomPlayerBar(
       {this.play,
       this.pause,
-      this.finish,
       this.complete,
       this.toggle,
       this.position,

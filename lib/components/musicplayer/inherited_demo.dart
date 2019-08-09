@@ -654,9 +654,6 @@ class StateContainerState extends State<StateContainer> {
           .toList();
 
       playingList.asMap().forEach((int index, Music music) async {
-        if (music.album == null || music.artists == null) {
-          print(music.name);
-        }
         var _url = await _getSongUrl(music.id);
         var _comment = await _getSongComment(music.id);
 
