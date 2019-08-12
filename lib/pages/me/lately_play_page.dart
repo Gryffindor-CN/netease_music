@@ -35,24 +35,24 @@ class MeHomePageState extends State<LatelyPlayPage> {
       "songList":[
         {
           "id": 347230,
-          "name":"龙的传人",
-          "aritstName":"成龙",
-          "albumName":"中国红",
+          "name":"海阔天空",
+          "aritstName":"Beyond",
+          "albumName":"海阔天空",
           "commentCount": 500,
-          "picUrl":"https://p1.music.126.net/klOSGBRQhevtM6c9RXrM1A==/18808245906527670.jpg",
+          "picUrl":"https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
           "songUrl":"http://m7.music.126.net/20190809122221/1353d63392de65d5693c8f4ebf92bac6/ymusic/b1c4/b5de/74d0/9158ae4873e10b743790320db9ef9b29.mp3",
           "al":{
-            "picUrl":"123",
-            "name":"龙歌",
+            "picUrl":"https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
+            "name":"海阔天空",
             "albumCoverImg": "https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
             "publishTime": 746812800000,
             "size": 10,
           },
           "ar":[
-            {"name":"成龙"}
+            {"name":"Beyond"}
           ],
 
-        }
+        },
       ]
     };
     _scrollController = ScrollController()..addListener(_scrollListener);
@@ -142,6 +142,17 @@ class MeHomePageState extends State<LatelyPlayPage> {
               ),
             ],
           ),
+          actions: (store.player != null && store.player.playingList.length > 0)
+              ? <Widget>[
+            IconButton(
+              onPressed: () {
+//              Routes.router
+//                  .navigateTo(widget.pageContext, '/albumcoverpage');
+              },
+              icon: Icon(Icons.equalizer),
+            )
+          ]
+              : [],
           // title: Text('Tabs Demo'),
         ),
         body: TabBarView(
@@ -462,9 +473,4 @@ class MeHomePageState extends State<LatelyPlayPage> {
     return _widgetlist;
   }
 
-  // 获取歌曲播放url
-  _getSongUrl(int id) async {
-    var result = await NeteaseRepository.getSongUrl(id);
-    return result;
-  }
 }

@@ -89,9 +89,9 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
     return SmartRefresher(
       enablePullDown: true,
       header: ClassicHeader(
-        decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            border: Border.all(color: Theme.of(context).primaryColor)),
+//        decoration: BoxDecoration(
+//            color: Theme.of(context).primaryColor,
+//            border: Border.all(color: Theme.of(context).primaryColor)),
         refreshStyle: RefreshStyle.Follow,
         completeText: '',
         releaseText: '',
