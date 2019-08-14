@@ -20,6 +20,7 @@ import 'package:sticky_headers/sticky_headers.dart';
 
 
 class LocalPage extends StatefulWidget {
+
   @override
   LocalPageState createState() => LocalPageState();
 }
@@ -54,9 +55,11 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
           "aritstName":"Beyond",
           "albumName":"海阔天空",
           "commentCount": 500,
+          "mvid":376199,
           "picUrl":"https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
           "songUrl":"http://m7.music.126.net/20190809122221/1353d63392de65d5693c8f4ebf92bac6/ymusic/b1c4/b5de/74d0/9158ae4873e10b743790320db9ef9b29.mp3",
           "al":{
+            "id":34209,
             "picUrl":"https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
             "name":"海阔天空",
             "albumCoverImg": "https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
@@ -64,9 +67,82 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
             "size": 10,
           },
           "ar":[
-            {"name":"Beyond"}
+            {"name":"Beyond","id":11127}
           ],
+          "detail":{
+            "name":"海阔天空",
+            "id":347230,
+            "pst":0,
+            "t":0,
+            "ar":[
+              {
+                "id":11127,
+                "name":"Beyond",
+                "tns":[
 
+                ],
+                "alias":[
+
+                ]
+              }
+            ],
+            "alia":[
+
+            ],
+            "pop":100,
+            "st":0,
+            "rt":"600902000004240302",
+            "fee":8,
+            "v":31,
+            "crbt":null,
+            "cf":"",
+            "al":{
+              "id":34209,
+              "name":"海阔天空",
+              "picUrl":"https://p2.music.126.net/QHw-RuMwfQkmgtiyRpGs0Q==/102254581395219.jpg",
+              "tns":[
+
+              ],
+              "pic":102254581395219
+            },
+            "dt":326348,
+            "h":{
+              "br":320000,
+              "fid":0,
+              "size":13070578,
+              "vd":0.109906
+            },
+            "m":{
+              "br":160000,
+              "fid":0,
+              "size":6549371,
+              "vd":0.272218
+            },
+            "l":{
+              "br":96000,
+              "fid":0,
+              "size":3940469,
+              "vd":0.228837
+            },
+            "a":null,
+            "cd":"1",
+            "no":1,
+            "rtUrl":null,
+            "ftype":0,
+            "rtUrls":[
+
+            ],
+            "djId":0,
+            "copyright":1,
+            "s_id":0,
+            "mark":0,
+            "mst":9,
+            "cp":7002,
+            "mv":376199,
+            "rtype":0,
+            "rurl":null,
+            "publishTime":746812800000
+          },
         },
       ]
     };
@@ -158,8 +234,8 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
             ? <Widget>[
           IconButton(
             onPressed: () {
-//              Routes.router
-//                  .navigateTo(widget.pageContext, '/albumcoverpage');
+              Routes.router
+                  .navigateTo(context, '/albumcoverpage');
             },
             icon: Icon(Icons.equalizer),
           )
@@ -256,7 +332,7 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
       physics: BouncingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
         return MusicItemList(
-          keyword: "123asd",
+          keyword: "test",
           titleWidget: Column(
             children: <Widget>[
               TextField(
@@ -369,22 +445,26 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
 
     songList.forEach((song){
       Music item = Music(
-        name: song['name'],
-        id: song['id'],
-        aritstName: song['aritstName'],
-        aritstId: 11127,
-        albumName: song['al']['name'],
-        albumId: 34209,
-        commentCount: song['commentCount'],
-        albumCoverImg: song['al']['albumCoverImg'],
-        album: Album(
-          id: 34209,
-          name: song['al']['name'],
-          coverImageUrl: song['al']['albumCoverImg'],
-          publishTime: 746812800000,
-          size: 10,
-        ),
-      );
+          name: song['name'],
+          id: song['id'],
+          aritstName: song['ar'][0]['name'],
+          aritstId: song['ar'][0]['id'],
+          albumName: song['al']['name'],
+          albumId: song['al']['id'],
+          albumCoverImg: song['al']['albumCoverImg'],
+          detail: song['detail'],
+          commentCount: song['commentCount'],
+          mvId: song['mvid'],
+          album: Album(
+              id: song['al']['id'],
+              name: song['al']['name'],
+              coverImageUrl: song['al']['albumCoverImg']),
+          artists: [
+            Artist(
+                id: song['ar'][0]['id'],
+                name: song['ar'][0]['name'],
+                imageUrl: '')
+          ]);
       MusicItem musicItem = MusicItem(
         item,
         underline: false,

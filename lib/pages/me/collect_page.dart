@@ -4,6 +4,7 @@ import 'package:netease_music/components/musicplayer/inherited_demo.dart';
 import 'package:netease_music/model/music.dart';
 import 'package:netease_music/pages/album/album_cover.dart';
 import 'package:netease_music/repository/netease.dart';
+import 'package:netease_music/router/Routes.dart';
 
 import 'collect_artist_page.dart';
 import 'collect_video_page.dart';
@@ -180,8 +181,8 @@ class CollectPageState extends State<CollectPage> with SingleTickerProviderState
             ? <Widget>[
           IconButton(
             onPressed: () {
-//              Routes.router
-//                  .navigateTo(widget.pageContext, '/albumcoverpage');
+              Routes.router
+                  .navigateTo(context, '/albumcoverpage');
             },
             icon: Icon(Icons.equalizer),
           )
