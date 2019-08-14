@@ -1,6 +1,7 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/another_page.dart';
+import 'package:netease_music/pages/me/collect_page.dart';
 import 'package:netease_music/pages/me/lately_play_page.dart';
 import 'package:netease_music/pages/me/local_page.dart';
 import 'package:netease_music/pages/my_music.dart';
@@ -53,3 +54,7 @@ var localHandler = new Handler(
       return new LocalPage();
     });
 
+var collectHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      return new CollectPage();
+    });

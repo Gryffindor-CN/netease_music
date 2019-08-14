@@ -847,6 +847,19 @@ class NeteaseRepository {
     } catch (e) {}
   }
 
+  // 获取收藏歌手列表
+  static getArtistSublist() async {
+    var url = '${API_HOST}artist/sublist';
+    try {
+//      Response response = await Dio().get(url);
+//      var result = json.decode(response.toString());
+      //接口需要用postman调一次后才能用,暂用假数据
+      String response = '{"data":[{"info":"","id":2116,"name":"陈奕迅","trans":null,"alias":["Eason Chan"],"albumSize":104,"mvSize":160,"picId":19165587183900212,"picUrl":"https://p2.music.126.net/_d1scu7z_1dmd0Zgv9mTLA==/19165587183900212.jpg","img1v1Url":"https://p1.music.126.net/_d1scu7z_1dmd0Zgv9mTLA==/19165587183900212.jpg"}],"hasMore":false,"count":1,"code":200}';
+      var result = json.decode(response);
+      return result;
+    } catch (e) {}
+  }
+
   // 获取所有视频
   static getVideos(String keyword, {int offset = 0}) async {
     var url =
@@ -854,6 +867,20 @@ class NeteaseRepository {
     try {
       Response response = await Dio().get(url);
       var result = json.decode(response.toString())['result'];
+
+      return result;
+    } catch (e) {}
+  }
+
+  // 获取已收藏的视频
+  static getVideoSublist() async {
+    var url ='${API_HOST}mv/sublist';
+    try {
+//      Response response = await Dio().get(url);
+//      var result = json.decode(response.toString());
+//      接口需要用postman调一次后才能用,暂用假数据
+      String response = '{"code":200,"data":[{"type":1,"title":"汪苏泷为TFboys所创作的歌曲，可惜遗憾被退回，自己却唱火了！","durationms":184800,"creator":[{"userId":375931615,"userName":"流行音悦台"}],"playTime":2498168,"coverUrl":"http://p1.music.126.net/x__mmCZi8zh76Qs6d5DVkw==/109951163573581233.jpg","vid":"B8887F3E7341057ADAEFE22E01851DD4","aliaName":null,"transName":null,"alg":null,"markTypes":[]}],"hasMore":false,"count":1}';
+      var result = json.decode(response);
 
       return result;
     } catch (e) {}
@@ -909,7 +936,7 @@ class NeteaseRepository {
 
   // 获取专辑详情
   static getAlbumDetail(int id) async {
-    var url = '${API_HOST}album/detail/dynamic?id=$id';
+    var url = '${API_HOST}album?id=$id';
     try {
       Response response = await Dio().get(url);
 
@@ -984,5 +1011,21 @@ class NeteaseRepository {
       var result = json.decode(response.toString())['playlist'];
       return result;
     } catch (e) {}
+  }
+
+  // 获取收藏专辑列表
+  static getAlbumSubList() async {
+    var url = '${API_HOST}album/sublist';
+    try {
+//      Response response = await Dio().get(url);
+//      var result = json.decode(response.toString());
+
+      //启动后第一次调接口有问题.用假数据
+      String response = '{"data":[{"subTime":1563868574135,"msg":[],"artists":[{"img1v1Id":18686200114669624,"topicPerson":0,"alias":[],"picId":0,"albumSize":0,"briefDesc":"","musicSize":0,"img1v1Url":"https://p2.music.126.net/VnZiScyynLG7atLIZ2YPkw==/18686200114669622.jpg","trans":"","picUrl":"https://p2.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg","followed":false,"name":"邓丽君","id":7570,"img1v1Id_str":"18686200114669622"}],"alias":["1977日本新桥演唱会"],"picId":27487790700591,"picUrl":"https://p2.music.126.net/Um00TCD9tGD0Kqu7Zi7x2Q==/27487790700591.jpg","name":"ファースト コンサート","id":489720,"size":14,"transNames":[]},{"subTime":1497786066409,"msg":[],"artists":[{"img1v1Id":18686200114669624,"topicPerson":0,"alias":[],"picId":0,"albumSize":0,"briefDesc":"","musicSize":0,"img1v1Url":"https://p2.music.126.net/VnZiScyynLG7atLIZ2YPkw==/18686200114669622.jpg","trans":"","picUrl":"https://p2.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg","followed":false,"name":"群星","id":122455,"img1v1Id_str":"18686200114669622"}],"alias":[],"picId":59373627916983,"picUrl":"https://p2.music.126.net/TeoPnAtNwpoAIEZKt-BJ6w==/59373627916983.jpg","name":"宝丽金劲爆跳舞街","id":512112,"size":36,"transNames":[]},{"subTime":1496907027901,"msg":[],"artists":[{"img1v1Id":18686200114669624,"topicPerson":0,"alias":[],"picId":0,"albumSize":0,"briefDesc":"","musicSize":0,"img1v1Url":"https://p2.music.126.net/VnZiScyynLG7atLIZ2YPkw==/18686200114669622.jpg","trans":"","picUrl":"https://p2.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg","followed":false,"name":"陈奕迅","id":2116,"img1v1Id_str":"18686200114669622"}],"alias":["电影《摆渡人》爱情版主题曲"],"picId":18610333812708196,"picUrl":"https://p2.music.126.net/71YQw1K88LS06iMjLRY5CA==/18610333812708195.jpg","name":"让我留在你身边","id":34961173,"size":1,"transNames":[]}],"count":3,"hasMore":false,"cover":"https://p2.music.126.net/71YQw1K88LS06iMjLRY5CA==/18610333812708195.jpg","paidCount":1,"code":200}';
+      var result = json.decode(response);
+      return result;
+    } catch (e) {
+      print(e);
+    }
   }
 }

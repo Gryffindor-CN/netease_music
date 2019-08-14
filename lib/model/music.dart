@@ -110,13 +110,14 @@ class PlayList {
 }
 
 class Album {
-  Album({this.id, this.name, this.coverImageUrl, this.publishTime, this.size});
+  Album({this.id, this.name, this.coverImageUrl, this.publishTime, this.size, this.artist});
 
   final int id;
   final String name;
   final String coverImageUrl;
   final int publishTime;
   final int size;
+  final String artist;
 
   static Album fromMap(Map map) {
     return Album(

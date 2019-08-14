@@ -89,7 +89,8 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
         name: "海阔天空",
         coverImageUrl: "https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg",
         publishTime: 746812800000,
-        size: 10
+        size: 10,
+        artist: "Beyond"
     ));
 
     _scrollController = ScrollController()..addListener(_scrollListener);
@@ -664,13 +665,13 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
     return SingleChildScrollView(
       child: Container(
         child: Column(
-          children: _guildAlbumContent(),
+          children: _buildAlbumContent(),
         ),
       ),
     );
   }
 
-  _guildAlbumContent(){
+  _buildAlbumContent(){
     List<Widget> _widgetList = [];
     _widgetList.add(TextField(
       textInputAction: TextInputAction.send,
@@ -701,7 +702,7 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
             .push(MaterialPageRoute(builder: (BuildContext context) {
           return AlbumCover(album.id);
         }));
-      })
+      },showPublishTime: false,showArtist: true,)
       );
     });
     return _widgetList;

@@ -23,6 +23,7 @@ class Routes {
   static String latelyPlayPage = '/mymusic/latelyplay';
 
   static String localPage = '/mymusic/local';
+  static String collectPage = '/mymusic/collect';
 
   /// 过渡动画在路由定义[router.define]时给定，没有特殊要求的情况下，统一使用 [TransitionType.native]
   static void configureRoutes(Router router) {
@@ -47,6 +48,9 @@ class Routes {
         transitionType: TransitionType.native);
     router.define(localPage,
         handler: localHandler,
+        transitionType: TransitionType.native);
+    router.define(collectPage,
+        handler: collectHandler,
         transitionType: TransitionType.native);
   }
 }

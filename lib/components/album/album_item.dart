@@ -6,7 +6,9 @@ class AlbumItem extends StatelessWidget {
   final Album item;
   final BuildContext pageContext;
   final GestureTapCallback onTap;
-  AlbumItem(this.item, this.pageContext, {this.onTap});
+  final bool showPublishTime;
+  final bool showArtist;
+  AlbumItem(this.item, this.pageContext, {this.onTap,this.showPublishTime = true, this.showArtist = false});
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +50,10 @@ class AlbumItem extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              Text(DateFormat("y.M.d").format(
+                              this.showPublishTime == true ? Text(DateFormat("y.M.d").format(
                                   DateTime.fromMillisecondsSinceEpoch(
-                                      item.publishTime))),
+                                      item.publishTime))):Text(""),
+                              this.showArtist == true ? Text(item.artist):Text(""),
                               SizedBox(
                                 width: 6.0,
                               ),

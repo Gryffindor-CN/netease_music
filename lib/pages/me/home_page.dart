@@ -316,6 +316,9 @@ class CollectionSection extends StatelessWidget {
           CounterSectionItem(
             title: '我的收藏',
             iconData: Icons.music_note,
+            onTap: (){
+              Routes.router.navigateTo(context, '/mymusic/collect');
+            },
           ),
         ],
       ),
@@ -323,17 +326,21 @@ class CollectionSection extends StatelessWidget {
   }
 }
 
+
+
 class CounterSectionItem extends StatelessWidget {
   CounterSectionItem({
     Key key,
     this.title,
     this.iconData,
     this.onTap,
+    this.count = 0,
   }) : super(key: key);
 
   final String title;
   final IconData iconData;
   final VoidCallback onTap;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +372,7 @@ class CounterSectionItem extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         Text(
-                          '0',
+                          '${this.count}',
                           style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.display1.color),
