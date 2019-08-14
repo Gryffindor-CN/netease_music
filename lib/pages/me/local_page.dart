@@ -216,9 +216,15 @@ class LocalPageState extends State<LocalPage> with SingleTickerProviderStateMixi
                 child: new TabBar(
                   indicator: const BoxDecoration(),
                   tabs: <Widget>[
-                    Text("单曲"),
-                    Text("节目"),
-                    Text("MV"),
+                    Tab(
+                      child: Text("单曲"),
+                    ),
+                    Tab(
+                      child: Text("节目"),
+                    ),
+                    Tab(
+                      child: Text("MV"),
+                    ),
                   ],
                   controller: _tabController,
                 ),
