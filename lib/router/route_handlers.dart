@@ -1,5 +1,6 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:netease_music/components/comment/comment_page.dart';
 import 'package:netease_music/pages/another_page.dart';
 import 'package:netease_music/pages/me/collect_page.dart';
 import 'package:netease_music/pages/me/lately_play_page.dart';
