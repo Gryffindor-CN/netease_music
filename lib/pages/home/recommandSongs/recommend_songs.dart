@@ -436,7 +436,7 @@ class _RecommendDetailHeader extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Text(
-                  _day < 10 ? '0$_day' : _day,
+                  _day < 10 ? '0$_day' : '$_day',
                   style: TextStyle(fontSize: 32.0),
                 ),
                 Padding(
