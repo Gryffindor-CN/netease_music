@@ -26,6 +26,11 @@ class Routes {
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
+  static String latelyPlayPage = '/mymusic/latelyplay';
+
+  static String localPage = '/mymusic/local';
+  static String collectPage = '/mymusic/collect';
+
   /// 过渡动画在路由定义[router.define]时给定，没有特殊要求的情况下，统一使用 [TransitionType.native]
   static void configureRoutes(Router router) {
     router.notFoundHandler = new Handler(
@@ -44,6 +49,7 @@ class Routes {
     router.define(albumconverPage,
         handler: playingPageHandler,
         transitionType: TransitionType.inFromRight);
+
     router.define(playlistSquarePage,
         handler: playlistSquarePageHandler,
         transitionType: TransitionType.inFromRight);
@@ -53,5 +59,15 @@ class Routes {
     router.define(recommandSongsPage,
         handler: recommandSongsPageHandler,
         transitionType: TransitionType.inFromRight);
+
+    router.define(latelyPlayPage,
+        handler: latelyplayHandler,
+        transitionType: TransitionType.native);
+    router.define(localPage,
+        handler: localHandler,
+        transitionType: TransitionType.native);
+    router.define(collectPage,
+        handler: collectHandler,
+        transitionType: TransitionType.native);
   }
 }

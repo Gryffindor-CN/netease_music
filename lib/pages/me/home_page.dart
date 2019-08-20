@@ -306,11 +306,17 @@ class CollectionSection extends StatelessWidget {
                 title: '本地音乐',
                 count: int.parse('${state.collectionState.myLocal}'),
                 iconData: Icons.music_note,
+                onTap: () {
+                  Routes.router.navigateTo(context, '/mymusic/local');
+                },
               ),
               CounterSectionItem(
                 title: '最近播放',
                 count: int.parse('${state.collectionState.recentPlay}'),
                 iconData: Icons.play_circle_outline,
+                onTap: () {
+                  Routes.router.navigateTo(context, '/mymusic/latelyplay');
+                },
               ),
               CounterSectionItem(
                 title: '我的电台',
@@ -321,6 +327,9 @@ class CollectionSection extends StatelessWidget {
                 title: '我的收藏',
                 count: int.parse('${state.collectionState.myCollection}'),
                 iconData: Icons.collections,
+                onTap: () {
+                  Routes.router.navigateTo(context, '/mymusic/collect');
+                },
               ),
             ],
           );

@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
-import '../../model/music.dart';
-import 'package:intl/intl.dart';
+import '../../model/model.dart';
 
-class AlbumItem extends StatelessWidget {
-  final Album item;
-  final BuildContext pageContext;
-  final GestureTapCallback onTap;
-  final bool showPublishTime;
-  final bool showArtist;
-  AlbumItem(this.item, this.pageContext, {this.onTap,this.showPublishTime = true, this.showArtist = false});
+class PlaylistItem extends StatelessWidget {
+  PlaylistItem(
+      {Key key,
+      this.playlist,
+      this.showTail = false,
+      this.showIdentifier = false,
+      this.onTap})
+      : super(key: key);
+  final PlayList playlist;
+  final bool showTail;
+  final bool showIdentifier;
+  final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: this.onTap == null ? null : this.onTap,
+      onTap: () {
+        onTap(playlist.id);
+      },
       child: Row(
         children: <Widget>[
           SizedBox(
@@ -30,9 +36,9 @@ class AlbumItem extends StatelessWidget {
                   height: 45.0,
                   margin: EdgeInsets.only(right: 10.0),
                   child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
                       child: Image.network(
-                        item.coverImageUrl,
+                        playlist.coverImgUrl,
                       )),
                 ),
                 Expanded(
@@ -41,7 +47,7 @@ class AlbumItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(item.name),
+                        Text(playlist.name),
                         SizedBox(
                           height: 4.0,
                         ),
@@ -50,15 +56,12 @@ class AlbumItem extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              this.showPublishTime == true ? Text(DateFormat("y.M.d").format(
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                      item.publishTime))):Text(""),
-                              this.showArtist == true ? Text(item.artist):Text(""),
+                              Text('${playlist.trackCount}首，'),
                               SizedBox(
                                 width: 6.0,
                               ),
                               Text(
-                                '${item.size}首',
+                                'by${playlist.nickName}',
                               ),
                             ],
                           ),

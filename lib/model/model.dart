@@ -16,12 +16,6 @@ class Music {
   int mvId;
   String url;
 
-  String get subTitle {
-    var ar = artists.map((a) => a.name).join('/');
-    var al = album.name;
-    return '$al - $ar';
-  }
-
   Music(
       {this.name,
       this.id,
@@ -45,6 +39,12 @@ class Music {
     return 'Music{id: $id, name: $name, aritstName: $aritstName, aritstId: $aritstId, albumName: $albumName, albumId: $albumId, detail: $detail, commentCount: $commentCount, songUrl: $songUrl, albumCoverImg: $albumCoverImg}';
   }
 
+  String get subTitle {
+    var ar = artists.map((a) => a.name).join('/');
+    var al = album.name;
+    return '$al - $ar';
+  }
+
   static Music fromMap(Map map) {
     if (map == null) {
       return null;
@@ -61,12 +61,6 @@ class Music {
       songUrl: map["songUrl"],
       albumCoverImg: map["albumCoverImg"],
       lyrics: map["lyrics"],
-      artists:
-          (map["artists"] as List).cast<Map>().map(Artist.fromMap).toList(),
-      album: Album.fromMap(map["album"]),
-      title: map["title"],
-      mvId: map["mvId"] ?? 0,
-      url: map["url"],
     );
   }
 
@@ -79,14 +73,10 @@ class Music {
       "aritstId": aritstId,
       "albumId": albumId,
       'commentCount': commentCount,
+      "album": detail,
       "songUrl": songUrl,
       "albumCoverImg": albumCoverImg,
       "lyrics": lyrics,
-      "artists": artists.map((e) => e.toMap()).toList(),
-      "album": album.toMap(),
-      "title": title,
-      "mvId": mvId,
-      "url": url,
     };
   }
 }
@@ -110,23 +100,13 @@ class PlayList {
 }
 
 class Album {
-  Album({this.id, this.name, this.coverImageUrl, this.publishTime, this.size, this.artist});
+  Album({this.id, this.name, this.coverImageUrl, this.publishTime, this.size});
 
   final int id;
   final String name;
   final String coverImageUrl;
   final int publishTime;
   final int size;
-  final String artist;
-
-  static Album fromMap(Map map) {
-    return Album(
-        id: map["id"], name: map["name"], coverImageUrl: map["coverImageUrl"]);
-  }
-
-  Map toMap() {
-    return {"id": id, "name": name, "coverImageUrl": coverImageUrl};
-  }
 }
 
 class Artist {
@@ -160,9 +140,5 @@ class Artist {
         alias: map["alias"],
         briefDesc: map["briefDesc"],
         followed: map["followed"]);
-  }
-
-  Map toMap() {
-    return {"id": id, "name": name, "imageUrl": imageUrl};
   }
 }

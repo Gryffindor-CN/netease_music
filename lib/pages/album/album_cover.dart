@@ -70,6 +70,7 @@ class _AlbumCoverState extends State<AlbumCover> {
     });
 
     setState(() {
+
       _result = AlbumDetail(
         name: result['album']['name'],
         coverUrl: result['album']['picUrl'],

@@ -49,7 +49,7 @@ packages:
       name: cookie_jar
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   crypto:
     dependency: transitive
     description:
@@ -70,7 +70,7 @@ packages:
       name: dio
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.7"
+    version: "2.1.13"
   event_bus:
     dependency: "direct dev"
     description:
@@ -84,7 +84,7 @@ packages:
       name: fluro
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.5.0"
+    version: "1.5.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -192,7 +192,7 @@ packages:
       name: pull_to_refresh
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.6"
+    version: "1.5.4"
   quiver:
     dependency: transitive
     description:
@@ -220,7 +220,7 @@ packages:
       name: shared_preferences
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.3+1"
+    version: "0.5.3+4"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -1,6 +1,9 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/pages/another_page.dart';
+import 'package:netease_music/pages/me/collect_page.dart';
+import 'package:netease_music/pages/me/lately_play_page.dart';
+import 'package:netease_music/pages/me/local_page.dart';
 import 'package:netease_music/pages/my_music.dart';
 import 'package:netease_music/pages/search/search.dart';
 import 'package:netease_music/pages/search/search_result.dart';
@@ -58,3 +61,18 @@ var recommandSongsPageHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
   return new RecommendSongs();
 });
+
+var latelyplayHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      return new LatelyPlayPage();
+    });
+
+var localHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      return new LocalPage();
+    });
+
+var collectHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      return new CollectPage();
+    });
