@@ -31,6 +31,9 @@ class Routes {
   static String localPage = '/mymusic/local';
   static String collectPage = '/mymusic/collect';
 
+  // 歌曲评论页
+  static String commentPage = '/commentpage';
+
   /// 过渡动画在路由定义[router.define]时给定，没有特殊要求的情况下，统一使用 [TransitionType.native]
   static void configureRoutes(Router router) {
     router.notFoundHandler = new Handler(
@@ -69,5 +72,6 @@ class Routes {
     router.define(collectPage,
         handler: collectHandler,
         transitionType: TransitionType.native);
+	router.define(commentPage, handler: commentPageHandler, transitionType: TransitionType.native);
   }
 }

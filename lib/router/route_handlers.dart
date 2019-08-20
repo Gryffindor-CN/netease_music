@@ -76,3 +76,9 @@ var collectHandler = new Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) {
       return new CollectPage();
     });
+
+var commentPageHandler = new Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      return new CommentPage(int.parse(params["type"][0]),params["id"][0],params["name"][0],params["author"][0],params["imageUrl"][0]);
+    }
+);

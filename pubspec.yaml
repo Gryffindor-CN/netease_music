@@ -24,7 +24,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   fluro: ^1.4.0
-
+  sticky_headers: ^0.1.8
+  dio: ^2.1.7
+  toast: ^0.1.4
+  # 透明图片占位符
+  transparent_image: ^1.0.0
+  emoji_picker:
+    git: https://github.com/Ahmadre/emoji_picker
 dev_dependencies:
   shared_preferences: ^0.5.3+4
   dio: ^2.1.7

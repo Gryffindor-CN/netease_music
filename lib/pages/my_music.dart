@@ -66,6 +66,22 @@ class MyMusicHome extends StatelessWidget{
                   Routes.router.navigateTo(context, '/mymusic/mycollection');
                 },
               ),
+              RaisedButton(
+                child: Text('歌曲评论页'),
+                onPressed: () {
+                  String url = '/commentpage?type=0&id=347230&name=海阔天空&author=Beyond&imageUrl=https%3a%2f%2fp2.music.126.net%2fQHw-RuMwfQkmgtiyRpGs0Q%3d%3d%2f102254581395219.jpg';
+                  url = Uri.encodeFull(url);
+                  Routes.router.navigateTo(pageContext, url);
+                },
+              ),
+              RaisedButton(
+                child: Text('歌单评论页'),
+                onPressed: () {
+                  String url = '/commentpage?type=1&id=2191720972&name=『程序员歌单』编程语言排行&author=弹人的琴&imageUrl=https%3a%2f%2fp1.music.126.net%2fGZjtmjnKL5Cg7yaAzXg4-A%3d%3d%2f109951163254733900.jpg';
+                  url = Uri.encodeFull(url);
+                  Routes.router.navigateTo(pageContext, url);
+                },
+              ),
             ],
           ),
         ),
