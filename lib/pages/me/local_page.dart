@@ -6,17 +6,13 @@ import 'package:netease_music/components/music/music_item_list.dart';
 import 'package:netease_music/components/musicplayer/inherited_demo.dart';
 import 'package:netease_music/components/musicplayer/player.dart';
 import 'package:netease_music/components/song_detail_dialog.dart';
-import 'package:netease_music/components/songlist_list/song_list_list.dart';
 import 'package:netease_music/model/music.dart';
 import 'package:netease_music/pages/album/album_cover.dart';
 import 'package:netease_music/pages/artist/artist_page.dart';
-import 'package:netease_music/repository/netease.dart';
 import 'package:netease_music/router/Routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
-import 'package:sticky_headers/sticky_headers.dart';
 
 class LocalPage extends StatefulWidget {
   @override
@@ -290,7 +286,7 @@ class LocalPageState extends State<LocalPage>
               ),
               body: new TabBarView(
                 children: [
-                  _buildMusic(store),
+                  _buildMusic(store,context),
                   _buildArtist(),
                   _buildAlbum(),
                 ],
@@ -314,7 +310,7 @@ class LocalPageState extends State<LocalPage>
     );
   }
 
-  _buildMusic(store) {
+  _buildMusic(store,mainContext) {
     return ListView.builder(
       controller: _scrollController,
       physics: BouncingScrollPhysics(),
@@ -413,14 +409,14 @@ class LocalPageState extends State<LocalPage>
               ),
             ],
           ),
-          list: _buildMusicList(store),
+          list: _buildMusicList(store,mainContext),
         );
       },
       itemCount: 1,
     );
   }
 
-  List<MusicItem> _buildMusicList(StateContainerState store) {
+  List<MusicItem> _buildMusicList(StateContainerState store,mainContext) {
     List<MusicItem> _widgetlist = [];
 
     List<dynamic> songList = data['songList'];
@@ -488,7 +484,12 @@ class LocalPageState extends State<LocalPage>
                     {
                       'leadingIcon': AntDesign.getIconData('message1'),
                       'title': '评论($commentCount)',
-                      'callback': () {}
+                      'callback': () {
+                        var picUrl = Uri.encodeComponent(song['picUrl']);
+                        String url = '/commentpage?type=0&id=${song['id']}&name=${song['name']}&author=${song['ar'][0]['name']}&imageUrl=$picUrl';
+                        url = Uri.encodeFull(url);
+                        Routes.router.navigateTo(mainContext, url);
+                      }
                     },
                     {
                       'leadingIcon': AntDesign.getIconData('sharealt'),
