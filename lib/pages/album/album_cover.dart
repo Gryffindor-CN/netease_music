@@ -534,7 +534,13 @@ class _PlaylistDetailHeader extends StatelessWidget {
     return DetailHeader(
       commentCount: albumDetail == null ? 0 : albumDetail.commentCount,
       shareCount: albumDetail == null ? 0 : albumDetail.shareCount,
-      onCommentTap: () {},
+      onCommentTap: () {
+
+        var imageUrl = Uri.encodeComponent(albumDetail.coverUrl);
+        String url = '/commentpage?type=2&id=${albumDetail.id}&name=${albumDetail.name}&author=${albumDetail.artist.name}&imageUrl=$imageUrl';
+        url = Uri.encodeFull(url);
+        Routes.router.navigateTo(context, url);
+      },
       onShareTap: () {},
       onSelectionTap: onSelect,
       content: Container(
