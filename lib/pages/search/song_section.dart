@@ -93,7 +93,12 @@ class SongSection extends StatelessWidget {
                                     'leadingIcon':
                                         AntDesign.getIconData('message1'),
                                     'title': '评论($commentCount)',
-                                    'callback': () {}
+                                    'callback': () {
+                                      var picUrl = Uri.encodeComponent(music.albumCoverImg);
+                                      String url = '/commentpage?type=0&id=${music.id}&name=${music.name}&author=${music.aritstName}&imageUrl=$picUrl';
+                                      url = Uri.encodeFull(url);
+                                      Routes.router.navigateTo(context, url);
+                                    }
                                   },
                                   {
                                     'leadingIcon':

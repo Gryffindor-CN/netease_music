@@ -194,7 +194,12 @@ class SearchSongTabState extends State<SearchSongTab>
                                     'leadingIcon':
                                         AntDesign.getIconData('message1'),
                                     'title': '评论($commentCount)',
-                                    'callback': () {}
+                                    'callback': () {
+                                      var picUrl = Uri.encodeComponent(item.albumCoverImg);
+                                      String url = '/commentpage?type=0&id=${item.id}&name=${item.name}&author=${item.aritstName}&imageUrl=$picUrl';
+                                      url = Uri.encodeFull(url);
+                                      Routes.router.navigateTo(context, url);
+                                    }
                                   },
                                   {
                                     'leadingIcon':
@@ -371,7 +376,12 @@ class SearchSongTabState extends State<SearchSongTab>
                                     'leadingIcon':
                                         AntDesign.getIconData('message1'),
                                     'title': '评论($commentCount)',
-                                    'callback': () {}
+                                    'callback': () {
+                                      var picUrl = Uri.encodeComponent(item.albumCoverImg);
+                                      String url = '/commentpage?type=0&id=${item.id}&name=${item.name}&author=${item.aritstName}&imageUrl=$picUrl';
+                                      url = Uri.encodeFull(url);
+                                      Routes.router.navigateTo(context, url);
+                                    }
                                   },
                                   {
                                     'leadingIcon':

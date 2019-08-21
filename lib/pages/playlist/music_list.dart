@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netease_music/router/Routes.dart';
 import '../../model/music.dart';
 import '../../components/music/music_item.dart';
 import '../../repository/netease.dart';
@@ -100,7 +101,12 @@ class MusicTitle extends StatelessWidget {
                                   'leadingIcon':
                                       AntDesign.getIconData('message1'),
                                   'title': '评论(${item.commentCount})',
-                                  'callback': () {}
+                                  'callback': () {
+                                    var picUrl = Uri.encodeComponent(item.albumCoverImg);
+                                    String url = '/commentpage?type=0&id=${item.id}&name=${item.name}&author=${item.aritstName}&imageUrl=$picUrl';
+                                    url = Uri.encodeFull(url);
+                                    Routes.router.navigateTo(context, url);
+                                  }
                                 },
                                 {
                                   'leadingIcon':
