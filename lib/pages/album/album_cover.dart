@@ -70,7 +70,6 @@ class _AlbumCoverState extends State<AlbumCover> {
     });
 
     setState(() {
-
       _result = AlbumDetail(
         name: result['album']['name'],
         coverUrl: result['album']['picUrl'],
@@ -535,10 +534,9 @@ class _PlaylistDetailHeader extends StatelessWidget {
       commentCount: albumDetail == null ? 0 : albumDetail.commentCount,
       shareCount: albumDetail == null ? 0 : albumDetail.shareCount,
       onCommentTap: () {
-
-        var imageUrl = Uri.encodeComponent(albumDetail.coverUrl);
-        String url = '/commentpage?type=2&id=${albumDetail.id}&name=${albumDetail.name}&author=${albumDetail.artist.name}&imageUrl=$imageUrl';
-        url = Uri.encodeFull(url);
+        var imageUrl = albumDetail.coverUrl.replaceAll('/', ')');
+        String url =
+            '/commentpage?type=2&id=${albumDetail.id}&name=${FluroConvertUtils.fluroCnParamsEncode(albumDetail.name)}&author=${FluroConvertUtils.fluroCnParamsEncode(albumDetail.artist.name)}&imageUrl=$imageUrl';
         Routes.router.navigateTo(context, url);
       },
       onShareTap: () {},

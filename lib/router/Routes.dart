@@ -23,6 +23,8 @@ class Routes {
 
   static String recommandSongsPage = '/home/recommandSongs/recommandsongspage';
 
+  static String commentSharePage = '/commentsharepage';
+
   // 二级路由
   static String mycollection = '/mymusic/mycollection';
 
@@ -64,14 +66,14 @@ class Routes {
         transitionType: TransitionType.inFromRight);
 
     router.define(latelyPlayPage,
-        handler: latelyplayHandler,
-        transitionType: TransitionType.native);
+        handler: latelyplayHandler, transitionType: TransitionType.native);
     router.define(localPage,
-        handler: localHandler,
-        transitionType: TransitionType.native);
+        handler: localHandler, transitionType: TransitionType.native);
     router.define(collectPage,
-        handler: collectHandler,
-        transitionType: TransitionType.native);
-	  router.define(commentPage, handler: commentPageHandler, transitionType: TransitionType.native);
+        handler: collectHandler, transitionType: TransitionType.native);
+    router.define(commentPage,
+        handler: commentPageHandler, transitionType: TransitionType.native);
+    router.define(commentSharePage,
+        handler: commentShareHandler, transitionType: TransitionType.native);
   }
 }

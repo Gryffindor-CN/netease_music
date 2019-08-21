@@ -16,6 +16,7 @@ import '../album/album_cover.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import '../../redux/app.dart';
+import '../../utils/utils.dart';
 
 class SongSection extends StatelessWidget {
   final String keyword;
@@ -94,9 +95,11 @@ class SongSection extends StatelessWidget {
                                         AntDesign.getIconData('message1'),
                                     'title': '评论($commentCount)',
                                     'callback': () {
-                                      var picUrl = Uri.encodeComponent(music.albumCoverImg);
-                                      String url = '/commentpage?type=0&id=${music.id}&name=${music.name}&author=${music.aritstName}&imageUrl=$picUrl';
-                                      url = Uri.encodeFull(url);
+                                      var picUrl = music.albumCoverImg
+                                          .replaceAll('/', ')');
+                                      String url =
+                                          '/commentpage?type=0&id=${music.id}&name=${FluroConvertUtils.fluroCnParamsEncode(music.name)}&author=${FluroConvertUtils.fluroCnParamsEncode(music.aritstName)}&imageUrl=$picUrl';
+
                                       Routes.router.navigateTo(context, url);
                                     }
                                   },

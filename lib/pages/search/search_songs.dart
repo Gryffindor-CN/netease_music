@@ -20,6 +20,7 @@ import '../album/album_cover.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 import '../../redux/app.dart';
+import '../../utils/utils.dart';
 
 class SearchSongTab extends StatefulWidget {
   final String keyword;
@@ -195,9 +196,11 @@ class SearchSongTabState extends State<SearchSongTab>
                                         AntDesign.getIconData('message1'),
                                     'title': '评论($commentCount)',
                                     'callback': () {
-                                      var picUrl = Uri.encodeComponent(item.albumCoverImg);
-                                      String url = '/commentpage?type=0&id=${item.id}&name=${item.name}&author=${item.aritstName}&imageUrl=$picUrl';
-                                      url = Uri.encodeFull(url);
+                                      var picUrl = item.albumCoverImg
+                                          .replaceAll('/', ')');
+                                      String url =
+                                          '/commentpage?type=0&id=${item.id}&name=${FluroConvertUtils.fluroCnParamsEncode(item.name)}&author=${FluroConvertUtils.fluroCnParamsEncode(item.aritstName)}&imageUrl=$picUrl';
+
                                       Routes.router.navigateTo(context, url);
                                     }
                                   },
@@ -377,9 +380,11 @@ class SearchSongTabState extends State<SearchSongTab>
                                         AntDesign.getIconData('message1'),
                                     'title': '评论($commentCount)',
                                     'callback': () {
-                                      var picUrl = Uri.encodeComponent(item.albumCoverImg);
-                                      String url = '/commentpage?type=0&id=${item.id}&name=${item.name}&author=${item.aritstName}&imageUrl=$picUrl';
-                                      url = Uri.encodeFull(url);
+                                      var picUrl = item.albumCoverImg
+                                          .replaceAll('/', ')');
+                                      String url =
+                                          '/commentpage?type=0&id=${item.id}&name=${FluroConvertUtils.fluroCnParamsEncode(item.name)}&author=${FluroConvertUtils.fluroCnParamsEncode(item.aritstName)}&imageUrl=$picUrl';
+
                                       Routes.router.navigateTo(context, url);
                                     }
                                   },

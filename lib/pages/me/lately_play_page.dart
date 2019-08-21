@@ -12,6 +12,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import 'package:sticky_headers/sticky_headers.dart';
+import '../../utils/utils.dart';
 
 class LatelyPlayPage extends StatefulWidget {
   @override
@@ -383,10 +384,11 @@ class MeHomePageState extends State<LatelyPlayPage> {
                       'leadingIcon': AntDesign.getIconData('message1'),
                       'title': '评论($commentCount)',
                       'callback': () {
-                        var picUrl = Uri.encodeComponent(song['picUrl']);
+                        var picUrl =
+                            song['picUrl'].toString().replaceAll('/', ')');
                         String url =
-                            '/commentpage?type=0&id=${song['id']}&name=${song['name']}&author=${song['ar'][0]['name']}&imageUrl=$picUrl';
-                        url = Uri.encodeFull(url);
+                            '/commentpage?type=0&id=${song['id']}&name=${FluroConvertUtils.fluroCnParamsEncode(song['name'])}&author=${FluroConvertUtils.fluroCnParamsEncode(song['ar'][0]['name'])}&imageUrl=$picUrl';
+
                         Routes.router.navigateTo(mainContext, url);
                       }
                     },

@@ -8,6 +8,7 @@ import 'comment_item.dart';
 import 'package:toast/toast.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import '../../pages/album_cover/album_cover.dart';
+import '../../pages/share/bottom_share_comment.dart';
 
 ///歌曲,歌单,专辑评论页
 class CommentPage extends StatefulWidget {
@@ -414,7 +415,14 @@ class _CommentPageState extends State<CommentPage> {
                 Icons.radio_button_unchecked,
               ),
               onPressed: () {
-                print('分享');
+                BottomShareComment.showBottomShareComment(
+                  context,
+                  int.parse(widget.id),
+                  widget.imageUrl,
+                  widget.name,
+                  widget.author,
+                  widget.type,
+                );
               },
             ),
             IconButton(
@@ -422,7 +430,6 @@ class _CommentPageState extends State<CommentPage> {
                 Icons.equalizer,
               ),
               onPressed: () {
-                // print('正在播放');
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (BuildContext context) {
                   return AlbumCoverPage();

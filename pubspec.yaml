@@ -33,13 +33,11 @@ dependencies:
     git: https://github.com/Ahmadre/emoji_picker
 dev_dependencies:
   shared_preferences: ^0.5.3+4
-  dio: ^2.1.7
   flutter_icons: ^0.1.4
   overlay_support: ^0.3.0
   flutter_swiper: ^1.1.6
   pull_to_refresh: ^1.4.4
   fluwx: ^0.6.3
-  sticky_headers: ^0.1.8
   event_bus: ^1.1.0
   audioplayers: ^0.13.1
   fluttertoast: ^3.1.0
@@ -73,6 +71,7 @@ flutter:
    - assets/icons/music_logo_32.png
    - assets/play_needle.png
    - assets/play_disc.png
+   - assets/code.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

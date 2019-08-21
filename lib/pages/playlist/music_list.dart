@@ -11,6 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../components/musicplayer/inherited_demo.dart';
 import '../album/album_cover.dart';
 import '../artist/artist_page.dart';
+import '../../utils/utils.dart';
 
 class MusicTitle extends StatelessWidget {
   final List<Music> songList;
@@ -102,9 +103,11 @@ class MusicTitle extends StatelessWidget {
                                       AntDesign.getIconData('message1'),
                                   'title': '评论(${item.commentCount})',
                                   'callback': () {
-                                    var picUrl = Uri.encodeComponent(item.albumCoverImg);
-                                    String url = '/commentpage?type=0&id=${item.id}&name=${item.name}&author=${item.aritstName}&imageUrl=$picUrl';
-                                    url = Uri.encodeFull(url);
+                                    var picUrl =
+                                        item.albumCoverImg.replaceAll('/', ')');
+                                    String url =
+                                        '/commentpage?type=0&id=${item.id}&name=${FluroConvertUtils.fluroCnParamsEncode(item.name)}&author=${FluroConvertUtils.fluroCnParamsEncode(item.aritstName)}&imageUrl=$picUrl';
+
                                     Routes.router.navigateTo(context, url);
                                   }
                                 },
@@ -281,7 +284,14 @@ class MusicTitle extends StatelessWidget {
                                   'leadingIcon':
                                       AntDesign.getIconData('message1'),
                                   'title': '评论(${item.commentCount})',
-                                  'callback': () {}
+                                  'callback': () {
+                                    var picUrl =
+                                        item.albumCoverImg.replaceAll('/', ')');
+                                    String url =
+                                        '/commentpage?type=0&id=${item.id}&name=${FluroConvertUtils.fluroCnParamsEncode(item.name)}&author=${FluroConvertUtils.fluroCnParamsEncode(item.aritstName)}&imageUrl=$picUrl';
+
+                                    Routes.router.navigateTo(context, url);
+                                  }
                                 },
                                 {
                                   'leadingIcon':

@@ -4,12 +4,9 @@ import 'package:transparent_image/transparent_image.dart';
 
 class CommentItem extends StatelessWidget {
   const CommentItem(
-      this.userName,
-      this.userImage,
-      this.likeCount,
-      this.time,
-      this.comment,
-      {Key key, this.isEnd = false}) : super(key: key);
+      this.userName, this.userImage, this.likeCount, this.time, this.comment,
+      {Key key, this.isEnd = false})
+      : super(key: key);
 
   // 用户名
   final String userName;
@@ -36,7 +33,6 @@ class CommentItem extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 0),
       child: Column(
         children: <Widget>[
-
           //头像,用户名,评论时间,点赞数量
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +42,7 @@ class CommentItem extends StatelessWidget {
                   children: <Widget>[
                     // 头像
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(15,0,8,0),
+                      padding: EdgeInsetsDirectional.fromSTEB(15, 0, 8, 0),
                       child: ClipOval(
                         child: SizedBox(
                           width: 30.0,
@@ -71,7 +67,8 @@ class CommentItem extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           this.userName,
-                          style: TextStyle(fontSize: 13, color: Color(0xff666666)),
+                          style:
+                              TextStyle(fontSize: 13, color: Color(0xff666666)),
                         ),
                         Text(
                           formatDate(this.time),
@@ -87,7 +84,7 @@ class CommentItem extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.only(right: 15.0),
                 child: InkWell(
-                  onTap: (){
+                  onTap: () {
                     print('点赞');
                   },
                   child: Row(
@@ -98,7 +95,6 @@ class CommentItem extends StatelessWidget {
                 ),
               ),
             ],
-
           ),
 
           //评论内容
@@ -110,10 +106,13 @@ class CommentItem extends StatelessWidget {
                     // Leading
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(53,5,15,0),
+                        padding: EdgeInsetsDirectional.fromSTEB(53, 5, 15, 0),
                         child: Text(
                           this.comment.trimLeft(),
-                          style: TextStyle(fontSize: 13, color: Color(0xff666666),height: 1.1),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xff666666),
+                              height: 1.1),
                         ),
                       ),
                     ),
@@ -126,8 +125,12 @@ class CommentItem extends StatelessWidget {
 
           //分隔线
           Padding(
-            padding: this.isEnd ? EdgeInsetsDirectional.fromSTEB(15,0,0,0) : EdgeInsetsDirectional.fromSTEB(53,0,0,0),
-            child: Divider(height: 22,),
+            padding: this.isEnd
+                ? EdgeInsetsDirectional.fromSTEB(15, 0, 0, 0)
+                : EdgeInsetsDirectional.fromSTEB(53, 0, 0, 0),
+            child: Divider(
+              height: 22,
+            ),
           ),
         ],
       ),
@@ -136,26 +139,30 @@ class CommentItem extends StatelessWidget {
 
   ///时间格式化
   ///时间戳(13位) --> xxxx年xx月xx日
-  String formatDate(int time){
+  String formatDate(int time) {
     var nowTime = DateTime.now();
     var dateTime = DateTime.fromMillisecondsSinceEpoch(time);
 
-    if(nowTime.year == dateTime.year){
+    if (nowTime.year == dateTime.year) {
       //是今年的只返回月日
       return dateTime.month.toString() + '月' + dateTime.day.toString() + '日';
     }
     //返回完整年月日
-    return dateTime.year.toString() + '年' + dateTime.month.toString() + '月' + dateTime.day.toString() + '日';
+    return dateTime.year.toString() +
+        '年' +
+        dateTime.month.toString() +
+        '月' +
+        dateTime.day.toString() +
+        '日';
   }
 
   ///点赞数格式化
-  List<Widget> formatLikedCount(){
-
+  List<Widget> formatLikedCount() {
     bool isBig = false;
     String total = this.likeCount.toString();
-    if(this.likeCount > 99999){
+    if (this.likeCount > 99999) {
       isBig = true;
-      total = (this.likeCount/10000).toStringAsFixed(1);
+      total = (this.likeCount / 10000).toStringAsFixed(1);
     }
 
     return [
@@ -164,10 +171,14 @@ class CommentItem extends StatelessWidget {
         style: TextStyle(fontSize: 12, color: Colors.grey),
       ),
       Text(
-        isBig?'万 ':' ',
+        isBig ? '万 ' : ' ',
         style: TextStyle(fontSize: 11, color: Colors.grey),
       ),
-      Icon(Icons.thumb_up, color: Colors.black45, size: 18,),
+      Icon(
+        Icons.thumb_up,
+        color: Colors.black45,
+        size: 18,
+      ),
     ];
   }
 }

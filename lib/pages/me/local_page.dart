@@ -13,6 +13,7 @@ import 'package:netease_music/router/Routes.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
+import '../../utils/utils.dart';
 
 class LocalPage extends StatefulWidget {
   @override
@@ -216,7 +217,7 @@ class LocalPageState extends State<LocalPage>
               ]
             : [],
       ),
-      body: new TabBarView(
+      body: TabBarView(
         controller: _tabController,
         children: <Widget>[
           new DefaultTabController(
@@ -284,12 +285,15 @@ class LocalPageState extends State<LocalPage>
                   indicatorColor: Colors.white,
                 ),
               ),
-              body: new TabBarView(
-                children: [
-                  _buildMusic(store,context),
-                  _buildArtist(),
-                  _buildAlbum(),
-                ],
+              body: Container(
+                decoration: BoxDecoration(color: Colors.white),
+                child: TabBarView(
+                  children: [
+                    _buildMusic(store, context),
+                    _buildArtist(),
+                    _buildAlbum(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -310,7 +314,7 @@ class LocalPageState extends State<LocalPage>
     );
   }
 
-  _buildMusic(store,mainContext) {
+  _buildMusic(store, mainContext) {
     return ListView.builder(
       controller: _scrollController,
       physics: BouncingScrollPhysics(),
@@ -339,11 +343,6 @@ class LocalPageState extends State<LocalPage>
               ),
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10.0),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                        bottom:
-                            BorderSide(color: Color(0xFFE0E0E0), width: 0.5))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -358,6 +357,7 @@ class LocalPageState extends State<LocalPage>
                           } else {}
                         },
                         child: Container(
+                          padding: EdgeInsets.only(left: 10.0),
                           child: Row(
                             children: <Widget>[
                               Icon(Icons.play_circle_outline),
@@ -409,14 +409,14 @@ class LocalPageState extends State<LocalPage>
               ),
             ],
           ),
-          list: _buildMusicList(store,mainContext),
+          list: _buildMusicList(store, mainContext),
         );
       },
       itemCount: 1,
     );
   }
 
-  List<MusicItem> _buildMusicList(StateContainerState store,mainContext) {
+  List<MusicItem> _buildMusicList(StateContainerState store, mainContext) {
     List<MusicItem> _widgetlist = [];
 
     List<dynamic> songList = data['songList'];
@@ -485,9 +485,11 @@ class LocalPageState extends State<LocalPage>
                       'leadingIcon': AntDesign.getIconData('message1'),
                       'title': '评论($commentCount)',
                       'callback': () {
-                        var picUrl = Uri.encodeComponent(song['picUrl']);
-                        String url = '/commentpage?type=0&id=${song['id']}&name=${song['name']}&author=${song['ar'][0]['name']}&imageUrl=$picUrl';
-                        url = Uri.encodeFull(url);
+                        var picUrl =
+                            song['picUrl'].toString().replaceAll('/', ')');
+                        String url =
+                            '/commentpage?type=0&id=${song['id']}&name=${FluroConvertUtils.fluroCnParamsEncode(song['name'])}&author=${FluroConvertUtils.fluroCnParamsEncode(song['ar'][0]['name'])}&imageUrl=$picUrl';
+
                         Routes.router.navigateTo(mainContext, url);
                       }
                     },
