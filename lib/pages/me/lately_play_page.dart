@@ -290,7 +290,7 @@ class MeHomePageState extends State<LatelyPlayPage> {
                     children: <Widget>[
                       MusicItemList(
                         keyword: "123asd",
-                        list: _buildList(store),
+                        list: _buildList(store,context),
                       ),
                     ],
                   ),
@@ -321,7 +321,7 @@ class MeHomePageState extends State<LatelyPlayPage> {
     );
   }
 
-  List<MusicItem> _buildList(StateContainerState store) {
+  List<MusicItem> _buildList(StateContainerState store,mainContext) {
     List<MusicItem> _widgetlist = [];
 
     List<dynamic> songList = data['songList'];
@@ -389,7 +389,12 @@ class MeHomePageState extends State<LatelyPlayPage> {
                     {
                       'leadingIcon': AntDesign.getIconData('message1'),
                       'title': '评论($commentCount)',
-                      'callback': () {}
+                      'callback': () {
+                        var picUrl = Uri.encodeComponent(song['picUrl']);
+                        String url = '/commentpage?type=0&id=${song['id']}&name=${song['name']}&author=${song['ar'][0]['name']}&imageUrl=$picUrl';
+                        url = Uri.encodeFull(url);
+                        Routes.router.navigateTo(mainContext, url);
+                      }
                     },
                     {
                       'leadingIcon': AntDesign.getIconData('sharealt'),

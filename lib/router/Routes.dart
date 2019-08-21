@@ -72,6 +72,6 @@ class Routes {
     router.define(collectPage,
         handler: collectHandler,
         transitionType: TransitionType.native);
-	router.define(commentPage, handler: commentPageHandler, transitionType: TransitionType.native);
+	  router.define(commentPage, handler: commentPageHandler, transitionType: TransitionType.native);
   }
 }

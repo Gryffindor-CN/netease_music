@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:netease_music/repository/netease.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import 'comment_item.dart';
 import 'package:toast/toast.dart';
@@ -49,20 +50,10 @@ class _CommentPageState extends State<CommentPage> {
   //是否显示表情选择器
   bool showEmojiSelector = false;
 
+  String url = '';
+
   ///加载数据
   void _getData(){
-
-    String url = '';
-
-    if(this.widget.type == 0){
-      url = 'http://192.168.206.131:3000/comment/music';
-    }
-    if(this.widget.type == 1){
-      url = 'http://192.168.206.131:3000/comment/playlist';
-    }
-    if(this.widget.type == 2){
-      url = 'http://192.168.206.131:3000/comment/album';
-    }
 
     Future.delayed(Duration(seconds: 2)).then((v) {
       Dio dio = new Dio();
@@ -97,7 +88,7 @@ class _CommentPageState extends State<CommentPage> {
 
       List<dynamic> comments = this.map['comments'];
       Dio dio = new Dio();
-      var response = dio.get("http://192.168.206.131:3000/comment/music",queryParameters: {"id": 347230, "limit": 10, "offset": this.commentPageNum*10});
+      var response = dio.get(url,queryParameters: {"id": 347230, "limit": 10, "offset": this.commentPageNum*10});
 
       response.then((value){
 
@@ -115,8 +106,6 @@ class _CommentPageState extends State<CommentPage> {
         });
       });
     }
-
-
 
   }
 
@@ -192,6 +181,8 @@ class _CommentPageState extends State<CommentPage> {
             //封面图
             leading: Image.network(
               Uri.decodeFull(this.widget.imageUrl),
+              width: 50,
+              height: 50,
             ),
             trailing: Icon(Icons.chevron_right),
           ),
@@ -568,6 +559,16 @@ class _CommentPageState extends State<CommentPage> {
         });
       }
     });
+
+    if(this.widget.type == 0){
+      url = API_HOST + 'comment/music';
+    }
+    if(this.widget.type == 1){
+      url = API_HOST + 'comment/playlist';
+    }
+    if(this.widget.type == 2){
+      url = API_HOST + 'comment/album';
+    }
   }
 
   @override
