@@ -824,7 +824,7 @@ class SearchSongTabState extends State<SearchSongTab>
             },
             converter: (Store<NeteaseState> appstore) {
               return () {
-                appstore.dispatch(Actions.AddToCollection);
+                appstore.dispatch(NeteaseActions.AddToCollection);
               };
             },
           )

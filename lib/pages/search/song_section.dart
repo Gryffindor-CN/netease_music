@@ -497,7 +497,7 @@ class SongSection extends StatelessWidget {
       },
       converter: (Store<NeteaseState> appstore) {
         return () {
-          appstore.dispatch(Actions.AddToCollection);
+          appstore.dispatch(NeteaseActions.AddToCollection);
         };
       },
     );

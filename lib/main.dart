@@ -1,7 +1,7 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:netease_music/model/music.dart';
-import 'package:netease_music/redux/app.dart' as prefix1;
+import 'package:netease_music/redux/app.dart';
 import 'package:netease_music/router/Routes.dart';
 import './components/circle_bottom_bar.dart';
 import './components/musicplayer/inherited_demo.dart';

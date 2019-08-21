@@ -1,11 +1,11 @@
 import 'collection.dart';
 import '../model/music.dart';
 
-enum Actions { AddToCollection, AddToRecentPlay, AddToRadio, AddToLocal }
+enum NeteaseActions { AddToCollection, AddToRecentPlay, AddToRadio, AddToLocal }
 
 NeteaseState appReducer(NeteaseState state, dynamic action) {
   print(action);
-  if (action == Actions.AddToCollection) {
+  if (action == NeteaseActions.AddToCollection) {
     return NeteaseState(
         collectionState: Collection(
             myCollection: state.collectionState.myCollection + 1,
@@ -28,14 +28,14 @@ NeteaseState appReducer(NeteaseState state, dynamic action) {
               myLocal: state.collectionState.myLocal,
               recentPlay: state.collectionState.recentPlay));
     }
-  } else if (action == Actions.AddToRadio) {
+  } else if (action == NeteaseActions.AddToRadio) {
     return NeteaseState(
         collectionState: Collection(
             myCollection: state.collectionState.myCollection,
             myRadio: state.collectionState.myRadio + 1,
             myLocal: state.collectionState.myLocal,
             recentPlay: state.collectionState.recentPlay));
-  } else if (action == Actions.AddToLocal) {
+  } else if (action == NeteaseActions.AddToLocal) {
     return NeteaseState(
         collectionState: Collection(
             myCollection: state.collectionState.myCollection,
