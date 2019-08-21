@@ -4,7 +4,6 @@ import '../model/music.dart';
 enum NeteaseActions { AddToCollection, AddToRecentPlay, AddToRadio, AddToLocal }
 
 NeteaseState appReducer(NeteaseState state, dynamic action) {
-  print(action);
   if (action == NeteaseActions.AddToCollection) {
     return NeteaseState(
         collectionState: Collection(

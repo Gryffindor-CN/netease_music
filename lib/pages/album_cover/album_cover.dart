@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../model/music.dart';
 import '../../components/musicplayer/playing_album_cover.dart';
 
 class AlbumCoverPage extends StatelessWidget {

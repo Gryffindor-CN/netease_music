@@ -7,12 +7,13 @@ import 'package:sticky_headers/sticky_headers.dart';
 import 'comment_item.dart';
 import 'package:toast/toast.dart';
 import 'package:emoji_picker/emoji_picker.dart';
-
+import '../../pages/album_cover/album_cover.dart';
 
 ///歌曲,歌单,专辑评论页
-class CommentPage extends StatefulWidget{
-
-  const CommentPage(this.type, this.id, this.name, this.author, this.imageUrl, {Key key}) : super(key: key);
+class CommentPage extends StatefulWidget {
+  const CommentPage(this.type, this.id, this.name, this.author, this.imageUrl,
+      {Key key})
+      : super(key: key);
 
   //类型 0:歌曲 1:歌单 2:专辑
   final int type;
@@ -32,8 +33,7 @@ class CommentPage extends StatefulWidget{
 }
 
 class _CommentPageState extends State<CommentPage> {
-
-  Map<String,dynamic> map;
+  Map<String, dynamic> map;
 
   //用于监听列表是否拉到最下面
   ScrollController _scrollController = new ScrollController();
@@ -53,33 +53,29 @@ class _CommentPageState extends State<CommentPage> {
   String url = '';
 
   ///加载数据
-  void _getData(){
-
+  void _getData() {
     Future.delayed(Duration(seconds: 2)).then((v) {
       Dio dio = new Dio();
-      var response = dio.get(url,queryParameters: {"id": this.widget.id, "limit": 10, "offset": 0});
-      response.then((value){
+      var response = dio.get(url,
+          queryParameters: {"id": this.widget.id, "limit": 10, "offset": 0});
+      response.then((value) {
         setState(() {
           this.map = value.data;
-          if(value.data['total'] == 0){
+          if (value.data['total'] == 0) {
             this.isDone = true;
           }
         });
-      }).catchError((e){
-      });
+      }).catchError((e) {});
     });
-
-
   }
 
   ///加载更多评论
   void _retrieveData() {
-
     if (!isPerformingRequest) {
       setState(() => isPerformingRequest = true);
       this.commentPageNum++;
 
-      if(this.commentPageNum * 10 > this.map['total']){
+      if (this.commentPageNum * 10 > this.map['total']) {
         setState(() {
           this.isDone = true;
         });
@@ -88,31 +84,33 @@ class _CommentPageState extends State<CommentPage> {
 
       List<dynamic> comments = this.map['comments'];
       Dio dio = new Dio();
-      var response = dio.get(url,queryParameters: {"id": 347230, "limit": 10, "offset": this.commentPageNum*10});
+      var response = dio.get(url, queryParameters: {
+        "id": 347230,
+        "limit": 10,
+        "offset": this.commentPageNum * 10
+      });
 
-      response.then((value){
-
+      response.then((value) {
         List<dynamic> data = value.data['comments'];
-        data.forEach((v){
+        data.forEach((v) {
           comments.add(v);
         });
         setState(() {
           this.map['comments'] = comments;
           isPerformingRequest = false;
         });
-      }).catchError((e){
+      }).catchError((e) {
         setState(() {
           isPerformingRequest = false;
         });
       });
     }
-
   }
 
   ///列表头,显示歌名/歌单名/封面等
-  Widget _buildTitleCard(){
+  Widget _buildTitleCard() {
     return Card(
-      margin:EdgeInsets.all(0),
+      margin: EdgeInsets.all(0),
       shape: Border(),
       elevation: 0,
       child: InkWell(
@@ -122,23 +120,28 @@ class _CommentPageState extends State<CommentPage> {
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                this.widget.type == 1 ? Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0,5,0,0),
-                  child: Container(
-                    alignment: Alignment.center,
-                    width: 20, height: 12,
-                    decoration: BoxDecoration(
-                      borderRadius: new BorderRadius.all(new Radius.circular(2.0)),
-                      border: new Border.all(width: 0.5, color: Color(0xFFFF6161)),
-                    ),
-                    child: Text(
-                      '歌单',
-                      style: TextStyle(fontSize: 8, color: Color(0xFFFF6161)),
-
-                    ),
-                  ),
-                ):Text(''),
-                Text(this.widget.type == 1 ?" ":''),
+                this.widget.type == 1
+                    ? Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: 20,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                new BorderRadius.all(new Radius.circular(2.0)),
+                            border: new Border.all(
+                                width: 0.5, color: Color(0xFFFF6161)),
+                          ),
+                          child: Text(
+                            '歌单',
+                            style: TextStyle(
+                                fontSize: 8, color: Color(0xFFFF6161)),
+                          ),
+                        ),
+                      )
+                    : Text(''),
+                Text(this.widget.type == 1 ? " " : ''),
                 Expanded(
                   child: Text(
                     this.widget.name,
@@ -154,7 +157,7 @@ class _CommentPageState extends State<CommentPage> {
                   child: Row(
                     children: <Widget>[
                       Text(
-                        this.widget.type == 1 ?'by ':'',
+                        this.widget.type == 1 ? 'by ' : '',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
@@ -169,7 +172,7 @@ class _CommentPageState extends State<CommentPage> {
                       ),
                     ],
                   ),
-                  onTap: (){
+                  onTap: () {
                     print('singer');
                   },
                 ),
@@ -187,7 +190,7 @@ class _CommentPageState extends State<CommentPage> {
             trailing: Icon(Icons.chevron_right),
           ),
         ),
-        onTap: (){
+        onTap: () {
           print('tap');
         },
       ),
@@ -195,9 +198,9 @@ class _CommentPageState extends State<CommentPage> {
   }
 
   ///评论输入框
-  Widget _buildInput(){
+  Widget _buildInput() {
     return Container(
-        padding: EdgeInsetsDirectional.fromSTEB(15,0,0,0),
+        padding: EdgeInsetsDirectional.fromSTEB(15, 0, 0, 0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -212,12 +215,12 @@ class _CommentPageState extends State<CommentPage> {
                 controller: commentController,
                 focusNode: commentInputFocusNode,
                 onChanged: (value) {
-                  if(commentController.text.length > 140){
+                  if (commentController.text.length > 140) {
                     Toast.show(
                       "你的输入已超出140字，\n请修改后发送。",
                       context,
                       duration: Toast.LENGTH_SHORT,
-                      gravity:  Toast.CENTER,
+                      gravity: Toast.CENTER,
                       textColor: Colors.white70,
                       backgroundColor: Color(0xd7000000),
                       backgroundRadius: 8,
@@ -232,82 +235,81 @@ class _CommentPageState extends State<CommentPage> {
                   ),
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-
                 ),
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(140)
-                ],
+                inputFormatters: [LengthLimitingTextInputFormatter(140)],
               ),
             ),
             IconButton(
               icon: Icon(Icons.image),
-              onPressed: (){
+              onPressed: () {
                 print('贴图');
               },
             ),
-            this.showEmojiSelector == true ?
-            IconButton(
-              icon: Icon(Icons.keyboard),
-              onPressed: (){
-                FocusScope.of(context).requestFocus(commentInputFocusNode);
-                setState(() {
-                  this.showEmojiSelector = false;
-                });
-              },
-            ):
-            IconButton(
-              icon: Icon(Icons.insert_emoticon),
-              onPressed: (){
-                // 触摸收起键盘
-                FocusScope.of(context).requestFocus(FocusNode());
-                setState(() {
-                  this.showEmojiSelector = true;
-                });
-
-              },
-            ),
+            this.showEmojiSelector == true
+                ? IconButton(
+                    icon: Icon(Icons.keyboard),
+                    onPressed: () {
+                      FocusScope.of(context)
+                          .requestFocus(commentInputFocusNode);
+                      setState(() {
+                        this.showEmojiSelector = false;
+                      });
+                    },
+                  )
+                : IconButton(
+                    icon: Icon(Icons.insert_emoticon),
+                    onPressed: () {
+                      // 触摸收起键盘
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      setState(() {
+                        this.showEmojiSelector = true;
+                      });
+                    },
+                  ),
           ],
-        )
-    );
+        ));
   }
 
   ///精彩评论
-  Widget _buildHotComment(){
-    return this.map['hotComments'].length == 0 ? Center() : StickyHeader(
-      header: Container(
-        color: Colors.white,
-        padding: EdgeInsetsDirectional.fromSTEB(15,8,0,6),
-        alignment: Alignment.centerLeft,
-        child: Text(
-          '精彩评论',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      content: Container(
-        color: Colors.white,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: _buildHotCommentItems(),
-        ),
-      ),
-    );
+  Widget _buildHotComment() {
+    return this.map['hotComments'].length == 0
+        ? Center()
+        : StickyHeader(
+            header: Container(
+              color: Colors.white,
+              padding: EdgeInsetsDirectional.fromSTEB(15, 8, 0, 6),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '精彩评论',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            content: Container(
+              color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _buildHotCommentItems(),
+              ),
+            ),
+          );
   }
-  List<Widget> _buildHotCommentItems(){
-    List<dynamic> hotComments = this.map['hotComments'];
-    if(hotComments != null && hotComments.length > 0){
 
-      return List.generate(hotComments.length, (index) =>
-          CommentItem(
-            hotComments[index]['user']['nickname'],
-            hotComments[index]['user']['avatarUrl'],
-            hotComments[index]['likedCount'],
-            hotComments[index]['time'],
-            hotComments[index]['content'],
-            isEnd: hotComments.length == index+1,
-          ),
+  List<Widget> _buildHotCommentItems() {
+    List<dynamic> hotComments = this.map['hotComments'];
+    if (hotComments != null && hotComments.length > 0) {
+      return List.generate(
+        hotComments.length,
+        (index) => CommentItem(
+              hotComments[index]['user']['nickname'],
+              hotComments[index]['user']['avatarUrl'],
+              hotComments[index]['likedCount'],
+              hotComments[index]['time'],
+              hotComments[index]['content'],
+              isEnd: hotComments.length == index + 1,
+            ),
       );
     }
 
@@ -315,11 +317,11 @@ class _CommentPageState extends State<CommentPage> {
   }
 
   ///评论
-  Widget _buildComment(){
+  Widget _buildComment() {
     return StickyHeader(
-      header:Container(
+      header: Container(
         color: Colors.white,
-        padding: EdgeInsetsDirectional.fromSTEB(15,8,0,6),
+        padding: EdgeInsetsDirectional.fromSTEB(15, 8, 0, 6),
         alignment: Alignment.bottomLeft,
         child: Row(
           children: <Widget>[
@@ -333,10 +335,7 @@ class _CommentPageState extends State<CommentPage> {
             Expanded(
               child: Text(
                 this.map['total'].toString(),
-                style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey),
               ),
             ),
           ],
@@ -351,19 +350,20 @@ class _CommentPageState extends State<CommentPage> {
       ),
     );
   }
-  List<Widget> _buildCommentItems(){
-    List<dynamic> hotComments = this.map['comments'];
-    if(hotComments != null && hotComments.length > 0){
 
-      return List.generate(hotComments.length, (index) =>
-          CommentItem(
-            hotComments[index]['user']['nickname'],
-            hotComments[index]['user']['avatarUrl'],
-            hotComments[index]['likedCount'],
-            hotComments[index]['time'],
-            hotComments[index]['content'],
-            isEnd: hotComments.length == this.map['total'],
-          ),
+  List<Widget> _buildCommentItems() {
+    List<dynamic> hotComments = this.map['comments'];
+    if (hotComments != null && hotComments.length > 0) {
+      return List.generate(
+        hotComments.length,
+        (index) => CommentItem(
+              hotComments[index]['user']['nickname'],
+              hotComments[index]['user']['avatarUrl'],
+              hotComments[index]['likedCount'],
+              hotComments[index]['time'],
+              hotComments[index]['content'],
+              isEnd: hotComments.length == this.map['total'],
+            ),
       );
     }
 
@@ -371,13 +371,13 @@ class _CommentPageState extends State<CommentPage> {
   }
 
   ///关闭输入键盘和表情选择器
-  void hideKeyBord(){
-    if(this.showEmojiSelector){
+  void hideKeyBord() {
+    if (this.showEmojiSelector) {
       setState(() {
         this.showEmojiSelector = false;
       });
     }
-    if(commentInputFocusNode.hasFocus){
+    if (commentInputFocusNode.hasFocus) {
       FocusScope.of(context).requestFocus(FocusNode());
     }
   }
@@ -386,38 +386,47 @@ class _CommentPageState extends State<CommentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(42.0),
+        preferredSize: Size.fromHeight(46.0),
         child: AppBar(
           elevation: 0,
-          backgroundColor: Colors.white,
           leading: IconButton(
-
-            icon: Icon(Icons.arrow_back_ios,color: Colors.black,),
-            onPressed: (){
+            icon: Icon(
+              Icons.arrow_back_ios,
+            ),
+            onPressed: () {
               Navigator.pop(context);
             },
           ),
           title: Center(
             child: Text(
-              this.map == null? '评论':'评论('+ this.map['total'].toString() +')',
+              this.map == null
+                  ? '评论'
+                  : '评论(' + this.map['total'].toString() + ')',
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.black,
               ),
             ),
           ),
           centerTitle: true,
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.radio_button_unchecked,color: Colors.black,),
-              onPressed: (){
+              icon: Icon(
+                Icons.radio_button_unchecked,
+              ),
+              onPressed: () {
                 print('分享');
               },
             ),
             IconButton(
-              icon: Icon(Icons.insert_chart,color: Colors.black,),
-              onPressed: (){
-                print('正在播放');
+              icon: Icon(
+                Icons.equalizer,
+              ),
+              onPressed: () {
+                // print('正在播放');
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (BuildContext context) {
+                  return AlbumCoverPage();
+                }));
               },
             ),
           ],
@@ -427,7 +436,6 @@ class _CommentPageState extends State<CommentPage> {
         color: Colors.white,
         child: Column(
           children: <Widget>[
-
             Expanded(
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
@@ -439,16 +447,15 @@ class _CommentPageState extends State<CommentPage> {
                   physics: BouncingScrollPhysics(),
                   itemCount: 5,
                   // ignore: missing_return
-                  itemBuilder: (BuildContext context, int index){
-
+                  itemBuilder: (BuildContext context, int index) {
                     //名字/作者/封面
-                    if(index == 0){
+                    if (index == 0) {
                       return _buildTitleCard();
                     }
 
                     //判断是否还没有加载到数据
-                    if(this.map == null ){
-                      if(index == 4){
+                    if (this.map == null) {
+                      if (index == 4) {
                         _getData();
                         return Container(
                           padding: const EdgeInsets.all(16.0),
@@ -458,8 +465,10 @@ class _CommentPageState extends State<CommentPage> {
                               SizedBox(
                                   width: 24.0,
                                   height: 24.0,
-                                  child: CircularProgressIndicator(strokeWidth: 2.0)
-                              ),
+                                  child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Theme.of(context).primaryColor),
+                                      strokeWidth: 2.0)),
                               Text(''),
                               Text(
                                 '正在加载...',
@@ -474,12 +483,10 @@ class _CommentPageState extends State<CommentPage> {
                       }
 
                       return Center();
-
                     }
 
                     //间隔
-                    if(index == 1){
-
+                    if (index == 1) {
                       return Container(
                         height: 8,
                         color: Color(0x1e999999),
@@ -488,57 +495,64 @@ class _CommentPageState extends State<CommentPage> {
                     }
 
                     //精彩评论
-                    if(index == 2){
+                    if (index == 2) {
                       return _buildHotComment();
                     }
 
                     //更多评论
-                    if(index == 3){
+                    if (index == 3) {
                       return _buildComment();
                     }
 
                     //加载更多
-                    if(index == 4){
-                      return this.isDone ?
-                      Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.all(16.0),
-                          child: Text("没有更多了", style: TextStyle(color: Colors.grey),)
-                      ):
-                      Container(
-                        padding: const EdgeInsets.all(16.0),
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                            width: 24.0,
-                            height: 24.0,
-                            child: CircularProgressIndicator(strokeWidth: 2.0)
-                        ),
-                      );
+                    if (index == 4) {
+                      return this.isDone
+                          ? Container(
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.all(16.0),
+                              child: Text(
+                                "没有更多了",
+                                style: TextStyle(color: Colors.grey),
+                              ))
+                          : Container(
+                              padding: const EdgeInsets.all(16.0),
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                  width: 24.0,
+                                  height: 24.0,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.0)),
+                            );
                     }
                   },
                 ),
               ),
             ),
-            Divider(height: 0,color: Colors.grey,),
+            Divider(
+              height: 0,
+              color: Colors.grey,
+            ),
 
             //评论输入框
             _buildInput(),
-            this.showEmojiSelector == true ? EmojiPicker(
-              rows: 3,
-              columns: 8,
-              numRecommended: 10,
-              buttonMode: ButtonMode.CUPERTINO,
-              onEmojiSelected: (emoji, category) {
-                setState(() {
-                  this.commentController.text = this.commentController.text+ emoji.emoji;
-                });
-              },
-            ):Center(),
+            this.showEmojiSelector == true
+                ? EmojiPicker(
+                    rows: 3,
+                    columns: 8,
+                    numRecommended: 10,
+                    buttonMode: ButtonMode.CUPERTINO,
+                    onEmojiSelected: (emoji, category) {
+                      setState(() {
+                        this.commentController.text =
+                            this.commentController.text + emoji.emoji;
+                      });
+                    },
+                  )
+                : Center(),
           ],
         ),
       ),
-      resizeToAvoidBottomPadding: !this.showEmojiSelector,//设置输入键盘是否要顶起内容
-
+      resizeToAvoidBottomPadding: !this.showEmojiSelector, //设置输入键盘是否要顶起内容
     );
   }
 
@@ -547,11 +561,12 @@ class _CommentPageState extends State<CommentPage> {
     super.initState();
     _scrollController.addListener(() {
       hideKeyBord();
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
         _retrieveData();
       }
     });
-    commentInputFocusNode.addListener((){
+    commentInputFocusNode.addListener(() {
       if (commentInputFocusNode.hasFocus) {
         // TextField has lost focus
         setState(() {
@@ -560,13 +575,13 @@ class _CommentPageState extends State<CommentPage> {
       }
     });
 
-    if(this.widget.type == 0){
+    if (this.widget.type == 0) {
       url = API_HOST + 'comment/music';
     }
-    if(this.widget.type == 1){
+    if (this.widget.type == 1) {
       url = API_HOST + 'comment/playlist';
     }
-    if(this.widget.type == 2){
+    if (this.widget.type == 2) {
       url = API_HOST + 'comment/album';
     }
   }
