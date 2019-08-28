@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:netease_music/components/musicplayer/inherited_demo.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'dart:ui';
@@ -183,7 +184,7 @@ class _RefreshIndicatorState extends State<RefreshIndicators> {
                           DefaultTextStyle(
                             style: TextStyle(
                                 color: Theme.of(context).textTheme.body1.color,
-                                fontSize: 12.0),
+                                fontSize: 14.0),
                             child: Container(
                                 margin: EdgeInsets.only(top: 20.0),
                                 padding: EdgeInsets.symmetric(horizontal: 15.0),
@@ -468,16 +469,20 @@ class NeteaseHomeContainerState extends State<NeteaseHomeContainer> {
               ]
             : [],
       ),
-      body: NeteaseToast(
-        toastText: '已为你推荐新的个性化内容!!!',
-        showToast: isShow,
-        child: RefreshIndicators(
-          showToastCb: () {
-            setState(() {
-              isShow = true;
-            });
-          },
-          pageContext: widget.pageContext,
+      body: DefaultTextStyle(
+        style: TextStyle(
+            fontSize: 14.0, color: Theme.of(context).textTheme.body1.color),
+        child: NeteaseToast(
+          toastText: '已为你推荐新的个性化内容!!!',
+          showToast: isShow,
+          child: RefreshIndicators(
+            showToastCb: () {
+              setState(() {
+                isShow = true;
+              });
+            },
+            pageContext: widget.pageContext,
+          ),
         ),
       ),
     );
@@ -591,7 +596,7 @@ class _PlaylistSquare extends StatelessWidget {
                                 playlist[index].name,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 12.0),
+                                style: TextStyle(fontSize: 13.0),
                               ),
                             )
                           ],
