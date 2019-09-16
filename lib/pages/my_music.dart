@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:netease_music/router/Routes.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import '../redux/app.dart';
 
 class MyMusic extends StatefulWidget {
   @override
@@ -17,26 +19,34 @@ class MyMusic extends StatefulWidget {
 class _MyMusicState extends State<MyMusic> {
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      initialRoute: '/',
-      onGenerateRoute: (RouteSettings settings) {
-        RoutePageBuilder builder;
-        switch(settings.name) {
-          case '/':
-            builder = (_, __, ___) => MyMusicHome(pageContext: context,);
-            break;
-          default:
-            throw Exception('Invalid route: ${settings.name}');
-        }
-        return PageRouteBuilder(
-          pageBuilder: builder,
+    return StoreBuilder<NeteaseState>(
+      builder: (BuildContext context, store) {
+        return Navigator(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            StoreProvider.of<NeteaseState>(context)
+                .dispatch(RecordPageContextAction(context));
+            RoutePageBuilder builder;
+            switch (settings.name) {
+              case '/':
+                builder = (_, __, ___) => MyMusicHome(
+                      pageContext: context,
+                    );
+                break;
+              default:
+                throw Exception('Invalid route: ${settings.name}');
+            }
+            return PageRouteBuilder(
+              pageBuilder: builder,
+            );
+          },
         );
       },
     );
   }
 }
 
-class MyMusicHome extends StatelessWidget{
+class MyMusicHome extends StatelessWidget {
   final BuildContext pageContext;
 
   const MyMusicHome({Key key, this.pageContext}) : super(key: key);
@@ -69,7 +79,8 @@ class MyMusicHome extends StatelessWidget{
               RaisedButton(
                 child: Text('歌曲评论页'),
                 onPressed: () {
-                  String url = '/commentpage?type=0&id=347230&name=海阔天空&author=Beyond&imageUrl=https%3a%2f%2fp2.music.126.net%2fQHw-RuMwfQkmgtiyRpGs0Q%3d%3d%2f102254581395219.jpg';
+                  String url =
+                      '/commentpage?type=0&id=347230&name=海阔天空&author=Beyond&imageUrl=https%3a%2f%2fp2.music.126.net%2fQHw-RuMwfQkmgtiyRpGs0Q%3d%3d%2f102254581395219.jpg';
                   url = Uri.encodeFull(url);
                   Routes.router.navigateTo(pageContext, url);
                 },
@@ -77,7 +88,8 @@ class MyMusicHome extends StatelessWidget{
               RaisedButton(
                 child: Text('歌单评论页'),
                 onPressed: () {
-                  String url = '/commentpage?type=1&id=2191720972&name=『程序员歌单』编程语言排行&author=弹人的琴&imageUrl=https%3a%2f%2fp1.music.126.net%2fGZjtmjnKL5Cg7yaAzXg4-A%3d%3d%2f109951163254733900.jpg';
+                  String url =
+                      '/commentpage?type=1&id=2191720972&name=『程序员歌单』编程语言排行&author=弹人的琴&imageUrl=https%3a%2f%2fp1.music.126.net%2fGZjtmjnKL5Cg7yaAzXg4-A%3d%3d%2f109951163254733900.jpg';
                   url = Uri.encodeFull(url);
                   Routes.router.navigateTo(pageContext, url);
                 },
@@ -90,7 +102,7 @@ class MyMusicHome extends StatelessWidget{
   }
 }
 
-class MyCollection extends StatelessWidget{
+class MyCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

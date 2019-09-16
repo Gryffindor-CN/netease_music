@@ -8,6 +8,9 @@ import './music_list.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../components/album/album_list.dart';
 import './video_list.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import '../../redux/app.dart';
+import '../album_cover/album_cover.dart';
 
 /// 歌手详情信息 header 高度
 const double HEIGHT_HEADER = 260 + 56.0;
@@ -380,29 +383,40 @@ class _ArtistDetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlexibleDetailBar(
-      background:
-          _BlurBackground(imageUrl: artist == null ? null : artist.imageUrl),
-      content: artist == null ? Center() : _buildContent(context),
-      builder: (context, t) => AppBar(
-            title: Text(
-              t > 0.9
-                  ? artist.alias.length > 0
-                      ? '${artist.name}（${artist.alias[0]}）'
-                      : '${artist.name}'
-                  : '',
-              style: TextStyle(fontSize: 18.0),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            titleSpacing: 0,
-            actions: <Widget>[
-              IconButton(
-                  icon: Icon(Icons.share), tooltip: "分享", onPressed: () {}),
-              IconButton(
-                  icon: Icon(Icons.equalizer), tooltip: "播放", onPressed: () {})
-            ],
-          ),
+    return StoreBuilder<NeteaseState>(
+      builder: (BuildContext context, state) {
+        return FlexibleDetailBar(
+          background: _BlurBackground(
+              imageUrl: artist == null ? null : artist.imageUrl),
+          content: artist == null ? Center() : _buildContent(context),
+          builder: (context, t) => AppBar(
+                title: Text(
+                  t > 0.9
+                      ? artist.alias.length > 0
+                          ? '${artist.name}（${artist.alias[0]}）'
+                          : '${artist.name}'
+                      : '',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                titleSpacing: 0,
+                actions: <Widget>[
+                  IconButton(
+                      icon: Icon(Icons.share), tooltip: "分享", onPressed: () {}),
+                  IconButton(
+                      icon: Icon(Icons.equalizer),
+                      tooltip: "播放",
+                      onPressed: () {
+                        Navigator.of(state.state.pagecontextState.context).push(
+                            MaterialPageRoute(builder: (BuildContext context) {
+                          return AlbumCoverPage();
+                        }));
+                      })
+                ],
+              ),
+        );
+      },
     );
   }
 

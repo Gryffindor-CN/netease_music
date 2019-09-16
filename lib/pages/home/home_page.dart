@@ -10,6 +10,8 @@ import '../../repository/netease.dart';
 import '../search/search.dart';
 import '../../utils/utils.dart';
 import '../playlist/playlist.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import '../../redux/app.dart';
 
 class RefreshIndicators extends StatefulWidget {
   RefreshIndicators({this.showToastCb, this.pageContext});
@@ -386,21 +388,27 @@ class NeteaseHomeState extends State<NeteaseHome>
   bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      initialRoute: '/',
-      onGenerateRoute: (RouteSettings settings) {
-        RoutePageBuilder builder;
-        switch (settings.name) {
-          case '/':
-            builder = (_, __, ___) => NeteaseHomeContainer(
-                  pageContext: context,
-                );
-            break;
-          default:
-            throw Exception('Invalid route: ${settings.name}');
-        }
-        return PageRouteBuilder(
-          pageBuilder: builder,
+    return StoreBuilder<NeteaseState>(
+      builder: (BuildContext context, store) {
+        return Navigator(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            StoreProvider.of<NeteaseState>(context)
+                .dispatch(RecordPageContextAction(context));
+            RoutePageBuilder builder;
+            switch (settings.name) {
+              case '/':
+                builder = (_, __, ___) => NeteaseHomeContainer(
+                      pageContext: context,
+                    );
+                break;
+              default:
+                throw Exception('Invalid route: ${settings.name}');
+            }
+            return PageRouteBuilder(
+              pageBuilder: builder,
+            );
+          },
         );
       },
     );

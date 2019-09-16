@@ -16,6 +16,8 @@ import './playlist_internal_search.dart';
 import '../../components/musicplayer/inherited_demo.dart';
 import '../../components/musicplayer/player.dart';
 import '../../router/Routes.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import '../../redux/app.dart';
 
 /// 歌单详情信息 header 高度
 const double HEIGHT_HEADER = 280 + 56.0;
@@ -533,59 +535,63 @@ class _PlaylistDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = StateContainer.of(context);
-    return FlexibleDetailBar(
-        background: _BlurBackground(
-          playlistDetail: playlistDetail,
-        ),
-        content: _buildContent(context),
-        builder: (context, t) {
-          return AppBar(
-            title: Text(t > 0.5
-                ? playlistDetail.name
-                : type == 'playlist' ? '歌单' : '排行榜'),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            titleSpacing: 0,
-            actions: (store.player != null &&
-                    store.player.playingList.length > 0)
-                ? <Widget>[
-                    IconButton(
-                        icon: Icon(Icons.search),
-                        tooltip: "歌单内搜索",
-                        onPressed: () {
-                          showSearch(
-                              context: context,
-                              delegate: PlaylistInternalSearchDelegate(
-                                  playlistDetail, Theme.of(context)));
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.more_vert),
-                        tooltip: "更多选项",
-                        onPressed: () {}),
-                    IconButton(
-                        icon: Icon(Icons.equalizer),
-                        tooltip: "播放器",
-                        onPressed: () {
-                          Routes.router.navigateTo(context, '/albumcoverpage');
-                        })
-                  ]
-                : [
-                    IconButton(
-                        icon: Icon(Icons.search),
-                        tooltip: "歌单内搜索",
-                        onPressed: () {
-                          showSearch(
-                              context: context,
-                              delegate: PlaylistInternalSearchDelegate(
-                                  playlistDetail, Theme.of(context)));
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.more_vert),
-                        tooltip: "更多选项",
-                        onPressed: () {}),
-                  ],
-          );
-        });
+    return StoreBuilder<NeteaseState>(builder: (BuildContext context, state) {
+      return FlexibleDetailBar(
+          background: _BlurBackground(
+            playlistDetail: playlistDetail,
+          ),
+          content: _buildContent(context),
+          builder: (context, t) {
+            return AppBar(
+              title: Text(t > 0.5
+                  ? playlistDetail.name
+                  : type == 'playlist' ? '歌单' : '排行榜'),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              titleSpacing: 0,
+              actions:
+                  (store.player != null && store.player.playingList.length > 0)
+                      ? <Widget>[
+                          IconButton(
+                              icon: Icon(Icons.search),
+                              tooltip: "歌单内搜索",
+                              onPressed: () {
+                                showSearch(
+                                    context: context,
+                                    delegate: PlaylistInternalSearchDelegate(
+                                        playlistDetail, Theme.of(context)));
+                              }),
+                          IconButton(
+                              icon: Icon(Icons.more_vert),
+                              tooltip: "更多选项",
+                              onPressed: () {}),
+                          IconButton(
+                              icon: Icon(Icons.equalizer),
+                              tooltip: "播放器",
+                              onPressed: () {
+                                Routes.router.navigateTo(
+                                    state.state.pagecontextState.context,
+                                    '/albumcoverpage');
+                              })
+                        ]
+                      : [
+                          IconButton(
+                              icon: Icon(Icons.search),
+                              tooltip: "歌单内搜索",
+                              onPressed: () {
+                                showSearch(
+                                    context: context,
+                                    delegate: PlaylistInternalSearchDelegate(
+                                        playlistDetail, Theme.of(context)));
+                              }),
+                          IconButton(
+                              icon: Icon(Icons.more_vert),
+                              tooltip: "更多选项",
+                              onPressed: () {}),
+                        ],
+            );
+          });
+    });
   }
 
   Widget _buildContent(
